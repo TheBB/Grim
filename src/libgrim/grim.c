@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "gc.h"
+#include "gmp.h"
 
 #include "grim.h"
 
