@@ -12,3 +12,6 @@ add_subdirectory("${CMAKE_SOURCE_DIR}/vendor")
 add_subdirectory("${CMAKE_SOURCE_DIR}/src/libgrim")
 add_subdirectory("${CMAKE_SOURCE_DIR}/src/grim")
 add_subdirectory("${CMAKE_SOURCE_DIR}/test")
+
+target_compile_options(libgrim PRIVATE -Wall -Wextra)
+target_compile_options(grim PRIVATE -Wall -Wextra)
