@@ -1,6 +1,6 @@
 find_package(GMP REQUIRED)
 
-add_library(libgrim SHARED grim.c)
+add_library(libgrim SHARED grim.c objects.c)
 set_target_properties(libgrim PROPERTIES
   C_STANDARD 11
   OUTPUT_NAME grim
