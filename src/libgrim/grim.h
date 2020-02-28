@@ -1,7 +1,8 @@
+#pragma once
+
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-
-#pragma once
 
 typedef uintptr_t grim_object;
 
@@ -21,8 +22,10 @@ typedef enum {
 } grim_type;
 
 grim_type grim_get_type(grim_object obj);
-intptr_t grim_extract_integer(grim_object obj);
-grim_object grim_pack_integer(intptr_t num);
+
+bool grim_can_extract_integer(grim_object obj);
+intmax_t grim_extract_integer(grim_object obj);
+grim_object grim_pack_integer(intmax_t num);
 
 void grim_init();
 void grim_fprint(grim_object obj, FILE *stream);

@@ -1,10 +1,10 @@
+#pragma once
+
 #include <stdint.h>
 
 #include "gmp.h"
 
 #include "grim.h"
-
-#pragma once
 
 typedef uint8_t grim_tag;
 

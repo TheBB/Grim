@@ -50,14 +50,22 @@ grim_indirect *grim_create_bigint() {
     return obj;
 }
 
-
-intptr_t grim_extract_integer(grim_object obj) {
-    bool signbit = ((intptr_t) obj) < 0;
-    intptr_t ret = obj >> 1;
-    return signbit ? (INTPTR_MIN | ret) : ret;
+bool grim_can_extract_integer(grim_object obj) {
+    if (grim_get_direct_tag(obj) == GRIM_FIXNUM_TAG)
+        return true;
+    return mpz_fits_slong_p(((grim_indirect *) obj)->bigint);
 }
 
-grim_object grim_pack_integer(intptr_t num) {
+intmax_t grim_extract_integer(grim_object obj) {
+    if (grim_get_direct_tag(obj) == GRIM_FIXNUM_TAG) {
+        bool signbit = ((intptr_t)obj) < 0;
+        intptr_t ret = obj >> 1;
+        return signbit ? (INTPTR_MIN | ret) : ret;
+    }
+    return mpz_get_si(((grim_indirect *) obj)->bigint);
+}
+
+grim_object grim_pack_integer(intmax_t num) {
     if (num >= GRIM_FIXNUM_MIN && num <= GRIM_FIXNUM_MAX)
         return (grim_object) ((uintptr_t) num << 1) | GRIM_FIXNUM_TAG;
     grim_indirect *obj = grim_create_bigint();
