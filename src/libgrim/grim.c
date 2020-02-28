@@ -14,6 +14,8 @@ typedef uint8_t grim_tag;
 
 
 #define GRIM_ALIGN alignof(max_align_t)
+#define GRIM_FIXNUM_MAX (INTPTR_MAX / 2)
+#define GRIM_FIXNUM_MIN (INTPTR_MIN / 2)
 
 enum {
     GRIM_INDIRECT_TAG  = 0b0000,
@@ -53,6 +55,8 @@ intptr_t grim_extract_fixnum(grim_object obj) {
 }
 
 grim_object grim_pack_fixnum(intptr_t num) {
+    assert(num >= GRIM_FIXNUM_MIN);
+    assert(num <= GRIM_FIXNUM_MAX);
     return (grim_object) ((uintptr_t) num << 1) | GRIM_FIXNUM_TAG;
 }
 

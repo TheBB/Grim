@@ -27,6 +27,12 @@ int main() {
     grim_print(grim_pack_fixnum(2));
     printf("\n");
 
+    grim_print(grim_pack_fixnum(4611686018427387903));
+    printf("\n");
+
+    grim_print(grim_pack_fixnum(-4611686018427387904));
+    printf("\n");
+
     /* grim_print(grim_pack_fixnum(0)); */
     /* printf("\n"); */
 
