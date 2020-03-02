@@ -27,6 +27,8 @@ bool grim_can_extract_integer(grim_object obj);
 intmax_t grim_extract_integer(grim_object obj);
 grim_object grim_pack_integer(intmax_t num);
 
+grim_object grim_pack_string(const char *input, const char *encoding);
+
 void grim_init();
 void grim_fprint(grim_object obj, FILE *stream);
 void grim_print(grim_object obj);

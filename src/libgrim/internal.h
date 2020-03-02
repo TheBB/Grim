@@ -24,6 +24,7 @@ enum {
 
     // Indirect types
     GRIM_BIGINT_TAG    = 0x0f,
+    GRIM_STRING_TAG    = 0x1f,
 };
 
 
@@ -31,6 +32,10 @@ typedef struct {
     grim_tag tag;
     union {
         mpz_t bigint;
+        struct {
+            uint8_t *str;
+            size_t strlen;
+        };
     };
 } grim_indirect;
 

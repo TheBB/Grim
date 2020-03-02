@@ -4,6 +4,7 @@
 
 #include "gc.h"
 #include "gmp.h"
+#include "unistdio.h"
 
 #include "grim.h"
 #include "internal.h"
@@ -34,6 +35,14 @@ void grim_fprint(grim_object obj, FILE *stream) {
         switch (grim_get_indirect_tag(obj)) {
         case GRIM_BIGINT_TAG:
             mpz_out_str(stream, 10, ((grim_indirect *) obj)->bigint);
+            return;
+        case GRIM_STRING_TAG:
+            fprintf(stream, "%d %d %d\n",
+                    ((grim_indirect *) obj)->str[0],
+                    ((grim_indirect *) obj)->str[1],
+                    ((grim_indirect *) obj)->str[2]
+            );
+            ulc_fprintf(stream, "%U", ((grim_indirect *) obj)->str);
             return;
         }
     default: case GRIM_UNDEFINED_TAG:
