@@ -13,6 +13,8 @@ int main() {
     printf("\n");
     grim_print(grim_true);
     printf("\n");
+    grim_print(grim_nil);
+    printf("\n");
 
     grim_print(grim_pack_integer(-2));
     printf("\n");

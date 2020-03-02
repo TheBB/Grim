@@ -21,6 +21,7 @@ enum {
     GRIM_UNDEFINED_TAG = 0b0110,
     GRIM_FALSE_TAG     = 0b1000,
     GRIM_TRUE_TAG      = 0b1010,
+    GRIM_NIL_TAG       = 0b1100,
 
     // Indirect types
     GRIM_BIGINT_TAG    = 0x0f,

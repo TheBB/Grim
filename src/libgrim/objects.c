@@ -27,6 +27,7 @@ grim_type grim_get_type(grim_object obj) {
     case GRIM_CHARACTER_TAG: return GRIM_CHARACTER;
     case GRIM_SYMBOL_TAG: return GRIM_SYMBOL;
     case GRIM_FALSE_TAG: case GRIM_TRUE_TAG: return GRIM_BOOLEAN;
+    case GRIM_NIL_TAG: return GRIM_NIL;
     case GRIM_INDIRECT_TAG:
         switch (grim_get_indirect_tag(obj)) {
         case GRIM_BIGINT_TAG: return GRIM_INTEGER;

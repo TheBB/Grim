@@ -9,6 +9,7 @@ typedef uintptr_t grim_object;
 extern const grim_object grim_undefined;
 extern const grim_object grim_false;
 extern const grim_object grim_true;
+extern const grim_object grim_nil;
 
 typedef enum {
     GRIM_INTEGER,
@@ -16,6 +17,7 @@ typedef enum {
     GRIM_SYMBOL,
     GRIM_UNDEFINED,
     GRIM_BOOLEAN,
+    GRIM_NIL,
     GRIM_STRING,
     GRIM_VECTOR,
     GRIM_CONS,

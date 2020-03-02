@@ -13,6 +13,7 @@
 const grim_object grim_undefined = GRIM_UNDEFINED_TAG;
 const grim_object grim_false = GRIM_FALSE_TAG;
 const grim_object grim_true = GRIM_TRUE_TAG;
+const grim_object grim_nil = GRIM_NIL_TAG;
 
 
 void grim_init() {
@@ -27,6 +28,9 @@ void grim_fprint(grim_object obj, FILE *stream) {
         return;
     case GRIM_TRUE_TAG:
         fprintf(stream, "#t");
+        return;
+    case GRIM_NIL_TAG:
+        fprintf(stream, "nil");
         return;
     case GRIM_FIXNUM_TAG:
         fprintf(stream, "%ld", grim_extract_integer(obj));
