@@ -5,6 +5,7 @@
 #include "gc.h"
 #include "gmp.h"
 #include "unistdio.h"
+#include "zhash.h"
 
 #include "grim.h"
 #include "internal.h"
@@ -17,6 +18,7 @@ const grim_object grim_nil = GRIM_NIL_TAG;
 
 
 void grim_init() {
+    grim_symbol_table = zcreate_hash_table();
     assert(GRIM_ALIGN >= 16);
     GC_INIT();
 }
@@ -34,6 +36,9 @@ void grim_fprint(FILE *stream, grim_object obj) {
         return;
     case GRIM_FIXNUM_TAG:
         fprintf(stream, "%ld", grim_extract_integer(obj));
+        return;
+    case GRIM_SYMBOL_TAG:
+        ulc_fprintf(stream, "%U", grim_get_symbol_name(obj));
         return;
     case GRIM_INDIRECT_TAG:
         switch (grim_get_indirect_tag(obj)) {

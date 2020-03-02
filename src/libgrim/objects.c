@@ -6,9 +6,13 @@
 #include "gc.h"
 #include "gmp.h"
 #include "uniconv.h"
+#include "zhash.h"
 
 #include "grim.h"
 #include "internal.h"
+
+
+struct ZHashTable *grim_symbol_table;
 
 
 grim_tag grim_get_direct_tag(grim_object obj) {
@@ -145,4 +149,32 @@ grim_object grim_get_car(grim_object obj) {
 
 grim_object grim_get_cdr(grim_object obj) {
     return ((grim_indirect *) obj)->cdr;
+}
+
+
+static grim_object grim_create_symbol(uint8_t *name, size_t len) {
+    grim_indirect *obj = grim_create_indirect();
+    obj->symbolname = name;
+    obj->symbollen = len;
+    return ((grim_object) obj) | GRIM_SYMBOL_TAG;
+}
+
+grim_object grim_intern(const char *name, const char *encoding) {
+    if (!encoding)
+        encoding = locale_charset();
+    size_t u8len;
+    uint8_t *u8name = u8_conv_from_encoding(encoding, iconveh_error, name, strlen(name), NULL, NULL, &u8len);
+    grim_object sym = (grim_object) zhash_get(grim_symbol_table, (char *) u8name);
+    if (sym != 0) {
+        free(u8name);
+        return sym;
+    }
+    sym = grim_create_symbol(u8name, u8len);
+    zhash_set(grim_symbol_table, (char *) u8name, (void *) sym);
+    return sym;
+}
+
+uint8_t *grim_get_symbol_name(grim_object obj) {
+    grim_indirect *wrapped = (grim_indirect *) (obj - GRIM_SYMBOL_TAG);
+    return wrapped->symbolname;
 }

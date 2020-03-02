@@ -69,4 +69,13 @@ int main() {
     c = grim_create_cons(grim_pack_integer(2), c);
     grim_print(c);
     printf("\n");
+
+    grim_object s = grim_intern("dingbob", NULL);
+    printf("%lx\n", s);
+
+    grim_object ss = grim_intern("dingbob", NULL);
+    printf("%lx\n", ss);
+
+    grim_print(s);
+    printf("\n");
 }
