@@ -32,6 +32,7 @@ grim_type grim_get_type(grim_object obj) {
         switch (grim_get_indirect_tag(obj)) {
         case GRIM_BIGINT_TAG: return GRIM_INTEGER;
         case GRIM_STRING_TAG: return GRIM_STRING;
+        case GRIM_VECTOR_TAG: return GRIM_VECTOR;
         }
     default: case GRIM_UNDEFINED_TAG: return GRIM_UNDEFINED;
     }
@@ -102,4 +103,28 @@ grim_object grim_pack_string(const char *input, const char *encoding) {
     if (!obj->str)
         return grim_undefined;
     return (grim_object) obj;
+}
+
+
+grim_object grim_create_vector(size_t nelems) {
+    grim_indirect *obj = grim_create_indirect();
+    obj->tag = GRIM_VECTOR_TAG;
+    obj->vector_data = (grim_object *) GC_MALLOC(nelems * sizeof(grim_object));
+    obj->vectorlen = nelems;
+    grim_object vec = (grim_object) obj;
+    for (size_t i = 0; i < nelems; i++)
+        grim_vector_set(vec, i, grim_undefined);
+    return vec;
+}
+
+size_t grim_vector_size(grim_object vec) {
+    return ((grim_indirect *) vec)->vectorlen;
+}
+
+void grim_vector_set(grim_object vec, size_t index, grim_object elt) {
+    ((grim_indirect *) vec)->vector_data[index] = elt;
+}
+
+grim_object grim_vector_get(grim_object vec, size_t index) {
+    return ((grim_indirect *) vec)->vector_data[index];
 }

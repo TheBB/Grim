@@ -31,6 +31,11 @@ grim_object grim_pack_integer(intmax_t num);
 
 grim_object grim_pack_string(const char *input, const char *encoding);
 
+grim_object grim_create_vector(size_t nelems);
+size_t grim_vector_size(grim_object vec);
+void grim_vector_set(grim_object vec, size_t index, grim_object elt);
+grim_object grim_vector_get(grim_object vec, size_t index);
+
 void grim_init();
-void grim_fprint(grim_object obj, FILE *stream);
+void grim_fprint(FILE *stream, grim_object obj);
 void grim_print(grim_object obj);

@@ -21,7 +21,7 @@ void grim_init() {
     GC_INIT();
 }
 
-void grim_fprint(grim_object obj, FILE *stream) {
+void grim_fprint(FILE *stream, grim_object obj) {
     switch(grim_get_direct_tag(obj)) {
     case GRIM_FALSE_TAG:
         fprintf(stream, "#f");
@@ -46,7 +46,19 @@ void grim_fprint(grim_object obj, FILE *stream) {
                     ((grim_indirect *) obj)->str[1],
                     ((grim_indirect *) obj)->str[2]
             );
-            ulc_fprintf(stream, "%U", ((grim_indirect *) obj)->str);
+            ulc_fprintf(stream, "\"%U\"", ((grim_indirect *) obj)->str);
+            return;
+        case GRIM_VECTOR_TAG:
+            {
+                fprintf(stream, "#(");
+                size_t len = grim_vector_size(obj);
+                for (size_t i = 0; i < len; i++) {
+                    grim_fprint(stream, grim_vector_get(obj, i));
+                    if (i + 1 < len)
+                        fprintf(stream, " ");
+                }
+                fprintf(stream, ")");
+            }
             return;
         }
     default: case GRIM_UNDEFINED_TAG:
@@ -56,5 +68,5 @@ void grim_fprint(grim_object obj, FILE *stream) {
 }
 
 void grim_print(grim_object obj) {
-    grim_fprint(obj, stdout);
+    grim_fprint(stdout, obj);
 }
