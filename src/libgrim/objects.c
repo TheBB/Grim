@@ -44,7 +44,9 @@ grim_type grim_get_type(grim_object obj) {
 }
 
 
-static grim_indirect *grim_create_indirect() {
+static grim_indirect *grim_create_indirect(bool permanent) {
+    if (permanent)
+        return (grim_indirect *) GC_MALLOC_UNCOLLECTABLE(sizeof(grim_indirect));
     return (grim_indirect *) GC_MALLOC(sizeof(grim_indirect));
 }
 
@@ -55,7 +57,7 @@ static void grim_finalize_bigint(void *obj, void *_) {
 }
 
 static grim_indirect *grim_create_bigint() {
-    grim_indirect *obj = grim_create_indirect();
+    grim_indirect *obj = grim_create_indirect(false);
     obj->tag = GRIM_BIGINT_TAG;
     mpz_init(obj->bigint);
     GC_REGISTER_FINALIZER(obj, grim_finalize_bigint, NULL, NULL, NULL);
@@ -92,7 +94,7 @@ static void grim_finalize_string(void *obj, void *_) {
 }
 
 static grim_indirect *grim_create_string() {
-    grim_indirect *obj = grim_create_indirect();
+    grim_indirect *obj = grim_create_indirect(false);
     obj->tag = GRIM_STRING_TAG;
     obj->str = NULL;
     obj->strlen = 0;
@@ -112,7 +114,7 @@ grim_object grim_pack_string(const char *input, const char *encoding) {
 
 
 grim_object grim_create_vector(size_t nelems) {
-    grim_indirect *obj = grim_create_indirect();
+    grim_indirect *obj = grim_create_indirect(false);
     obj->tag = GRIM_VECTOR_TAG;
     obj->vector_data = (grim_object *) GC_MALLOC(nelems * sizeof(grim_object));
     obj->vectorlen = nelems;
@@ -136,7 +138,7 @@ grim_object grim_vector_get(grim_object vec, size_t index) {
 
 
 grim_object grim_create_cons(grim_object car, grim_object cdr) {
-    grim_indirect *obj = grim_create_indirect();
+    grim_indirect *obj = grim_create_indirect(false);
     obj->tag = GRIM_CONS_TAG;
     obj->car = car;
     obj->cdr = cdr;
@@ -153,7 +155,7 @@ grim_object grim_get_cdr(grim_object obj) {
 
 
 static grim_object grim_create_symbol(uint8_t *name, size_t len) {
-    grim_indirect *obj = grim_create_indirect();
+    grim_indirect *obj = grim_create_indirect(true);
     obj->symbolname = name;
     obj->symbollen = len;
     return ((grim_object) obj) | GRIM_SYMBOL_TAG;
