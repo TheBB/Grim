@@ -27,6 +27,7 @@ enum {
     GRIM_BIGINT_TAG    = 0x0f,
     GRIM_STRING_TAG    = 0x1f,
     GRIM_VECTOR_TAG    = 0x2f,
+    GRIM_CONS_TAG      = 0x3f,
 };
 
 
@@ -41,6 +42,10 @@ typedef struct {
         struct {
             grim_object *vector_data;
             size_t vectorlen;
+        };
+        struct {
+            grim_object car;
+            grim_object cdr;
         };
     };
 } grim_indirect;

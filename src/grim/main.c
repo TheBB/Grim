@@ -53,4 +53,20 @@ int main() {
     grim_vector_set(v, 2, grim_nil);
     grim_print(v);
     printf("\n");
+
+    grim_object c = grim_create_cons(grim_pack_integer(0), grim_pack_integer(1));
+    grim_print(c);
+    printf("\n");
+
+    c = grim_create_cons(grim_pack_integer(0), grim_nil);
+    grim_print(c);
+    printf("\n");
+
+    c = grim_create_cons(grim_pack_integer(1), c);
+    grim_print(c);
+    printf("\n");
+
+    c = grim_create_cons(grim_pack_integer(2), c);
+    grim_print(c);
+    printf("\n");
 }

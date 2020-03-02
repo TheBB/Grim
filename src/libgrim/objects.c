@@ -33,6 +33,7 @@ grim_type grim_get_type(grim_object obj) {
         case GRIM_BIGINT_TAG: return GRIM_INTEGER;
         case GRIM_STRING_TAG: return GRIM_STRING;
         case GRIM_VECTOR_TAG: return GRIM_VECTOR;
+        case GRIM_CONS_TAG: return GRIM_CONS;
         }
     default: case GRIM_UNDEFINED_TAG: return GRIM_UNDEFINED;
     }
@@ -127,4 +128,21 @@ void grim_vector_set(grim_object vec, size_t index, grim_object elt) {
 
 grim_object grim_vector_get(grim_object vec, size_t index) {
     return ((grim_indirect *) vec)->vector_data[index];
+}
+
+
+grim_object grim_create_cons(grim_object car, grim_object cdr) {
+    grim_indirect *obj = grim_create_indirect();
+    obj->tag = GRIM_CONS_TAG;
+    obj->car = car;
+    obj->cdr = cdr;
+    return (grim_object) obj;
+}
+
+grim_object grim_get_car(grim_object obj) {
+    return ((grim_indirect *) obj)->car;
+}
+
+grim_object grim_get_cdr(grim_object obj) {
+    return ((grim_indirect *) obj)->cdr;
 }

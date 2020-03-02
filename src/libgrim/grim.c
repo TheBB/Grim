@@ -41,25 +41,38 @@ void grim_fprint(FILE *stream, grim_object obj) {
             mpz_out_str(stream, 10, ((grim_indirect *) obj)->bigint);
             return;
         case GRIM_STRING_TAG:
-            fprintf(stream, "%d %d %d\n",
-                    ((grim_indirect *) obj)->str[0],
-                    ((grim_indirect *) obj)->str[1],
-                    ((grim_indirect *) obj)->str[2]
-            );
             ulc_fprintf(stream, "\"%U\"", ((grim_indirect *) obj)->str);
             return;
         case GRIM_VECTOR_TAG:
-            {
-                fprintf(stream, "#(");
-                size_t len = grim_vector_size(obj);
-                for (size_t i = 0; i < len; i++) {
-                    grim_fprint(stream, grim_vector_get(obj, i));
-                    if (i + 1 < len)
-                        fprintf(stream, " ");
-                }
-                fprintf(stream, ")");
+        {
+            fprintf(stream, "#(");
+            size_t len = grim_vector_size(obj);
+            for (size_t i = 0; i < len; i++) {
+                grim_fprint(stream, grim_vector_get(obj, i));
+                if (i + 1 < len)
+                    fprintf(stream, " ");
             }
+            fprintf(stream, ")");
             return;
+        }
+        case GRIM_CONS_TAG:
+        {
+            fprintf(stream, "(");
+            bool needs_space = false;
+            while (grim_get_type(obj) == GRIM_CONS) {
+                if (needs_space)
+                    fprintf(stream, " ");
+                grim_fprint(stream, grim_get_car(obj));
+                obj = grim_get_cdr(obj);
+                needs_space = true;
+            }
+            if (grim_get_type(obj) != GRIM_NIL) {
+                fprintf(stream, " . ");
+                grim_fprint(stream, obj);
+            }
+            fprintf(stream, ")");
+            return;
+        }
         }
     default: case GRIM_UNDEFINED_TAG:
         fprintf(stream, "#undefined");

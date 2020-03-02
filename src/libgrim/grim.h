@@ -36,6 +36,10 @@ size_t grim_vector_size(grim_object vec);
 void grim_vector_set(grim_object vec, size_t index, grim_object elt);
 grim_object grim_vector_get(grim_object vec, size_t index);
 
+grim_object grim_create_cons(grim_object car, grim_object cdr);
+grim_object grim_get_car(grim_object obj);
+grim_object grim_get_cdr(grim_object obj);
+
 void grim_init();
 void grim_fprint(FILE *stream, grim_object obj);
 void grim_print(grim_object obj);
