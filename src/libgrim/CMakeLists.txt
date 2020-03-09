@@ -1,7 +1,7 @@
 find_package(GMP REQUIRED)
 find_package(Unistring REQUIRED)
 
-add_library(libgrim SHARED grim.c objects.c)
+add_library(libgrim SHARED grim.c objects.c strings.c)
 set_target_properties(libgrim PROPERTIES
   C_STANDARD 11
   OUTPUT_NAME grim

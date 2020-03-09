@@ -10,6 +10,7 @@
 
 #include "grim.h"
 #include "internal.h"
+#include "strings.h"
 
 
 struct ZHashTable *grim_symbol_table;
@@ -110,6 +111,12 @@ grim_object grim_pack_string(const char *input, const char *encoding) {
     if (!obj->str)
         return grim_undefined;
     return (grim_object) obj;
+}
+
+grim_object grim_pack_string_escape(const char *input, const char *encoding) {
+    grim_object str = grim_pack_string(input, encoding);
+    grim_unescape_string(str);
+    return str;
 }
 
 

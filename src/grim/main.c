@@ -43,7 +43,7 @@ int main() {
     grim_print(grim_pack_integer(-4611686018427387905));
     printf("\n");
 
-    grim_object z = grim_pack_string("å", NULL);
+    grim_object z = grim_pack_string_escape("æ\\U000000f8\\u00e5", NULL);
     grim_print(z);
     printf("\n");
 
