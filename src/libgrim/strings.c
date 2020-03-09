@@ -160,13 +160,13 @@ void grim_unescape_string(grim_object str) {
 
     while (srcptr < endptr) {
         ch = *(srcptr++);
-        if (ch != 0x5c)
+        if (ch != '\\')
             *(tgtptr++) = ch;
         else
             grim_unescape(&srcptr, &tgtptr);
     }
 
-    *tgtptr = 0x00;
+    *tgtptr = 0;
     ((grim_indirect *)str)->strlen = tgtptr - ((grim_indirect *)str)->str;
 }
 
