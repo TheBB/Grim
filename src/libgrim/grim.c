@@ -9,6 +9,7 @@
 
 #include "grim.h"
 #include "internal.h"
+#include "strings.h"
 
 
 const grim_object grim_undefined = GRIM_UNDEFINED_TAG;
@@ -46,7 +47,7 @@ void grim_fprint(FILE *stream, grim_object obj) {
             mpz_out_str(stream, 10, ((grim_indirect *) obj)->bigint);
             return;
         case GRIM_STRING_TAG:
-            ulc_fprintf(stream, "\"%U\"", ((grim_indirect *) obj)->str);
+            grim_fprint_escape_string(stream, obj, NULL);
             return;
         case GRIM_VECTOR_TAG:
         {

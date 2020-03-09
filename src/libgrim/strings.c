@@ -1,6 +1,10 @@
 #include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistring/iconveh.h>
 
 #include "unistr.h"
+#include "uniconv.h"
 
 #include "grim.h"
 #include "internal.h"
@@ -14,6 +18,8 @@ static void grim_decode_unicode(uint8_t **srcptr, uint8_t **tgtptr, int nchars) 
         assert((ch = *((*srcptr)++)));
         if ('0' <= ch && ch <= '9')
             code = 16 * code + (ch - '0');
+        else if ('A' <= ch && ch <= 'F')
+            code = 16 * code + 10 + ch - 'A';
         else if ('a' <= ch && ch <= 'f')
             code = 16 * code + 10 + ch - 'a';
         else
@@ -51,4 +57,51 @@ void grim_unescape_string(grim_object str) {
 
     *tgtptr = 0x00;
     ((grim_indirect *)str)->strlen = tgtptr - ((grim_indirect *)str)->str;
+}
+
+
+void grim_fprint_escape_string(FILE *stream, grim_object str, const char *encoding) {
+    if (!encoding)
+        encoding = locale_charset();
+    grim_indirect *ind = (grim_indirect *)str;
+    uint8_t *buf = ind->str;
+    size_t start = 0, end, length = ind->strlen, convlength;
+
+    fprintf(stream, "\"");
+    while (start <= length) {
+        end = start;
+
+        while (end <= length) {
+            uint8_t ch = buf[end];
+            if (ch == 0x22 || ch == 0x5c || ch == 0x08 || ch == 0x0a || ch == 0x09)
+                break;
+            end++;
+        }
+
+        char *printbuf = u8_conv_to_encoding(
+            encoding, iconveh_escape_sequence, buf,
+            end <= length ? end - start : end - start - 1,
+            NULL, NULL, &convlength
+        );
+        fprintf(stream, "%*s", (int) convlength, printbuf);
+        free(printbuf);
+
+        if (end > length)
+            break;
+
+        uint8_t ch = buf[end];
+        switch (ch) {
+        case 0x22: fprintf(stream, "\\\""); break;
+        case 0x5c: fprintf(stream, "\\\\"); break;
+        case 0x08: fprintf(stream, "\\b"); break;
+        case 0x0a: fprintf(stream, "\\n"); break;
+        case 0x09: fprintf(stream, "\\t"); break;
+        default: assert(false);
+        }
+
+        start = end + 1;
+
+        break;
+    }
+    fprintf(stream, "\"");
 }
