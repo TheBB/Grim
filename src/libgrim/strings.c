@@ -11,7 +11,82 @@
 #include "strings.h"
 
 
-static void grim_decode_unicode(uint8_t **srcptr, uint8_t **tgtptr, int nchars) {
+/* Table for converting ASCII code to canonical escape sequence. */
+#define N_SESCAPE (sizeof(T_SESCAPE) / sizeof(T_SESCAPE[0]))
+#define HAS_SESCAPE(c) ((c) < N_SESCAPE && T_SESCAPE[(c)] != 0)
+static const char *T_SESCAPE[] = {
+    [0] = "\\0",
+    [1] = "\\^A",
+    [2] = "\\^B",
+    [3] = "\\^C",
+    [4] = "\\^D",
+    [5] = "\\^E",
+    [6] = "\\^F",
+    [7] = "\\a",
+    [8] = "\\b",
+    [9] = "\\t",
+    [10] = "\\n",
+    [11] = "\\v",
+    [12] = "\\f",
+    [13] = "\\r",
+    [14] = "\\^N",
+    [15] = "\\^O",
+    [16] = "\\^P",
+    [17] = "\\^Q",
+    [18] = "\\^R",
+    [19] = "\\^S",
+    [20] = "\\^T",
+    [21] = "\\^U",
+    [22] = "\\^V",
+    [23] = "\\^W",
+    [24] = "\\^X",
+    [25] = "\\^Y",
+    [26] = "\\^Z",
+    [27] = "\\e",
+    [28] = "\\^\\",
+    [29] = "\\^]",
+    [30] = "\\^^",
+    [31] = "\\^_",
+    [34] = "\"",
+    [92] = "\\\\",
+    [127] = "\\^?",
+};
+
+/* Table for converting single-character escape sequences to
+ * corresponding ASCII character.
+ */
+#define N_SUSCAPE (sizeof(T_SUSCAPE) / sizeof(T_SUSCAPE[0]))
+#define HAS_SUSCAPE(c) ((c == '0') || ((c) < N_SUSCAPE && T_SUSCAPE[(c)] != 0))
+static const uint8_t T_SUSCAPE[] = {
+    ['0'] = 0,
+    ['a'] = 7,
+    ['b'] = 8,
+    ['t'] = 9,
+    ['n'] = 10,
+    ['v'] = 11,
+    ['f'] = 12,
+    ['r'] = 13,
+    ['e'] = 27,
+    ['"'] = 34,
+    ['\\'] = 92,
+};
+
+/* Table for converting control character escape codes.
+ * The standard capital letters A-Z are not listed here.
+ */
+#define N_SUSCAPE_CTRL (sizeof(T_SUSCAPE_CTRL) / sizeof(T_SUSCAPE_CTRL[0]))
+#define HAS_SUSCAPE_CTRL(c) ((c) < N_SUSCAPE_CTRL && T_SUSCAPE_CTRL[(c)] != 0)
+static const uint8_t T_SUSCAPE_CTRL[] = {
+    ['['] = 27,
+    ['\\'] = 28,
+    [']'] = 29,
+    ['^'] = 30,
+    ['_'] = 31,
+    ['?'] = 127,
+};
+
+
+static void grim_unescape_unicode(uint8_t **srcptr, uint8_t **tgtptr, int nchars) {
     ucs4_t code = 0;
     uint8_t ch;
     for (int i = 0; i < nchars; i++) {
@@ -29,30 +104,42 @@ static void grim_decode_unicode(uint8_t **srcptr, uint8_t **tgtptr, int nchars) 
 }
 
 
+static void grim_unescape(uint8_t **srcptr, uint8_t **tgtptr) {
+    uint8_t ch = *((*srcptr)++);
+    if (HAS_SUSCAPE(ch)) {
+        *((*tgtptr)++) = T_SUSCAPE[ch];
+        return;
+    }
+
+    if (ch == '^') {
+        ch = *((*srcptr)++);
+        assert(ch);
+        if ('A' <= ch && ch <= 'Z')
+            *((*tgtptr)++) = ch - 'A' + 1;
+        assert(HAS_SUSCAPE_CTRL(ch));
+        *((*tgtptr)++) = T_SUSCAPE_CTRL[ch];
+    }
+    else if (ch == 'u')
+        grim_unescape_unicode(srcptr, tgtptr, 4);
+    else if (ch == 'U')
+        grim_unescape_unicode(srcptr, tgtptr, 8);
+    else
+        assert(false);
+}
+
+
 void grim_unescape_string(grim_object str) {
     uint8_t *srcptr = ((grim_indirect *)str)->str;
+    uint8_t *endptr = srcptr + ((grim_indirect *)str)->strlen;
     uint8_t *tgtptr = srcptr;
     uint8_t ch;
 
-    while ((ch = *(srcptr++))) {
-        if (ch != 0x5c) {
+    while (srcptr < endptr) {
+        ch = *(srcptr++);
+        if (ch != 0x5c)
             *(tgtptr++) = ch;
-            continue;
-        }
-
-        assert((ch = *(srcptr++)));
-        switch (ch) {
-        case 0x0a: break;                     // \\n -> ignore
-        case 0x22: *(tgtptr++) = 0x22; break; // \" -> quote
-        case 0x5c: *(tgtptr++) = 0x5c; break; // \\ -> backslash
-        case 0x62: *(tgtptr++) = 0x08; break; // \b -> backspace
-        case 0x6e: *(tgtptr++) = 0x0a; break; // \n -> newline
-        case 0x74: *(tgtptr++) = 0x09; break; // \t -> tab
-        case 0x75:                            // \uXXXX
-            grim_decode_unicode(&srcptr, &tgtptr, 4); break;
-        case 0x55:                            // \UXXXXXXXX
-            grim_decode_unicode(&srcptr, &tgtptr, 8); break;
-        }
+        else
+            grim_unescape(&srcptr, &tgtptr);
     }
 
     *tgtptr = 0x00;
@@ -68,40 +155,31 @@ void grim_fprint_escape_string(FILE *stream, grim_object str, const char *encodi
     size_t start = 0, end, length = ind->strlen, convlength;
 
     fprintf(stream, "\"");
-    while (start <= length) {
+    while (start < length) {
         end = start;
 
-        while (end <= length) {
+        while (end < length) {
             uint8_t ch = buf[end];
-            if (ch == 0x22 || ch == 0x5c || ch == 0x08 || ch == 0x0a || ch == 0x09)
+            if (HAS_SESCAPE(ch))
                 break;
             end++;
         }
 
         char *printbuf = u8_conv_to_encoding(
             encoding, iconveh_escape_sequence, buf,
-            end <= length ? end - start : end - start - 1,
-            NULL, NULL, &convlength
+            end - start, NULL, NULL, &convlength
         );
         fprintf(stream, "%*s", (int) convlength, printbuf);
         free(printbuf);
 
-        if (end > length)
+        if (end >= length)
             break;
 
         uint8_t ch = buf[end];
-        switch (ch) {
-        case 0x22: fprintf(stream, "\\\""); break;
-        case 0x5c: fprintf(stream, "\\\\"); break;
-        case 0x08: fprintf(stream, "\\b"); break;
-        case 0x0a: fprintf(stream, "\\n"); break;
-        case 0x09: fprintf(stream, "\\t"); break;
-        default: assert(false);
-        }
+        assert(HAS_SESCAPE(ch));
+        fprintf(stream, "%s", T_SESCAPE[ch]);
 
         start = end + 1;
-
-        break;
     }
     fprintf(stream, "\"");
 }

@@ -44,9 +44,9 @@ int main() {
     printf("\n");
 
     /* grim_object z = grim_pack_string_escape("zz", NULL); */
-    grim_object z = grim_pack_string_escape("æ\\U000000f8\\u00e5", NULL);
+    /* grim_object z = grim_pack_string_escape("æ\\U000000f8\\u00e5", NULL); */
     /* grim_object z = grim_pack_string_escape("abc\\n", NULL); */
-    /* grim_object z = grim_pack_string_escape("abc\\u00e5\\n", NULL); */
+    grim_object z = grim_pack_string_escape("abc\\u00e5\\n", NULL);
     grim_print(z);
     printf("\n");
 
