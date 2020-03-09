@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "unitypes.h"
+
 typedef uintptr_t grim_object;
 
 extern const grim_object grim_undefined;
@@ -43,6 +45,10 @@ grim_object grim_get_cdr(grim_object obj);
 
 grim_object grim_intern(const char *name, const char *encoding);
 uint8_t *grim_get_symbol_name(grim_object obj);
+
+grim_object grim_pack_character(ucs4_t ch);
+grim_object grim_pack_character_name(const char *name, const char *encoding);
+ucs4_t grim_extract_character(grim_object obj);
 
 void grim_init();
 void grim_fprint(FILE *stream, grim_object obj);

@@ -86,7 +86,7 @@ static const uint8_t T_SUSCAPE_CTRL[] = {
 };
 
 
-static void grim_unescape_unicode(uint8_t **srcptr, uint8_t **tgtptr, int nchars) {
+static ucs4_t count_codepoint(uint8_t **srcptr, int nchars) {
     ucs4_t code = 0;
     uint8_t ch;
     for (int i = 0; i < nchars; i++) {
@@ -100,18 +100,21 @@ static void grim_unescape_unicode(uint8_t **srcptr, uint8_t **tgtptr, int nchars
         else
             assert(false);
     }
+    return code;
+}
+
+
+static void grim_unescape_unicode(uint8_t **srcptr, uint8_t **tgtptr, int nchars) {
+    ucs4_t code = count_codepoint(srcptr, nchars);
     *tgtptr += u8_uctomb(*tgtptr, code, nchars + 2);
 }
 
 
 static void grim_unescape(uint8_t **srcptr, uint8_t **tgtptr) {
     uint8_t ch = *((*srcptr)++);
-    if (HAS_SUSCAPE(ch)) {
+    if (HAS_SUSCAPE(ch))
         *((*tgtptr)++) = T_SUSCAPE[ch];
-        return;
-    }
-
-    if (ch == '^') {
+    else if (ch == '^') {
         ch = *((*srcptr)++);
         assert(ch);
         if ('A' <= ch && ch <= 'Z')
@@ -125,6 +128,27 @@ static void grim_unescape(uint8_t **srcptr, uint8_t **tgtptr) {
         grim_unescape_unicode(srcptr, tgtptr, 8);
     else
         assert(false);
+}
+
+
+ucs4_t grim_unescape_character(uint8_t *str) {
+    uint8_t ch = str[0];
+    assert(ch);
+    if (ch == 's')
+        return ' ';
+    if (HAS_SUSCAPE(ch))
+        return T_SUSCAPE[ch];
+    if (ch == '^') {
+        ch = str[1];
+        assert(ch);
+        if ('A' <= ch && ch <= 'Z')
+            return ch - 'A' + 1;
+        assert(HAS_SUSCAPE_CTRL(ch));
+        return T_SUSCAPE_CTRL[ch];
+    }
+    assert(ch == 'u' || ch == 'U');
+    uint8_t *srcptr = str + 1;
+    return count_codepoint(&srcptr, (ch == 'u') ? 4 : 8);
 }
 
 
@@ -144,6 +168,24 @@ void grim_unescape_string(grim_object str) {
 
     *tgtptr = 0x00;
     ((grim_indirect *)str)->strlen = tgtptr - ((grim_indirect *)str)->str;
+}
+
+
+void grim_fprint_escape_character(FILE *stream, ucs4_t ch, const char *encoding) {
+    if (!encoding)
+        encoding = locale_charset();
+    if (ch == ' ')
+        fprintf(stream, "#\\s");
+    else if (HAS_SESCAPE(ch))
+        fprintf(stream, "#%s", T_SESCAPE[ch]);
+    else {
+        uint8_t buf[6];
+        int len = u8_uctomb(buf, ch, 6);
+        size_t convlength;
+        char *printbuf = u8_conv_to_encoding(encoding, iconveh_escape_sequence, buf, len, NULL, NULL, &convlength);
+        fprintf(stream, "#\\%*s", (int) convlength, printbuf);
+        free(printbuf);
+    }
 }
 
 

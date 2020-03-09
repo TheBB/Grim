@@ -41,6 +41,9 @@ void grim_fprint(FILE *stream, grim_object obj) {
     case GRIM_SYMBOL_TAG:
         ulc_fprintf(stream, "%U", grim_get_symbol_name(obj));
         return;
+    case GRIM_CHARACTER_TAG:
+        grim_fprint_escape_character(stream, grim_extract_character(obj), NULL);
+        return;
     case GRIM_INDIRECT_TAG:
         switch (grim_get_indirect_tag(obj)) {
         case GRIM_BIGINT_TAG:

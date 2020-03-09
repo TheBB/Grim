@@ -187,3 +187,22 @@ uint8_t *grim_get_symbol_name(grim_object obj) {
     grim_indirect *wrapped = (grim_indirect *) (obj - GRIM_SYMBOL_TAG);
     return wrapped->symbolname;
 }
+
+
+grim_object grim_pack_character(ucs4_t ch) {
+    return (((grim_object) ch) << 8) | GRIM_CHARACTER_TAG;
+}
+
+grim_object grim_pack_character_name(const char *name, const char *encoding) {
+    if (!encoding)
+        encoding = locale_charset();
+    size_t u8len;
+    uint8_t *str = u8_conv_from_encoding(encoding, iconveh_error, name, strlen(name), NULL, NULL, &u8len);
+    ucs4_t ch = grim_unescape_character(str);
+    free(str);
+    return grim_pack_character(ch);
+}
+
+ucs4_t grim_extract_character(grim_object obj) {
+    return (ucs4_t) (obj >> 8);
+}
