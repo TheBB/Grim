@@ -131,7 +131,7 @@ static const struct {const char *word; ucs4_t character;} T_CESCAPE_WORD[] = {
     {"escape", 27},
     {"space", 32},
     {"backslash", 92},
-    {"caret", 92},
+    {"caret", 94},
 };
 
 
