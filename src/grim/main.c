@@ -97,4 +97,32 @@ int main() {
     d = grim_pack_character(' ');
     grim_print(d);
     printf("\n");
+
+    d = grim_pack_character_name("^@", NULL);
+    grim_print(d);
+    printf("\n");
+
+    d = grim_pack_character_name("null", NULL);
+    grim_print(d);
+    printf("\n");
+
+    d = grim_pack_character_name("\\", NULL);
+    grim_print(d);
+    printf("\n");
+
+    d = grim_pack_character_name("^", NULL);
+    grim_print(d);
+    printf("\n");
+
+    d = grim_pack_character_name("x", NULL);
+    grim_print(d);
+    printf("\n");
+
+    d = grim_pack_character_name("U000000f8", NULL);
+    grim_print(d);
+    printf("\n");
+
+    d = grim_pack_character_name("u00e5", NULL);
+    grim_print(d);
+    printf("\n");
 }

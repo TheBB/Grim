@@ -1,7 +1,9 @@
 #include <assert.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistring/iconveh.h>
+#include <unitypes.h>
 
 #include "unistr.h"
 #include "uniconv.h"
@@ -71,18 +73,65 @@ static const uint8_t T_SUSCAPE[] = {
     ['\\'] = 92,
 };
 
-/* Table for converting control character escape codes.
- * The standard capital letters A-Z are not listed here.
+/* Table for converting ASCII code to canonical escape sequence for
+ * characters.
  */
-#define N_SUSCAPE_CTRL (sizeof(T_SUSCAPE_CTRL) / sizeof(T_SUSCAPE_CTRL[0]))
-#define HAS_SUSCAPE_CTRL(c) ((c) < N_SUSCAPE_CTRL && T_SUSCAPE_CTRL[(c)] != 0)
-static const uint8_t T_SUSCAPE_CTRL[] = {
-    ['['] = 27,
-    ['\\'] = 28,
-    [']'] = 29,
-    ['^'] = 30,
-    ['_'] = 31,
-    ['?'] = 127,
+#define N_CESCAPE (sizeof(T_CESCAPE) / sizeof(T_CESCAPE[0]))
+#define HAS_CESCAPE(c) ((c) < N_CESCAPE && T_CESCAPE[(c)] != 0)
+static const char * T_CESCAPE[] = {
+    [0] = "\\null",
+    [1] = "\\^A",
+    [2] = "\\^B",
+    [3] = "\\^C",
+    [4] = "\\^D",
+    [5] = "\\^E",
+    [6] = "\\^F",
+    [7] = "\\bell",
+    [8] = "\\backspace",
+    [9] = "\\tab",
+    [10] = "\\linefeed",
+    [11] = "\\verticaltab",
+    [12] = "\\formfeed",
+    [13] = "\\return",
+    [14] = "\\^N",
+    [15] = "\\^O",
+    [16] = "\\^P",
+    [17] = "\\^Q",
+    [18] = "\\^R",
+    [19] = "\\^S",
+    [20] = "\\^T",
+    [21] = "\\^U",
+    [22] = "\\^V",
+    [23] = "\\^W",
+    [24] = "\\^X",
+    [25] = "\\^Y",
+    [26] = "\\^Z",
+    [27] = "\\escape",
+    [28] = "\\^\\",
+    [29] = "\\^]",
+    [30] = "\\^^",
+    [31] = "\\^_",
+    [32] = "\\space",
+    [92] = "\\backslash",
+    [94] = "\\caret",
+    [127] = "\\^?",
+};
+
+/* Table for converting word-like escape sequences to characters. */
+#define N_CESCAPE_WORD (sizeof(T_CESCAPE_WORD) / sizeof(T_CESCAPE_WORD[0]))
+static const struct {const char *word; ucs4_t character;} T_CESCAPE_WORD[] = {
+    {"null", 0},
+    {"bell", 7},
+    {"backspace", 8},
+    {"tab", 9},
+    {"linefeed", 10},
+    {"verticaltab", 11},
+    {"formfeed", 12},
+    {"return", 13},
+    {"escape", 27},
+    {"space", 32},
+    {"backslash", 92},
+    {"caret", 92},
 };
 
 
@@ -117,10 +166,12 @@ static void grim_unescape(uint8_t **srcptr, uint8_t **tgtptr) {
     else if (ch == '^') {
         ch = *((*srcptr)++);
         assert(ch);
-        if ('A' <= ch && ch <= 'Z')
+        if ('@' <= ch && ch <= '_')
             *((*tgtptr)++) = ch - 'A' + 1;
-        assert(HAS_SUSCAPE_CTRL(ch));
-        *((*tgtptr)++) = T_SUSCAPE_CTRL[ch];
+        else {
+            assert(ch == '?');
+            *((*tgtptr)++) = 127;
+        }
     }
     else if (ch == 'u')
         grim_unescape_unicode(srcptr, tgtptr, 4);
@@ -134,21 +185,29 @@ static void grim_unescape(uint8_t **srcptr, uint8_t **tgtptr) {
 ucs4_t grim_unescape_character(uint8_t *str) {
     uint8_t ch = str[0];
     assert(ch);
-    if (ch == 's')
-        return ' ';
-    if (HAS_SUSCAPE(ch))
-        return T_SUSCAPE[ch];
     if (ch == '^') {
         ch = str[1];
-        assert(ch);
-        if ('A' <= ch && ch <= 'Z')
+        if (!ch)
+            return '^';
+        if ('@' <= ch && ch <= '_')
             return ch - 'A' + 1;
-        assert(HAS_SUSCAPE_CTRL(ch));
-        return T_SUSCAPE_CTRL[ch];
+        assert(ch == '?');
+        return 127;
     }
-    assert(ch == 'u' || ch == 'U');
-    uint8_t *srcptr = str + 1;
-    return count_codepoint(&srcptr, (ch == 'u') ? 4 : 8);
+    if (ch == '\\')
+        return 92;
+    for (size_t i = 0; i < N_CESCAPE_WORD; i++)
+        if (!u8_strcmp(str, (const uint8_t *)T_CESCAPE_WORD[i].word))
+            return T_CESCAPE_WORD[i].character;
+    if (ch == 'u' || ch == 'U') {
+        if (!str[1])
+            return ch;
+        uint8_t *srcptr = str + 1;
+        return count_codepoint(&srcptr, (ch == 'u') ? 4 : 8);
+    }
+    ucs4_t retval;
+    u8_mbtouc(&retval, str, 1);
+    return retval;
 }
 
 
@@ -174,10 +233,8 @@ void grim_unescape_string(grim_object str) {
 void grim_fprint_escape_character(FILE *stream, ucs4_t ch, const char *encoding) {
     if (!encoding)
         encoding = locale_charset();
-    if (ch == ' ')
-        fprintf(stream, "#\\s");
-    else if (HAS_SESCAPE(ch))
-        fprintf(stream, "#%s", T_SESCAPE[ch]);
+    if (HAS_CESCAPE(ch))
+        fprintf(stream, "#%s", T_CESCAPE[ch]);
     else {
         uint8_t buf[6];
         int len = u8_uctomb(buf, ch, 6);
