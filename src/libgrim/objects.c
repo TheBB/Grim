@@ -119,6 +119,10 @@ grim_object grim_pack_string_escape(const char *input, const char *encoding) {
     return str;
 }
 
+size_t grim_get_strlen(grim_object obj) {
+    return ((grim_indirect *) obj)->strlen - 1;
+}
+
 
 grim_object grim_create_vector(size_t nelems) {
     grim_indirect *obj = grim_create_indirect(false);

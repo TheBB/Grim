@@ -124,7 +124,7 @@ static MunitResult characters(const MunitParameter params[], void *fixture) {
     return MUNIT_OK;
 }
 
-MunitTest suite_immediate_objects[] = {
+MunitTest tests_immediate_objects[] = {
     {"/undefined", undefined, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/booleans", booleans, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/nil", nil, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
