@@ -130,5 +130,5 @@ MunitTest tests_immediate_objects[] = {
     {"/nil", nil, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/fixnums", fixnums, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/characters", characters, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    { NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL }
+    { NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
 };
