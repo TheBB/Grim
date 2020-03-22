@@ -42,5 +42,5 @@ static MunitResult escape(const MunitParameter params[], void *fixture) {
 MunitTest tests_strings[] = {
     {"/basic", basic, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/escape", escape, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    { NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
+    {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
 };
