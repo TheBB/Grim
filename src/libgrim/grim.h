@@ -51,6 +51,8 @@ grim_object grim_pack_character(ucs4_t ch);
 grim_object grim_pack_character_name(const char *name, const char *encoding);
 ucs4_t grim_extract_character(grim_object obj);
 
+grim_object grim_create_buffer(size_t sizehint);
+
 void grim_init();
 void grim_fprint(FILE *stream, grim_object obj);
 void grim_print(grim_object obj);

@@ -232,3 +232,38 @@ grim_object grim_pack_character_name(const char *name, const char *encoding) {
 ucs4_t grim_extract_character(grim_object obj) {
     return (ucs4_t) (obj >> 8);
 }
+
+
+// Buffers
+// -----------------------------------------------------------------------------
+
+static void grim_finalize_buffer(void *obj, void *_) {
+    (void)_;
+    free(((grim_indirect *) obj)->buf);
+}
+
+grim_object grim_create_buffer(size_t sizehint) {
+    grim_indirect *obj = grim_create_indirect(false);
+    obj->tag = GRIM_BUFFER_TAG;
+    assert((obj->buf = malloc(sizehint)));
+    obj->buflen = 0;
+    obj->bufcap = sizehint;
+    GC_REGISTER_FINALIZER(obj, grim_finalize_buffer, NULL, NULL, NULL);
+    return (grim_object) obj;
+}
+
+void grim_buffer_ensure_free_capacity(grim_object obj, size_t sizehint) {
+    grim_indirect *ind = (grim_indirect *) obj;
+    size_t required = ind->buflen + sizehint;
+    if (ind->bufcap < required) {
+        assert((ind->buf = realloc(ind->buf, required)));
+        ind->bufcap = required;
+    }
+}
+
+void grim_buffer_copy(grim_object obj, const char *data, size_t length) {
+    grim_buffer_ensure_free_capacity(obj, length);
+    grim_indirect *ind = (grim_indirect *) obj;
+    memcpy(ind->buf + ind->buflen, data, length);
+    ind->buflen += length;
+}

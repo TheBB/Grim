@@ -30,6 +30,7 @@ enum {
     GRIM_STRING_TAG    = 0x1f,
     GRIM_VECTOR_TAG    = 0x2f,
     GRIM_CONS_TAG      = 0x3f,
+    GRIM_BUFFER_TAG    = 0x4f,
 };
 
 
@@ -53,6 +54,11 @@ typedef struct {
             uint8_t *symbolname;
             size_t symbollen;
         };
+        struct {
+            char *buf;
+            size_t buflen;
+            size_t bufcap;
+        };
     };
 } grim_indirect;
 
@@ -60,3 +66,6 @@ extern struct ZHashTable *grim_symbol_table;
 
 grim_tag grim_get_direct_tag(grim_object obj);
 grim_tag grim_get_indirect_tag(grim_object obj);
+
+void grim_buffer_ensure_free_capacity(grim_object obj, size_t sizehint);
+void grim_buffer_copy(grim_object obj, const char *data, size_t length);
