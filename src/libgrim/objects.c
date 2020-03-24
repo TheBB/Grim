@@ -46,9 +46,13 @@ grim_type grim_get_type(grim_object obj) {
 
 
 static grim_indirect *grim_create_indirect(bool permanent) {
+    grim_indirect *retval;
     if (permanent)
-        return (grim_indirect *) GC_MALLOC_UNCOLLECTABLE(sizeof(grim_indirect));
-    return (grim_indirect *) GC_MALLOC(sizeof(grim_indirect));
+        retval = GC_MALLOC_UNCOLLECTABLE(sizeof(grim_indirect));
+    else
+        retval = GC_MALLOC(sizeof(grim_indirect));
+    assert(retval);
+    return retval;
 }
 
 
@@ -136,7 +140,7 @@ size_t grim_get_strlen(grim_object obj) {
 grim_object grim_create_vector(size_t nelems) {
     grim_indirect *obj = grim_create_indirect(false);
     obj->tag = GRIM_VECTOR_TAG;
-    obj->vector_data = (grim_object *) GC_MALLOC(nelems * sizeof(grim_object));
+    assert((obj->vector_data = GC_MALLOC(nelems * sizeof(grim_object))));
     obj->vectorlen = nelems;
     grim_object vec = (grim_object) obj;
     for (size_t i = 0; i < nelems; i++)
