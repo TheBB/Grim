@@ -52,6 +52,9 @@ static grim_indirect *grim_create_indirect(bool permanent) {
 }
 
 
+// Integers
+// -----------------------------------------------------------------------------
+
 static void grim_finalize_bigint(void *obj, void *_) {
     (void)_;
     mpz_clear(((grim_indirect *) obj)->bigint);
@@ -89,6 +92,9 @@ grim_object grim_pack_integer(intmax_t num) {
 }
 
 
+// Strings
+// -----------------------------------------------------------------------------
+
 static void grim_finalize_string(void *obj, void *_) {
     (void)_;
     free(((grim_indirect *) obj)->str);
@@ -124,6 +130,9 @@ size_t grim_get_strlen(grim_object obj) {
 }
 
 
+// Vectors
+// -----------------------------------------------------------------------------
+
 grim_object grim_create_vector(size_t nelems) {
     grim_indirect *obj = grim_create_indirect(false);
     obj->tag = GRIM_VECTOR_TAG;
@@ -148,6 +157,9 @@ grim_object grim_vector_get(grim_object vec, size_t index) {
 }
 
 
+// Cons cells
+// -----------------------------------------------------------------------------
+
 grim_object grim_create_cons(grim_object car, grim_object cdr) {
     grim_indirect *obj = grim_create_indirect(false);
     obj->tag = GRIM_CONS_TAG;
@@ -164,6 +176,9 @@ grim_object grim_get_cdr(grim_object obj) {
     return ((grim_indirect *) obj)->cdr;
 }
 
+
+// Symbols
+// -----------------------------------------------------------------------------
 
 static grim_object grim_create_symbol(uint8_t *name, size_t len) {
     grim_indirect *obj = grim_create_indirect(true);
@@ -192,6 +207,9 @@ uint8_t *grim_get_symbol_name(grim_object obj) {
     return wrapped->symbolname;
 }
 
+
+// Characters
+// -----------------------------------------------------------------------------
 
 grim_object grim_pack_character(ucs4_t ch) {
     return (((grim_object) ch) << 8) | GRIM_CHARACTER_TAG;
