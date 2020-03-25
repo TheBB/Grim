@@ -10,6 +10,9 @@
 #include "strings.h"
 
 
+typedef void printfunc(grim_object buf, grim_object src, const char *encoding);
+
+
 static void grim_encode_simple(grim_object buf, grim_object src, const char *encoding) {
     switch (grim_get_direct_tag(src)) {
     case GRIM_FALSE_TAG:
@@ -57,8 +60,37 @@ static void grim_encode_simple(grim_object buf, grim_object src, const char *enc
     }
 
     grim_buffer_copy(buf, "#<undefined>", 12);
+
 }
 
+static void grim_encode_vector(grim_object buf, grim_object src, const char *encoding, printfunc printer) {
+    grim_buffer_copy(buf, "#(", 2);
+    size_t len = grim_vector_size(src);
+    for (size_t i = 0; i < len; i++) {
+        printer(buf, grim_vector_get(src, i), encoding);
+        if (i + 1 < len)
+            grim_buffer_copy(buf, " ", 1);
+    }
+    grim_buffer_copy(buf, ")", 1);
+}
+
+
+static void grim_encode_cons(grim_object buf, grim_object src, const char *encoding, printfunc printer) {
+    grim_buffer_copy(buf, "(", 1);
+    bool needs_space = false;
+    while (grim_get_type(src) == GRIM_CONS) {
+        if (needs_space)
+            grim_buffer_copy(buf, " ", 1);
+        printer(buf, grim_get_car(src), encoding);
+        src = grim_get_cdr(src);
+        needs_space = true;
+    }
+    if (grim_get_type(src) != GRIM_NIL) {
+        grim_buffer_copy(buf, " . ", 3);
+        printer(buf, src, encoding);
+    }
+    grim_buffer_copy(buf, ")", 1);
+}
 
 static void grim_encode_display(grim_object buf, grim_object src, const char *encoding) {
     switch (grim_get_direct_tag(src)) {
@@ -71,38 +103,13 @@ static void grim_encode_display(grim_object buf, grim_object src, const char *en
             grim_display_string(buf, src, encoding);
             return;
         case GRIM_VECTOR_TAG:
-        {
-            grim_buffer_copy(buf, "#(", 2);
-            size_t len = grim_vector_size(src);
-            for (size_t i = 0; i < len; i++) {
-                grim_encode_display(buf, grim_vector_get(src, i), encoding);
-                if (i + 1 < len)
-                    grim_buffer_copy(buf, " ", 1);
-            }
-            grim_buffer_copy(buf, ")", 1);
+            grim_encode_vector(buf, src, encoding, grim_encode_display);
             return;
-        }
         case GRIM_CONS_TAG:
-        {
-            grim_buffer_copy(buf, "(", 1);
-            bool needs_space = false;
-            while (grim_get_type(src) == GRIM_CONS) {
-                if (needs_space)
-                    grim_buffer_copy(buf, " ", 1);
-                grim_encode_display(buf, grim_get_car(src), encoding);
-                src = grim_get_cdr(src);
-                needs_space = true;
-            }
-            if (grim_get_type(src) != GRIM_NIL) {
-                grim_buffer_copy(buf, " . ", 3);
-                grim_encode_display(buf, src, encoding);
-            }
-            grim_buffer_copy(buf, ")", 1);
+            grim_encode_cons(buf, src, encoding, grim_encode_display);
             return;
-        }
         }
     }
-
     grim_encode_simple(buf, src, encoding);
 }
 
@@ -118,35 +125,11 @@ static void grim_encode_print(grim_object buf, grim_object src, const char *enco
             grim_print_string(buf, src, encoding);
             return;
         case GRIM_VECTOR_TAG:
-        {
-            grim_buffer_copy(buf, "#(", 2);
-            size_t len = grim_vector_size(src);
-            for (size_t i = 0; i < len; i++) {
-                grim_encode_print(buf, grim_vector_get(src, i), encoding);
-                if (i + 1 < len)
-                    grim_buffer_copy(buf, " ", 1);
-            }
-            grim_buffer_copy(buf, ")", 1);
+            grim_encode_vector(buf, src, encoding, grim_encode_print);
             return;
-        }
         case GRIM_CONS_TAG:
-        {
-            grim_buffer_copy(buf, "(", 1);
-            bool needs_space = false;
-            while (grim_get_type(src) == GRIM_CONS) {
-                if (needs_space)
-                    grim_buffer_copy(buf, " ", 1);
-                grim_encode_print(buf, grim_get_car(src), encoding);
-                src = grim_get_cdr(src);
-                needs_space = true;
-            }
-            if (grim_get_type(src) != GRIM_NIL) {
-                grim_buffer_copy(buf, " . ", 3);
-                grim_encode_display(buf, src, encoding);
-            }
-            grim_buffer_copy(buf, ")", 1);
+            grim_encode_cons(buf, src, encoding, grim_encode_print);
             return;
-        }
         }
     }
 
