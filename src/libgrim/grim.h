@@ -54,5 +54,5 @@ ucs4_t grim_extract_character(grim_object obj);
 grim_object grim_create_buffer(size_t sizehint);
 
 void grim_init();
-void grim_fprint(FILE *stream, grim_object obj);
-void grim_print(grim_object obj);
+void grim_display(grim_object obj, const char *encoding);
+void grim_print(grim_object obj, const char *encoding);

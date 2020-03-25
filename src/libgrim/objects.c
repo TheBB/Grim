@@ -252,6 +252,11 @@ grim_object grim_create_buffer(size_t sizehint) {
     return (grim_object) obj;
 }
 
+void grim_dump_buffer(FILE *stream, grim_object obj) {
+    grim_indirect *ind = (grim_indirect *) obj;
+    fprintf(stream, "%*s", (int) ind->buflen, ind->buf);
+}
+
 void grim_buffer_ensure_free_capacity(grim_object obj, size_t sizehint) {
     grim_indirect *ind = (grim_indirect *) obj;
     size_t required = ind->buflen + sizehint;

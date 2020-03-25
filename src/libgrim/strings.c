@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistring/iconveh.h>
 #include <unitypes.h>
 
@@ -230,55 +231,80 @@ void grim_unescape_string(grim_object str) {
 }
 
 
-void grim_fprint_escape_character(FILE *stream, ucs4_t ch, const char *encoding) {
+void grim_display_character(grim_object buf, grim_object src, const char *encoding) {
     if (!encoding)
         encoding = locale_charset();
-    if (HAS_CESCAPE(ch))
-        fprintf(stream, "#%s", T_CESCAPE[ch]);
-    else {
-        uint8_t buf[6];
-        int len = u8_uctomb(buf, ch, 6);
-        size_t convlength;
-        char *printbuf = u8_conv_to_encoding(encoding, iconveh_escape_sequence, buf, len, NULL, NULL, &convlength);
-        fprintf(stream, "#\\%*s", (int) convlength, printbuf);
-        free(printbuf);
-    }
+    uint8_t workspace[6];
+    int len = u8_uctomb(workspace, grim_extract_character(src), 6);
+    size_t convlength;
+    char *encoded = u8_conv_to_encoding(encoding, iconveh_question_mark, workspace, len, NULL, NULL, &convlength);
+    grim_buffer_copy(buf, encoded, convlength);
+    free(encoded);
 }
 
 
-void grim_fprint_escape_string(FILE *stream, grim_object str, const char *encoding) {
+void grim_display_string(grim_object buf, grim_object src, const char *encoding) {
     if (!encoding)
         encoding = locale_charset();
-    grim_indirect *ind = (grim_indirect *)str;
-    uint8_t *buf = ind->str;
-    size_t start = 0, end, length = ind->strlen, convlength;
+    grim_indirect *ind = (grim_indirect *)src;
+    size_t convlength;
+    char *encoded = u8_conv_to_encoding(encoding, iconveh_question_mark, ind->str, ind->strlen-1, NULL, NULL, &convlength);
+    grim_buffer_copy(buf, encoded, convlength);
+    free(encoded);
+}
 
-    fprintf(stream, "\"");
+
+void grim_print_character(grim_object buf, grim_object src, const char *encoding) {
+    if (!encoding)
+        encoding = locale_charset();
+    ucs4_t ch = grim_extract_character(src);
+    if (HAS_CESCAPE(ch)) {
+        grim_buffer_copy(buf, "#", 1);
+        grim_buffer_copy(buf, T_CESCAPE[ch], strlen(T_CESCAPE[ch]));
+        return;
+    }
+    uint8_t workspace[6];
+    int len = u8_uctomb(workspace, ch, 6);
+    size_t convlength;
+    char *encoded = u8_conv_to_encoding(encoding, iconveh_escape_sequence, workspace, len, NULL, NULL, &convlength);
+    grim_buffer_copy(buf, encoded, convlength);
+    free(encoded);
+}
+
+
+void grim_print_string(grim_object buf, grim_object src, const char *encoding) {
+    if (!encoding)
+        encoding = locale_charset();
+    grim_indirect *ind = (grim_indirect *)src;
+    uint8_t *buffer = ind->str;
+    size_t start = 0, end, length = ind->strlen-1, convlength;
+
+    grim_buffer_copy(buf, "\"", 1);
     while (start < length) {
         end = start;
 
         while (end < length) {
-            uint8_t ch = buf[end];
+            uint8_t ch = buffer[end];
             if (HAS_SESCAPE(ch))
                 break;
             end++;
         }
 
         char *printbuf = u8_conv_to_encoding(
-            encoding, iconveh_escape_sequence, buf,
+            encoding, iconveh_escape_sequence, buffer,
             end - start, NULL, NULL, &convlength
         );
-        fprintf(stream, "%*s", (int) convlength, printbuf);
+        grim_buffer_copy(buf, printbuf, convlength);
         free(printbuf);
 
         if (end >= length)
             break;
 
-        uint8_t ch = buf[end];
+        uint8_t ch = buffer[end];
         assert(HAS_SESCAPE(ch));
-        fprintf(stream, "%s", T_SESCAPE[ch]);
+        grim_buffer_copy(buf, T_SESCAPE[ch], strlen(T_SESCAPE[ch]));
 
         start = end + 1;
     }
-    fprintf(stream, "\"");
+    grim_buffer_copy(buf, "\"", 1);
 }
