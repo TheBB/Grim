@@ -56,7 +56,7 @@ static void grim_encode_simple(grim_object buf, grim_object src, const char *enc
         return;
     }
 
-    grim_buffer_copy(buf, "#undefined", 10);
+    grim_buffer_copy(buf, "#<undefined>", 12);
 }
 
 
