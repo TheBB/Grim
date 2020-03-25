@@ -49,6 +49,9 @@ static void grim_encode_simple(grim_object buf, grim_object src, const char *enc
             free(z);
             return;
         }
+        case GRIM_BUFFER_TAG:
+            grim_buffer_copy(buf, "#<buffer>", 9);
+            return;
         }
         return;
     }

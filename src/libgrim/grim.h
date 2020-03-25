@@ -23,6 +23,7 @@ typedef enum {
     GRIM_STRING,
     GRIM_VECTOR,
     GRIM_CONS,
+    GRIM_BUFFER,
 } grim_type;
 
 grim_type grim_get_type(grim_object obj);

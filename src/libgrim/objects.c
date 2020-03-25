@@ -39,6 +39,7 @@ grim_type grim_get_type(grim_object obj) {
         case GRIM_STRING_TAG: return GRIM_STRING;
         case GRIM_VECTOR_TAG: return GRIM_VECTOR;
         case GRIM_CONS_TAG: return GRIM_CONS;
+        case GRIM_BUFFER_TAG: return GRIM_BUFFER;
         }
     default: case GRIM_UNDEFINED_TAG: return GRIM_UNDEFINED;
     }
