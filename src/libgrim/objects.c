@@ -118,7 +118,7 @@ grim_object grim_pack_string(const char *input, const char *encoding) {
     grim_indirect *obj = grim_create_string();
     if (!encoding)
         encoding = locale_charset();
-    obj->str = u8_conv_from_encoding(encoding, iconveh_error, input, strlen(input) + 1, NULL, NULL, &obj->strlen);
+    obj->str = u8_conv_from_encoding(encoding, iconveh_error, input, strlen(input), NULL, NULL, &obj->strlen);
     if (!obj->str)
         return grim_undefined;
     return (grim_object) obj;
@@ -131,7 +131,15 @@ grim_object grim_pack_string_escape(const char *input, const char *encoding) {
 }
 
 size_t grim_get_strlen(grim_object obj) {
-    return ((grim_indirect *) obj)->strlen - 1;
+    return ((grim_indirect *) obj)->strlen;
+}
+
+size_t grim_set_strlen(grim_object obj, size_t length) {
+    return ((grim_indirect *) obj)->strlen = length;
+}
+
+uint8_t *grim_get_strptr(grim_object obj) {
+    return ((grim_indirect *) obj)->str;
 }
 
 
@@ -224,8 +232,8 @@ grim_object grim_pack_character_name(const char *name, const char *encoding) {
     if (!encoding)
         encoding = locale_charset();
     size_t u8len;
-    uint8_t *str = u8_conv_from_encoding(encoding, iconveh_error, name, strlen(name) + 1, NULL, NULL, &u8len);
-    ucs4_t ch = grim_unescape_character(str);
+    uint8_t *str = u8_conv_from_encoding(encoding, iconveh_error, name, strlen(name), NULL, NULL, &u8len);
+    ucs4_t ch = grim_unescape_character(str, u8len);
     free(str);
     return grim_pack_character(ch);
 }

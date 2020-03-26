@@ -67,6 +67,9 @@ extern struct ZHashTable *grim_symbol_table;
 grim_tag grim_get_direct_tag(grim_object obj);
 grim_tag grim_get_indirect_tag(grim_object obj);
 
+uint8_t *grim_get_strptr(grim_object obj);
+size_t grim_set_strlen(grim_object obj, size_t length);
+
 void grim_dump_buffer(FILE *stream, grim_object obj);
 void grim_buffer_ensure_free_capacity(grim_object obj, size_t sizehint);
 void grim_buffer_copy(grim_object obj, const char *data, size_t length);

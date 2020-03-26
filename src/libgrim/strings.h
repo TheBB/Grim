@@ -4,7 +4,7 @@
 
 #include "grim.h"
 
-ucs4_t grim_unescape_character(uint8_t *str);
+ucs4_t grim_unescape_character(uint8_t *str, size_t length);
 void grim_unescape_string(grim_object str);
 
 void grim_display_character(grim_object buf, grim_object src, const char *encoding);

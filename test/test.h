@@ -94,9 +94,9 @@ extern MunitTest tests_strings[];
         gta_is_string(y);                                                      \
         size_t L = (l);                                                        \
         uint8_t *w = (uint8_t *)(v);                                           \
-        munit_assert_ullong(((grim_indirect *)y)->strlen, ==, L + 1);          \
+        munit_assert_ullong(((grim_indirect *)y)->strlen, ==, L);              \
         munit_assert_ullong(grim_get_strlen(y), ==, L);                        \
-        for (size_t i = 0; i <= L; i++)                                        \
+        for (size_t i = 0; i < L; i++)                                         \
             munit_assert_uint8(((grim_indirect *)y)->str[i], ==, w[i]);        \
     } while (0)
 
