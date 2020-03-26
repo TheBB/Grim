@@ -70,3 +70,6 @@ grim_tag grim_get_indirect_tag(grim_object obj);
 void grim_dump_buffer(FILE *stream, grim_object obj);
 void grim_buffer_ensure_free_capacity(grim_object obj, size_t sizehint);
 void grim_buffer_copy(grim_object obj, const char *data, size_t length);
+
+void grim_encode_display(grim_object buf, grim_object src, const char *encoding);
+void grim_encode_print(grim_object buf, grim_object src, const char *encoding);

@@ -50,7 +50,7 @@ static const char *T_SESCAPE[] = {
     [29] = "\\^]",
     [30] = "\\^^",
     [31] = "\\^_",
-    [34] = "\"",
+    [34] = "\\\"",
     [92] = "\\\\",
     [127] = "\\^?",
 };
@@ -291,7 +291,7 @@ void grim_print_string(grim_object buf, grim_object src, const char *encoding) {
         }
 
         char *printbuf = u8_conv_to_encoding(
-            encoding, iconveh_escape_sequence, buffer,
+            encoding, iconveh_escape_sequence, buffer + start,
             end - start, NULL, NULL, &convlength
         );
         grim_buffer_copy(buf, printbuf, convlength);

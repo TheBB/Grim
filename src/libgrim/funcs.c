@@ -92,7 +92,7 @@ static void grim_encode_cons(grim_object buf, grim_object src, const char *encod
     grim_buffer_copy(buf, ")", 1);
 }
 
-static void grim_encode_display(grim_object buf, grim_object src, const char *encoding) {
+void grim_encode_display(grim_object buf, grim_object src, const char *encoding) {
     switch (grim_get_direct_tag(src)) {
     case GRIM_CHARACTER_TAG:
         grim_display_character(buf, src, encoding);
@@ -114,7 +114,7 @@ static void grim_encode_display(grim_object buf, grim_object src, const char *en
 }
 
 
-static void grim_encode_print(grim_object buf, grim_object src, const char *encoding) {
+void grim_encode_print(grim_object buf, grim_object src, const char *encoding) {
     switch (grim_get_direct_tag(src)) {
     case GRIM_CHARACTER_TAG:
         grim_print_character(buf, src, encoding);

@@ -91,10 +91,30 @@ extern MunitTest tests_strings[];
 #define gta_check_string(c, l, v)                                              \
     do {                                                                       \
         grim_object y = (c);                                                   \
+        gta_is_string(y);                                                      \
         size_t L = (l);                                                        \
         uint8_t *w = (uint8_t *)(v);                                           \
         munit_assert_ullong(((grim_indirect *)y)->strlen, ==, L + 1);          \
         munit_assert_ullong(grim_get_strlen(y), ==, L);                        \
         for (size_t i = 0; i <= L; i++)                                        \
             munit_assert_uint8(((grim_indirect *)y)->str[i], ==, w[i]);        \
+    } while (0)
+
+#define gta_is_buffer(c)                                                       \
+    do {                                                                       \
+        grim_object z = (c);                                                   \
+        munit_assert_int(grim_get_type(z), ==, GRIM_BUFFER);                   \
+        munit_assert_int(grim_get_direct_tag(z), ==, GRIM_INDIRECT_TAG);       \
+        munit_assert_int(grim_get_indirect_tag(z), ==, GRIM_BUFFER_TAG);       \
+    } while (0)
+
+#define gta_check_buffer(c, l, v)                                              \
+    do {                                                                       \
+        grim_object y = (c);                                                   \
+        gta_is_buffer(y);                                                      \
+        size_t L = (l);                                                        \
+        char *w = (char *)(v);                                                 \
+        munit_assert_ullong(((grim_indirect *)y)->buflen, ==, L);              \
+        for (size_t i = 0; i <= L; i++)                                        \
+            munit_assert_char(((grim_indirect *)y)->buf[i], ==, w[i]);         \
     } while (0)
