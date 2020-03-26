@@ -11,7 +11,6 @@
 
 #include "grim.h"
 #include "internal.h"
-#include "strings.h"
 
 
 /* Table for converting ASCII code to canonical escape sequence. */

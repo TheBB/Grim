@@ -9,7 +9,6 @@
 
 #include "grim.h"
 #include "internal.h"
-#include "strings.h"
 
 
 const grim_object grim_undefined = GRIM_UNDEFINED_TAG;

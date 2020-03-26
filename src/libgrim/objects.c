@@ -10,7 +10,6 @@
 
 #include "grim.h"
 #include "internal.h"
-#include "strings.h"
 
 
 struct ZHashTable *grim_symbol_table;
