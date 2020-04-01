@@ -3,7 +3,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "zhash.h"
 #include "gmp.h"
 
 #include "grim.h"

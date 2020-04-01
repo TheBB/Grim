@@ -5,7 +5,6 @@
 #include "gc.h"
 #include "gmp.h"
 #include "unistdio.h"
-#include "zhash.h"
 
 #include "grim.h"
 #include "internal.h"
