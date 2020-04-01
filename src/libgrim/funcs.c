@@ -149,3 +149,22 @@ void grim_print(grim_object obj, const char *encoding) {
     grim_encode_print(buf, obj, encoding);
     grim_dump_buffer(stdout, buf);
 }
+
+
+bool grim_eq(grim_object a, grim_object b) {
+    if (grim_get_direct_tag(a) != GRIM_INDIRECT_TAG &&
+        grim_get_direct_tag(b) != GRIM_INDIRECT_TAG)
+        return a == b;
+    if (grim_get_indirect_tag(a) != grim_get_indirect_tag(b))
+        return false;
+    switch (grim_get_indirect_tag(a)) {
+    case GRIM_BIGINT_TAG:
+        return !mpz_cmp(((grim_indirect *)a)->bigint, ((grim_indirect *)b)->bigint);
+    case GRIM_STRING_TAG:
+        if (grim_get_strlen(a) != grim_get_strlen(b))
+            return false;
+        return !memcmp(grim_get_strptr(a), grim_get_strptr(b), grim_get_strlen(a));
+    }
+
+    return a == b;
+}

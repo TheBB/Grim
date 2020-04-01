@@ -57,3 +57,4 @@ grim_object grim_create_buffer(size_t sizehint);
 void grim_init();
 void grim_display(grim_object obj, const char *encoding);
 void grim_print(grim_object obj, const char *encoding);
+bool grim_eq(grim_object a, grim_object b);
