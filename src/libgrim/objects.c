@@ -287,3 +287,11 @@ void grim_buffer_copy(grim_object obj, const char *data, size_t length) {
     memcpy(ind->buf + ind->buflen, data, length);
     ind->buflen += length;
 }
+
+char *grim_get_bufptr(grim_object obj) {
+    return ((grim_indirect *) obj)->buf;
+}
+
+size_t grim_get_buflen(grim_object obj) {
+    return ((grim_indirect *) obj)->buflen;
+}

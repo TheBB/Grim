@@ -73,6 +73,8 @@ size_t grim_set_strlen(grim_object obj, size_t length);
 void grim_dump_buffer(FILE *stream, grim_object obj);
 void grim_buffer_ensure_free_capacity(grim_object obj, size_t sizehint);
 void grim_buffer_copy(grim_object obj, const char *data, size_t length);
+char *grim_get_bufptr(grim_object obj);
+size_t grim_get_buflen(grim_object obj);
 
 void grim_encode_display(grim_object buf, grim_object src, const char *encoding);
 void grim_encode_print(grim_object buf, grim_object src, const char *encoding);
@@ -84,3 +86,5 @@ void grim_display_character(grim_object buf, grim_object src, const char *encodi
 void grim_display_string(grim_object buf, grim_object src, const char *encoding);
 void grim_print_character(grim_object buf, grim_object src, const char *encoding);
 void grim_print_string(grim_object buf, grim_object src, const char *encoding);
+
+uint64_t grim_hash(grim_object obj, uint64_t h);
