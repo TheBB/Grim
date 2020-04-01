@@ -1,19 +1,21 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "gmp.h"
 #include "unistdio.h"
 
 #include "grim.h"
 #include "internal.h"
-#include "strings.h"
 
 
 typedef void printfunc(grim_object buf, grim_object src, const char *encoding);
 
 
 static void grim_encode_simple(grim_object buf, grim_object src, const char *encoding) {
+    (void) encoding;
+
     switch (grim_get_direct_tag(src)) {
     case GRIM_FALSE_TAG:
         grim_buffer_copy(buf, "#f", 2);
@@ -28,16 +30,6 @@ static void grim_encode_simple(grim_object buf, grim_object src, const char *enc
     {
         char *z = NULL;
         int len = asprintf(&z, "%ld", grim_extract_integer(src));
-        grim_buffer_copy(buf, z, len);
-        free(z);
-        return;
-    }
-    case GRIM_SYMBOL_TAG:
-    {
-        // TODO: Use encoding here
-        (void) encoding;
-        char *z = NULL;
-        int len = ulc_asprintf(&z, "%U", grim_get_symbol_name(src));
         grim_buffer_copy(buf, z, len);
         free(z);
         return;
@@ -94,6 +86,9 @@ static void grim_encode_cons(grim_object buf, grim_object src, const char *encod
 
 void grim_encode_display(grim_object buf, grim_object src, const char *encoding) {
     switch (grim_get_direct_tag(src)) {
+    case GRIM_SYMBOL_TAG:
+        grim_display_string(buf, grim_get_symbol_name(src), encoding);
+        return;
     case GRIM_CHARACTER_TAG:
         grim_display_character(buf, src, encoding);
         return;
@@ -116,6 +111,9 @@ void grim_encode_display(grim_object buf, grim_object src, const char *encoding)
 
 void grim_encode_print(grim_object buf, grim_object src, const char *encoding) {
     switch (grim_get_direct_tag(src)) {
+    case GRIM_SYMBOL_TAG:
+        grim_display_string(buf, grim_get_symbol_name(src), encoding);
+        return;
     case GRIM_CHARACTER_TAG:
         grim_print_character(buf, src, encoding);
         return;

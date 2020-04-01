@@ -18,7 +18,7 @@ const grim_object grim_nil = GRIM_NIL_TAG;
 
 
 void grim_init() {
-    grim_symbol_table = zcreate_hash_table();
     assert(GRIM_ALIGN >= 16);
+    grim_symbol_table = grim_create_hashtable(0);
     GC_INIT();
 }

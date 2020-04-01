@@ -47,7 +47,7 @@ grim_object grim_get_car(grim_object obj);
 grim_object grim_get_cdr(grim_object obj);
 
 grim_object grim_intern(const char *name, const char *encoding);
-uint8_t *grim_get_symbol_name(grim_object obj);
+grim_object grim_get_symbol_name(grim_object obj);
 
 grim_object grim_pack_character(ucs4_t ch);
 grim_object grim_pack_character_name(const char *name, const char *encoding);

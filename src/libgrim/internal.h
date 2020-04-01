@@ -60,8 +60,7 @@ typedef struct {
             grim_object cdr;
         };
         struct {
-            uint8_t *symbolname;
-            size_t symbollen;
+            grim_object symbolname;
         };
         struct {
             char *buf;
@@ -76,7 +75,7 @@ typedef struct {
     };
 } grim_indirect;
 
-extern struct ZHashTable *grim_symbol_table;
+extern grim_object grim_symbol_table;
 
 grim_tag grim_get_direct_tag(grim_object obj);
 grim_tag grim_get_indirect_tag(grim_object obj);

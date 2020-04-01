@@ -12,7 +12,7 @@
 #include "internal.h"
 
 
-struct ZHashTable *grim_symbol_table;
+grim_object grim_symbol_table;
 
 
 grim_tag grim_get_direct_tag(grim_object obj) {
@@ -193,29 +193,23 @@ grim_object grim_get_cdr(grim_object obj) {
 // Symbols
 // -----------------------------------------------------------------------------
 
-static grim_object grim_create_symbol(uint8_t *name, size_t len) {
+static grim_object grim_create_symbol(grim_object name) {
     grim_indirect *obj = grim_create_indirect(true);
     obj->symbolname = name;
-    obj->symbollen = len;
     return ((grim_object) obj) | GRIM_SYMBOL_TAG;
 }
 
 grim_object grim_intern(const char *name, const char *encoding) {
-    if (!encoding)
-        encoding = locale_charset();
-    size_t u8len;
-    uint8_t *u8name = u8_conv_from_encoding(encoding, iconveh_error, name, strlen(name) + 1, NULL, NULL, &u8len);
-    grim_object sym = (grim_object) zhash_get(grim_symbol_table, (char *) u8name);
-    if (sym != 0) {
-        free(u8name);
+    grim_object str = grim_pack_string(name, encoding);
+    grim_object sym = grim_hashtable_get(grim_symbol_table, str);
+    if (sym != grim_undefined)
         return sym;
-    }
-    sym = grim_create_symbol(u8name, u8len);
-    zhash_set(grim_symbol_table, (char *) u8name, (void *) sym);
+    sym = grim_create_symbol(str);
+    grim_hashtable_set(grim_symbol_table, str, sym);
     return sym;
 }
 
-uint8_t *grim_get_symbol_name(grim_object obj) {
+grim_object grim_get_symbol_name(grim_object obj) {
     grim_indirect *wrapped = (grim_indirect *) (obj - GRIM_SYMBOL_TAG);
     return wrapped->symbolname;
 }
