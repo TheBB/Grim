@@ -31,8 +31,17 @@ enum {
     GRIM_VECTOR_TAG    = 0x2f,
     GRIM_CONS_TAG      = 0x3f,
     GRIM_BUFFER_TAG    = 0x4f,
+    GRIM_HASHTABLE_TAG = 0x5f,
 };
 
+struct grim_hashnode_ {
+    grim_object key;
+    grim_object value;
+    uint64_t hash;
+    struct grim_hashnode_ *next;
+};
+
+typedef struct grim_hashnode_ grim_hashnode;
 
 typedef struct {
     grim_tag tag;
@@ -58,6 +67,11 @@ typedef struct {
             char *buf;
             size_t buflen;
             size_t bufcap;
+        };
+        struct {
+            grim_hashnode **hashnodes;
+            size_t hashcap;
+            size_t hashfill;
         };
     };
 } grim_indirect;

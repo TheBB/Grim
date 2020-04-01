@@ -24,6 +24,7 @@ typedef enum {
     GRIM_VECTOR,
     GRIM_CONS,
     GRIM_BUFFER,
+    GRIM_HASHTABLE,
 } grim_type;
 
 grim_type grim_get_type(grim_object obj);
@@ -53,6 +54,10 @@ grim_object grim_pack_character_name(const char *name, const char *encoding);
 ucs4_t grim_extract_character(grim_object obj);
 
 grim_object grim_create_buffer(size_t sizehint);
+
+grim_object grim_create_hashtable(size_t sizehint);
+grim_object grim_hashtable_get(grim_object table, grim_object key);
+void grim_hashtable_set(grim_object table, grim_object key, grim_object value);
 
 void grim_init();
 void grim_display(grim_object obj, const char *encoding);
