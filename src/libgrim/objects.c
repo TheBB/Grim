@@ -245,12 +245,17 @@ ucs4_t grim_extract_character(grim_object obj) {
 // Buffers
 // -----------------------------------------------------------------------------
 
+#define GRIM_BUFFER_GROWTH_FACTOR (1.5)
+#define GRIM_BUFFER_MIN_SIZE (1024)
+
 static void grim_finalize_buffer(void *obj, void *_) {
     (void)_;
     free(((grim_indirect *) obj)->buf);
 }
 
 grim_object grim_create_buffer(size_t sizehint) {
+    if (sizehint < GRIM_BUFFER_MIN_SIZE)
+        sizehint = GRIM_BUFFER_MIN_SIZE;
     grim_indirect *obj = grim_create_indirect(false);
     obj->tag = GRIM_BUFFER_TAG;
     assert((obj->buf = malloc(sizehint)));
@@ -268,9 +273,11 @@ void grim_dump_buffer(FILE *stream, grim_object obj) {
 void grim_buffer_ensure_free_capacity(grim_object obj, size_t sizehint) {
     grim_indirect *ind = (grim_indirect *) obj;
     size_t required = ind->buflen + sizehint;
-    if (ind->bufcap < required) {
-        assert((ind->buf = realloc(ind->buf, required)));
-        ind->bufcap = required;
+    while (ind->bufcap < required) {
+        size_t newsize = (size_t) (ind->bufcap * GRIM_BUFFER_GROWTH_FACTOR);
+        printf("%lu\n", newsize);
+        assert((ind->buf = realloc(ind->buf, newsize)));
+        ind->bufcap = newsize;
     }
 }
 
