@@ -1,4 +1,5 @@
 #include "grim.h"
+#include "internal.h"
 #include "test.h"
 
 static MunitResult insert(const MunitParameter params[], void *fixture) {
@@ -96,9 +97,20 @@ static MunitResult overwrite(const MunitParameter params[], void *fixture) {
     return MUNIT_OK;
 }
 
+static MunitResult stress(const MunitParameter params[], void *fixture) {
+    grim_object table = grim_hashtable_create(0);
+    for (intmax_t i = 0; i < 4000; i++)
+        grim_hashtable_set(table, grim_integer_pack(i), grim_integer_pack(i));
+    gta_check_hashtable(table, 4000);
+    for (intmax_t i = 0; i < 4000; i++)
+        gta_check_fixnum(grim_hashtable_get(table, grim_integer_pack(i)), i);
+    return MUNIT_OK;
+}
+
 MunitTest tests_hashtables[] = {
     {"/insert", insert, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/retrieve", retrieve, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/overwrite", overwrite, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+    {"/stress", stress, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
 };
