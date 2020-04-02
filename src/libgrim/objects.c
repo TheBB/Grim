@@ -373,4 +373,13 @@ void grim_hashtable_set(grim_object table, grim_object key, grim_object value) {
         ind->hashfill++;
     (*node)->value = value;
 }
+
+void grim_hashtable_unset(grim_object table, grim_object key) {
+    grim_indirect *ind = (grim_indirect *) table;
+    size_t hash = grim_hash(key, 0);
+    grim_hashnode **node = grim_hashtable_node(ind->hashnodes, key, hash, ind->hashcap, false);
+    if (*node) {
+        *node = (*node)->next;
+        ind->hashfill--;
+    }
 }

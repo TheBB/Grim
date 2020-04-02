@@ -97,6 +97,39 @@ static MunitResult overwrite(const MunitParameter params[], void *fixture) {
     return MUNIT_OK;
 }
 
+static MunitResult delete(const MunitParameter params[], void *fixture) {
+    grim_object table = grim_hashtable_create(0);
+    gta_check_hashtable(table, 0);
+
+    grim_object key1 = grim_string_pack("alpha", NULL);
+    grim_object key2 = grim_string_pack("beta", NULL);
+    grim_object key3 = grim_string_pack("gamma", NULL);
+
+    grim_hashtable_set(table, key1, grim_false);
+    grim_hashtable_set(table, key2, grim_true);
+    gta_check_hashtable(table, 2);
+
+    grim_hashtable_unset(table, key3);
+    gta_check_hashtable(table, 2);
+    munit_assert(grim_hashtable_has(table, key1));
+    munit_assert(grim_hashtable_has(table, key2));
+    munit_assert(!grim_hashtable_has(table, key3));
+
+    grim_hashtable_unset(table, key2);
+    gta_check_hashtable(table, 1);
+    munit_assert(grim_hashtable_has(table, key1));
+    munit_assert(!grim_hashtable_has(table, key2));
+    munit_assert(!grim_hashtable_has(table, key3));
+
+    grim_hashtable_unset(table, key1);
+    gta_check_hashtable(table, 0);
+    munit_assert(!grim_hashtable_has(table, key1));
+    munit_assert(!grim_hashtable_has(table, key2));
+    munit_assert(!grim_hashtable_has(table, key3));
+
+    return MUNIT_OK;
+}
+
 static MunitResult stress(const MunitParameter params[], void *fixture) {
     grim_object table = grim_hashtable_create(0);
     for (intmax_t i = 0; i < 4000; i++)
@@ -111,6 +144,7 @@ MunitTest tests_hashtables[] = {
     {"/insert", insert, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/retrieve", retrieve, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/overwrite", overwrite, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+    {"/delete", delete, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/stress", stress, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
 };
