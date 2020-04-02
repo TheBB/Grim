@@ -3,6 +3,7 @@
 static MunitSuite suites[] = {
     {"/immediate-objects", tests_immediate_objects, NULL, 1, MUNIT_SUITE_OPTION_NONE},
     {"/strings", tests_strings, NULL, 1, MUNIT_SUITE_OPTION_NONE},
+    {"/hashtables", tests_hashtables, NULL, 1, MUNIT_SUITE_OPTION_NONE},
     {NULL, NULL, NULL, 0, MUNIT_SUITE_OPTION_NONE}
 };
 

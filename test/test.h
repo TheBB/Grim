@@ -5,6 +5,7 @@
 
 extern MunitTest tests_immediate_objects[];
 extern MunitTest tests_strings[];
+extern MunitTest tests_hashtables[];
 
 #define gta_check_repr(c, v)                                                   \
     do {                                                                       \
@@ -117,4 +118,20 @@ extern MunitTest tests_strings[];
         munit_assert_ullong(((grim_indirect *)y)->buflen, ==, L);              \
         for (size_t i = 0; i <= L; i++)                                        \
             munit_assert_char(((grim_indirect *)y)->buf[i], ==, w[i]);         \
+    } while (0)
+
+#define gta_is_hashtable(c)                                                    \
+    do {                                                                       \
+        grim_object z = (c);                                                   \
+        munit_assert_int(grim_type(z), ==, GRIM_HASHTABLE);                    \
+        munit_assert_int(grim_direct_tag(z), ==, GRIM_INDIRECT_TAG);           \
+        munit_assert_int(grim_indirect_tag(z), ==, GRIM_HASHTABLE_TAG);        \
+    } while (0)
+
+#define gta_check_hashtable(c, l)                                              \
+    do {                                                                       \
+        grim_object y = (c);                                                   \
+        gta_is_hashtable(y);                                                   \
+        size_t L = (l);                                                        \
+        munit_assert_ullong(grim_hashtable_size(y), ==, L);                    \
     } while (0)

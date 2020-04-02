@@ -3,6 +3,7 @@ add_executable(
   main.c
   immediate-objects.c
   strings.c
+  hashtables.c
 )
 target_link_libraries(grimtest munit libgrim)
 
