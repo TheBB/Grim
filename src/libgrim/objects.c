@@ -148,7 +148,7 @@ uint8_t *grim_get_strptr(grim_object obj) {
 grim_object grim_create_vector(size_t nelems) {
     grim_indirect *obj = grim_create_indirect(false);
     obj->tag = GRIM_VECTOR_TAG;
-    assert((obj->vector_data = GC_MALLOC(nelems * sizeof(grim_object))));
+    assert((obj->vectordata = GC_MALLOC(nelems * sizeof(grim_object))));
     obj->vectorlen = nelems;
     grim_object vec = (grim_object) obj;
     for (size_t i = 0; i < nelems; i++)
@@ -161,11 +161,11 @@ size_t grim_vector_size(grim_object vec) {
 }
 
 void grim_vector_set(grim_object vec, size_t index, grim_object elt) {
-    ((grim_indirect *) vec)->vector_data[index] = elt;
+    ((grim_indirect *) vec)->vectordata[index] = elt;
 }
 
 grim_object grim_vector_get(grim_object vec, size_t index) {
-    return ((grim_indirect *) vec)->vector_data[index];
+    return ((grim_indirect *) vec)->vectordata[index];
 }
 
 

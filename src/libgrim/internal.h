@@ -51,7 +51,7 @@ typedef struct {
             size_t strlen;
         };
         struct {
-            grim_object *vector_data;
+            grim_object *vectordata;
             size_t vectorlen;
         };
         struct {
