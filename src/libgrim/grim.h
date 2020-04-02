@@ -62,4 +62,4 @@ void grim_hashtable_set(grim_object table, grim_object key, grim_object value);
 void grim_init();
 void grim_display(grim_object obj, const char *encoding);
 void grim_print(grim_object obj, const char *encoding);
-bool grim_eq(grim_object a, grim_object b);
+bool grim_equal(grim_object a, grim_object b);

@@ -315,11 +315,10 @@ grim_object grim_create_hashtable(size_t sizehint) {
 static grim_hashnode *grim_hashtable_node(grim_hashnode **nodes, grim_object key, size_t hash, size_t length, bool create) {
     size_t index = hash % length;
     grim_hashnode *node = nodes[index];
-    while (node) {
-        if (grim_eq(key, node->key))
-            return node;
+    while (node && !grim_equal(key, node->key))
         node = node->next;
-    }
+    if (node)
+        return node;
     if (!create)
         return NULL;
     node = GC_MALLOC(sizeof(grim_hashnode));

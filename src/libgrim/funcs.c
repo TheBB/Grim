@@ -149,7 +149,7 @@ void grim_print(grim_object obj, const char *encoding) {
 }
 
 
-bool grim_eq(grim_object a, grim_object b) {
+bool grim_equal(grim_object a, grim_object b) {
     if (grim_get_direct_tag(a) != GRIM_INDIRECT_TAG &&
         grim_get_direct_tag(b) != GRIM_INDIRECT_TAG)
         return a == b;
