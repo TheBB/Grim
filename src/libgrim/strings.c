@@ -211,8 +211,8 @@ ucs4_t grim_unescape_character(uint8_t *str, size_t length) {
 
 
 void grim_unescape_string(grim_object str) {
-    uint8_t *srcptr = grim_get_strptr(str);
-    uint8_t *endptr = srcptr + grim_get_strlen(str);
+    uint8_t *srcptr = grim_strptr(str);
+    uint8_t *endptr = srcptr + grim_strlen(str);
     uint8_t *tgtptr = srcptr;
     uint8_t ch;
 
@@ -224,7 +224,7 @@ void grim_unescape_string(grim_object str) {
             grim_unescape(&srcptr, &tgtptr);
     }
 
-    grim_set_strlen(str, tgtptr - grim_get_strptr(str));
+    grim_set_strlen(str, tgtptr - grim_strptr(str));
 }
 
 
@@ -232,7 +232,7 @@ void grim_display_character(grim_object buf, grim_object src, const char *encodi
     if (!encoding)
         encoding = locale_charset();
     uint8_t workspace[6];
-    int len = u8_uctomb(workspace, grim_extract_character(src), 6);
+    int len = u8_uctomb(workspace, grim_character_extract(src), 6);
     size_t convlength;
     char *encoded = u8_conv_to_encoding(encoding, iconveh_question_mark, workspace, len, NULL, NULL, &convlength);
     grim_buffer_copy(buf, encoded, convlength);
@@ -247,8 +247,8 @@ void grim_display_string(grim_object buf, grim_object src, const char *encoding)
     char *encoded = u8_conv_to_encoding(
         encoding,
         iconveh_question_mark,
-        grim_get_strptr(src),
-        grim_get_strlen(src),
+        grim_strptr(src),
+        grim_strlen(src),
         NULL, NULL,
         &convlength
     );
@@ -260,7 +260,7 @@ void grim_display_string(grim_object buf, grim_object src, const char *encoding)
 void grim_print_character(grim_object buf, grim_object src, const char *encoding) {
     if (!encoding)
         encoding = locale_charset();
-    ucs4_t ch = grim_extract_character(src);
+    ucs4_t ch = grim_character_extract(src);
     if (HAS_CESCAPE(ch)) {
         grim_buffer_copy(buf, "#", 1);
         grim_buffer_copy(buf, T_CESCAPE[ch], strlen(T_CESCAPE[ch]));
@@ -278,8 +278,8 @@ void grim_print_character(grim_object buf, grim_object src, const char *encoding
 void grim_print_string(grim_object buf, grim_object src, const char *encoding) {
     if (!encoding)
         encoding = locale_charset();
-    uint8_t *buffer = grim_get_strptr(src);
-    size_t start = 0, end, length = grim_get_strlen(src), convlength;
+    uint8_t *buffer = grim_strptr(src);
+    size_t start = 0, end, length = grim_strlen(src), convlength;
 
     grim_buffer_copy(buf, "\"", 1);
     while (start < length) {

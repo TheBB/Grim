@@ -25,37 +25,37 @@ typedef enum {
     GRIM_CONS,
     GRIM_BUFFER,
     GRIM_HASHTABLE,
-} grim_type;
+} grim_type_t;
 
-grim_type grim_get_type(grim_object obj);
+grim_type_t grim_type(grim_object obj);
 
-bool grim_can_extract_integer(grim_object obj);
-intmax_t grim_extract_integer(grim_object obj);
-grim_object grim_pack_integer(intmax_t num);
+bool grim_integer_extractable(grim_object obj);
+intmax_t grim_integer_extract(grim_object obj);
+grim_object grim_integer_pack(intmax_t num);
 
-grim_object grim_pack_string(const char *input, const char *encoding);
-grim_object grim_pack_string_escape(const char *input, const char *encoding);
-size_t grim_get_strlen(grim_object obj);
+grim_object grim_string_pack(const char *input, const char *encoding);
+grim_object grim_string_pack_escape(const char *input, const char *encoding);
+size_t grim_strlen(grim_object obj);
 
-grim_object grim_create_vector(size_t nelems);
+grim_object grim_vector_create(size_t nelems);
 size_t grim_vector_size(grim_object vec);
 void grim_vector_set(grim_object vec, size_t index, grim_object elt);
 grim_object grim_vector_get(grim_object vec, size_t index);
 
-grim_object grim_create_cons(grim_object car, grim_object cdr);
-grim_object grim_get_car(grim_object obj);
-grim_object grim_get_cdr(grim_object obj);
+grim_object grim_cons_create(grim_object car, grim_object cdr);
+grim_object grim_car(grim_object obj);
+grim_object grim_cdr(grim_object obj);
 
 grim_object grim_intern(const char *name, const char *encoding);
-grim_object grim_get_symbol_name(grim_object obj);
+grim_object grim_symbol_name(grim_object obj);
 
-grim_object grim_pack_character(ucs4_t ch);
-grim_object grim_pack_character_name(const char *name, const char *encoding);
-ucs4_t grim_extract_character(grim_object obj);
+grim_object grim_character_pack(ucs4_t ch);
+grim_object grim_character_pack_name(const char *name, const char *encoding);
+ucs4_t grim_character_extract(grim_object obj);
 
-grim_object grim_create_buffer(size_t sizehint);
+grim_object grim_buffer_create(size_t sizehint);
 
-grim_object grim_create_hashtable(size_t sizehint);
+grim_object grim_hashtable_create(size_t sizehint);
 size_t grim_hashtable_size(grim_object table);
 bool grim_hashtable_has(grim_object table, grim_object key);
 grim_object grim_hashtable_get(grim_object table, grim_object key);

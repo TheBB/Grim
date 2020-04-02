@@ -37,17 +37,17 @@ static uint64_t hash_int_float(uint64_t n, double f, uint64_t h) {
 
 
 uint64_t grim_hash(grim_object obj, uint64_t h) {
-    h += hash_uint64(grim_get_type(obj));
+    h += hash_uint64(grim_type(obj));
 
-    switch (grim_get_direct_tag(obj)) {
+    switch (grim_direct_tag(obj)) {
     case GRIM_INDIRECT_TAG:
-        switch (grim_get_indirect_tag(obj)) {
+        switch (grim_indirect_tag(obj)) {
         case GRIM_BIGINT_TAG:
             return hash_bigint(((grim_indirect *) obj)->bigint, h);
         case GRIM_STRING_TAG:
-            return hash_buffer((char *) grim_get_strptr(obj), grim_get_strlen(obj), h);
+            return hash_buffer((char *) grim_strptr(obj), grim_strlen(obj), h);
         case GRIM_BUFFER_TAG:
-            return hash_buffer(grim_get_bufptr(obj), grim_get_buflen(obj), h);
+            return hash_buffer(grim_bufptr(obj), grim_buflen(obj), h);
         default:
             assert(false);
             return 0;

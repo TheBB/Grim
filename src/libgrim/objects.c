@@ -14,25 +14,25 @@
 grim_object grim_symbol_table;
 
 
-grim_tag grim_get_direct_tag(grim_object obj) {
+grim_tag_t grim_direct_tag(grim_object obj) {
     if ((obj & GRIM_FIXNUM_TAG) != 0)
         return GRIM_FIXNUM_TAG;
     return obj & 0x0f;
 }
 
-grim_tag grim_get_indirect_tag(grim_object obj) {
-    return *((grim_tag *) obj);
+grim_tag_t grim_indirect_tag(grim_object obj) {
+    return *((grim_tag_t *) obj);
 }
 
-grim_type grim_get_type(grim_object obj) {
-    switch (grim_get_direct_tag(obj)) {
+grim_type_t grim_type(grim_object obj) {
+    switch (grim_direct_tag(obj)) {
     case GRIM_FIXNUM_TAG: return GRIM_INTEGER;
     case GRIM_CHARACTER_TAG: return GRIM_CHARACTER;
     case GRIM_SYMBOL_TAG: return GRIM_SYMBOL;
     case GRIM_FALSE_TAG: case GRIM_TRUE_TAG: return GRIM_BOOLEAN;
     case GRIM_NIL_TAG: return GRIM_NIL;
     case GRIM_INDIRECT_TAG:
-        switch (grim_get_indirect_tag(obj)) {
+        switch (grim_indirect_tag(obj)) {
         case GRIM_BIGINT_TAG: return GRIM_INTEGER;
         case GRIM_STRING_TAG: return GRIM_STRING;
         case GRIM_VECTOR_TAG: return GRIM_VECTOR;
@@ -45,7 +45,7 @@ grim_type grim_get_type(grim_object obj) {
 }
 
 
-static grim_indirect *grim_create_indirect(bool permanent) {
+static grim_indirect *grim_indirect_create(bool permanent) {
     grim_indirect *retval;
     if (permanent)
         retval = GC_MALLOC_UNCOLLECTABLE(sizeof(grim_indirect));
@@ -59,27 +59,27 @@ static grim_indirect *grim_create_indirect(bool permanent) {
 // Integers
 // -----------------------------------------------------------------------------
 
-static void grim_finalize_bigint(void *obj, void *_) {
+static void grim_bigint_finalize(void *obj, void *_) {
     (void)_;
     mpz_clear(((grim_indirect *) obj)->bigint);
 }
 
-static grim_indirect *grim_create_bigint() {
-    grim_indirect *obj = grim_create_indirect(false);
+static grim_indirect *grim_bigint_create() {
+    grim_indirect *obj = grim_indirect_create(false);
     obj->tag = GRIM_BIGINT_TAG;
     mpz_init(obj->bigint);
-    GC_REGISTER_FINALIZER(obj, grim_finalize_bigint, NULL, NULL, NULL);
+    GC_REGISTER_FINALIZER(obj, grim_bigint_finalize, NULL, NULL, NULL);
     return obj;
 }
 
-bool grim_can_extract_integer(grim_object obj) {
-    if (grim_get_direct_tag(obj) == GRIM_FIXNUM_TAG)
+bool grim_integer_extractable(grim_object obj) {
+    if (grim_direct_tag(obj) == GRIM_FIXNUM_TAG)
         return true;
     return mpz_fits_slong_p(((grim_indirect *) obj)->bigint);
 }
 
-intmax_t grim_extract_integer(grim_object obj) {
-    if (grim_get_direct_tag(obj) == GRIM_FIXNUM_TAG) {
+intmax_t grim_integer_extract(grim_object obj) {
+    if (grim_direct_tag(obj) == GRIM_FIXNUM_TAG) {
         bool signbit = ((intptr_t)obj) < 0;
         intptr_t ret = obj >> 1;
         return signbit ? (INTPTR_MIN | ret) : ret;
@@ -87,10 +87,10 @@ intmax_t grim_extract_integer(grim_object obj) {
     return mpz_get_si(((grim_indirect *) obj)->bigint);
 }
 
-grim_object grim_pack_integer(intmax_t num) {
+grim_object grim_integer_pack(intmax_t num) {
     if (num >= GRIM_FIXNUM_MIN && num <= GRIM_FIXNUM_MAX)
         return (grim_object) ((uintptr_t) num << 1) | GRIM_FIXNUM_TAG;
-    grim_indirect *obj = grim_create_bigint();
+    grim_indirect *obj = grim_bigint_create();
     mpz_set_si(obj->bigint, num);
     return (grim_object) obj;
 }
@@ -99,22 +99,22 @@ grim_object grim_pack_integer(intmax_t num) {
 // Strings
 // -----------------------------------------------------------------------------
 
-static void grim_finalize_string(void *obj, void *_) {
+static void grim_string_finalize(void *obj, void *_) {
     (void)_;
     free(((grim_indirect *) obj)->str);
 }
 
-static grim_indirect *grim_create_string() {
-    grim_indirect *obj = grim_create_indirect(false);
+static grim_indirect *grim_string_create() {
+    grim_indirect *obj = grim_indirect_create(false);
     obj->tag = GRIM_STRING_TAG;
     obj->str = NULL;
     obj->strlen = 0;
-    GC_REGISTER_FINALIZER(obj, grim_finalize_string, NULL, NULL, NULL);
+    GC_REGISTER_FINALIZER(obj, grim_string_finalize, NULL, NULL, NULL);
     return obj;
 }
 
-grim_object grim_pack_string(const char *input, const char *encoding) {
-    grim_indirect *obj = grim_create_string();
+grim_object grim_string_pack(const char *input, const char *encoding) {
+    grim_indirect *obj = grim_string_create();
     if (!encoding)
         encoding = locale_charset();
     obj->str = u8_conv_from_encoding(encoding, iconveh_error, input, strlen(input), NULL, NULL, &obj->strlen);
@@ -123,13 +123,13 @@ grim_object grim_pack_string(const char *input, const char *encoding) {
     return (grim_object) obj;
 }
 
-grim_object grim_pack_string_escape(const char *input, const char *encoding) {
-    grim_object str = grim_pack_string(input, encoding);
+grim_object grim_string_pack_escape(const char *input, const char *encoding) {
+    grim_object str = grim_string_pack(input, encoding);
     grim_unescape_string(str);
     return str;
 }
 
-size_t grim_get_strlen(grim_object obj) {
+size_t grim_strlen(grim_object obj) {
     return ((grim_indirect *) obj)->strlen;
 }
 
@@ -137,7 +137,7 @@ size_t grim_set_strlen(grim_object obj, size_t length) {
     return ((grim_indirect *) obj)->strlen = length;
 }
 
-uint8_t *grim_get_strptr(grim_object obj) {
+uint8_t *grim_strptr(grim_object obj) {
     return ((grim_indirect *) obj)->str;
 }
 
@@ -145,8 +145,8 @@ uint8_t *grim_get_strptr(grim_object obj) {
 // Vectors
 // -----------------------------------------------------------------------------
 
-grim_object grim_create_vector(size_t nelems) {
-    grim_indirect *obj = grim_create_indirect(false);
+grim_object grim_vector_create(size_t nelems) {
+    grim_indirect *obj = grim_indirect_create(false);
     obj->tag = GRIM_VECTOR_TAG;
     assert((obj->vectordata = GC_MALLOC(nelems * sizeof(grim_object))));
     obj->vectorlen = nelems;
@@ -172,19 +172,19 @@ grim_object grim_vector_get(grim_object vec, size_t index) {
 // Cons cells
 // -----------------------------------------------------------------------------
 
-grim_object grim_create_cons(grim_object car, grim_object cdr) {
-    grim_indirect *obj = grim_create_indirect(false);
+grim_object grim_cons_create(grim_object car, grim_object cdr) {
+    grim_indirect *obj = grim_indirect_create(false);
     obj->tag = GRIM_CONS_TAG;
     obj->car = car;
     obj->cdr = cdr;
     return (grim_object) obj;
 }
 
-grim_object grim_get_car(grim_object obj) {
+grim_object grim_car(grim_object obj) {
     return ((grim_indirect *) obj)->car;
 }
 
-grim_object grim_get_cdr(grim_object obj) {
+grim_object grim_cdr(grim_object obj) {
     return ((grim_indirect *) obj)->cdr;
 }
 
@@ -192,23 +192,23 @@ grim_object grim_get_cdr(grim_object obj) {
 // Symbols
 // -----------------------------------------------------------------------------
 
-static grim_object grim_create_symbol(grim_object name) {
-    grim_indirect *obj = grim_create_indirect(true);
+static grim_object grim_symbol_create(grim_object name) {
+    grim_indirect *obj = grim_indirect_create(true);
     obj->symbolname = name;
     return ((grim_object) obj) | GRIM_SYMBOL_TAG;
 }
 
 grim_object grim_intern(const char *name, const char *encoding) {
-    grim_object str = grim_pack_string(name, encoding);
+    grim_object str = grim_string_pack(name, encoding);
     grim_object sym = grim_hashtable_get(grim_symbol_table, str);
     if (sym != grim_undefined)
         return sym;
-    sym = grim_create_symbol(str);
+    sym = grim_symbol_create(str);
     grim_hashtable_set(grim_symbol_table, str, sym);
     return sym;
 }
 
-grim_object grim_get_symbol_name(grim_object obj) {
+grim_object grim_symbol_name(grim_object obj) {
     grim_indirect *wrapped = (grim_indirect *) (obj - GRIM_SYMBOL_TAG);
     return wrapped->symbolname;
 }
@@ -217,21 +217,21 @@ grim_object grim_get_symbol_name(grim_object obj) {
 // Characters
 // -----------------------------------------------------------------------------
 
-grim_object grim_pack_character(ucs4_t ch) {
+grim_object grim_character_pack(ucs4_t ch) {
     return (((grim_object) ch) << 8) | GRIM_CHARACTER_TAG;
 }
 
-grim_object grim_pack_character_name(const char *name, const char *encoding) {
+grim_object grim_character_pack_name(const char *name, const char *encoding) {
     if (!encoding)
         encoding = locale_charset();
     size_t u8len;
     uint8_t *str = u8_conv_from_encoding(encoding, iconveh_error, name, strlen(name), NULL, NULL, &u8len);
     ucs4_t ch = grim_unescape_character(str, u8len);
     free(str);
-    return grim_pack_character(ch);
+    return grim_character_pack(ch);
 }
 
-ucs4_t grim_extract_character(grim_object obj) {
+ucs4_t grim_character_extract(grim_object obj) {
     return (ucs4_t) (obj >> 8);
 }
 
@@ -242,24 +242,24 @@ ucs4_t grim_extract_character(grim_object obj) {
 #define GRIM_BUFFER_GROWTH_FACTOR (1.5)
 #define GRIM_BUFFER_MIN_SIZE (1024)
 
-static void grim_finalize_buffer(void *obj, void *_) {
+static void grim_buffer_finalize(void *obj, void *_) {
     (void)_;
     free(((grim_indirect *) obj)->buf);
 }
 
-grim_object grim_create_buffer(size_t sizehint) {
+grim_object grim_buffer_create(size_t sizehint) {
     if (sizehint < GRIM_BUFFER_MIN_SIZE)
         sizehint = GRIM_BUFFER_MIN_SIZE;
-    grim_indirect *obj = grim_create_indirect(false);
+    grim_indirect *obj = grim_indirect_create(false);
     obj->tag = GRIM_BUFFER_TAG;
     assert((obj->buf = malloc(sizehint)));
     obj->buflen = 0;
     obj->bufcap = sizehint;
-    GC_REGISTER_FINALIZER(obj, grim_finalize_buffer, NULL, NULL, NULL);
+    GC_REGISTER_FINALIZER(obj, grim_buffer_finalize, NULL, NULL, NULL);
     return (grim_object) obj;
 }
 
-void grim_dump_buffer(FILE *stream, grim_object obj) {
+void grim_buffer_dump(FILE *stream, grim_object obj) {
     grim_indirect *ind = (grim_indirect *) obj;
     fprintf(stream, "%*s", (int) ind->buflen, ind->buf);
 }
@@ -282,11 +282,11 @@ void grim_buffer_copy(grim_object obj, const char *data, size_t length) {
     ind->buflen += length;
 }
 
-char *grim_get_bufptr(grim_object obj) {
+char *grim_bufptr(grim_object obj) {
     return ((grim_indirect *) obj)->buf;
 }
 
-size_t grim_get_buflen(grim_object obj) {
+size_t grim_buflen(grim_object obj) {
     return ((grim_indirect *) obj)->buflen;
 }
 
@@ -298,10 +298,10 @@ size_t grim_get_buflen(grim_object obj) {
 #define GRIM_HASHTABLE_GROWTH_FACTOR (1.5)
 #define GRIM_HASHTABLE_MIN_SIZE (1024)
 
-grim_object grim_create_hashtable(size_t sizehint) {
+grim_object grim_hashtable_create(size_t sizehint) {
     if (sizehint < GRIM_HASHTABLE_MIN_SIZE)
         sizehint = GRIM_HASHTABLE_MIN_SIZE;
-    grim_indirect *obj = grim_create_indirect(false);
+    grim_indirect *obj = grim_indirect_create(false);
     obj->tag = GRIM_HASHTABLE_TAG;
     obj->hashnodes = GC_MALLOC(sizehint * sizeof(grim_hashnode *));
     assert(obj->hashnodes);

@@ -7,7 +7,7 @@
 
 #include "grim.h"
 
-typedef uint8_t grim_tag;
+typedef uint8_t grim_tag_t;
 
 #define GRIM_ALIGN alignof(max_align_t)
 #define GRIM_FIXNUM_MAX (INTPTR_MAX / 2)
@@ -33,17 +33,17 @@ enum {
     GRIM_HASHTABLE_TAG = 0x5f,
 };
 
-struct grim_hashnode_ {
+struct grim_hashnode_t {
     grim_object key;
     grim_object value;
     uint64_t hash;
-    struct grim_hashnode_ *next;
+    struct grim_hashnode_t *next;
 };
 
-typedef struct grim_hashnode_ grim_hashnode;
+typedef struct grim_hashnode_t grim_hashnode;
 
 typedef struct {
-    grim_tag tag;
+    grim_tag_t tag;
     union {
         mpz_t bigint;
         struct {
@@ -76,17 +76,17 @@ typedef struct {
 
 extern grim_object grim_symbol_table;
 
-grim_tag grim_get_direct_tag(grim_object obj);
-grim_tag grim_get_indirect_tag(grim_object obj);
+grim_tag_t grim_direct_tag(grim_object obj);
+grim_tag_t grim_indirect_tag(grim_object obj);
 
-uint8_t *grim_get_strptr(grim_object obj);
+uint8_t *grim_strptr(grim_object obj);
 size_t grim_set_strlen(grim_object obj, size_t length);
 
-void grim_dump_buffer(FILE *stream, grim_object obj);
+void grim_buffer_dump(FILE *stream, grim_object obj);
 void grim_buffer_ensure_free_capacity(grim_object obj, size_t sizehint);
 void grim_buffer_copy(grim_object obj, const char *data, size_t length);
-char *grim_get_bufptr(grim_object obj);
-size_t grim_get_buflen(grim_object obj);
+char *grim_bufptr(grim_object obj);
+size_t grim_buflen(grim_object obj);
 
 void grim_encode_display(grim_object buf, grim_object src, const char *encoding);
 void grim_encode_print(grim_object buf, grim_object src, const char *encoding);

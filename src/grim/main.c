@@ -16,60 +16,60 @@ int main() {
     grim_display(grim_nil, NULL);
     printf("\n");
 
-    grim_display(grim_pack_integer(-2), NULL);
+    grim_display(grim_integer_pack(-2), NULL);
     printf("\n");
 
-    grim_display(grim_pack_integer(-1), NULL);
+    grim_display(grim_integer_pack(-1), NULL);
     printf("\n");
 
-    grim_display(grim_pack_integer(0), NULL);
+    grim_display(grim_integer_pack(0), NULL);
     printf("\n");
 
-    grim_display(grim_pack_integer(1), NULL);
+    grim_display(grim_integer_pack(1), NULL);
     printf("\n");
 
-    grim_display(grim_pack_integer(2), NULL);
+    grim_display(grim_integer_pack(2), NULL);
     printf("\n");
 
-    grim_display(grim_pack_integer(4611686018427387903), NULL);
+    grim_display(grim_integer_pack(4611686018427387903), NULL);
     printf("\n");
 
-    grim_display(grim_pack_integer(-4611686018427387904), NULL);
+    grim_display(grim_integer_pack(-4611686018427387904), NULL);
     printf("\n");
 
-    grim_display(grim_pack_integer(4611686018427387904), NULL);
+    grim_display(grim_integer_pack(4611686018427387904), NULL);
     printf("\n");
 
-    grim_display(grim_pack_integer(-4611686018427387905), NULL);
+    grim_display(grim_integer_pack(-4611686018427387905), NULL);
     printf("\n");
 
-    grim_object z = grim_pack_string_escape("zz", NULL);
-    /* grim_object z = grim_pack_string_escape("æ\\U000000f8\\u00e5", NULL); */
-    /* grim_object z = grim_pack_string_escape("abc\\n", NULL); */
-    /* grim_object z = grim_pack_string_escape("abc\\u00e5\\n", NULL); */
+    grim_object z = grim_string_pack_escape("zz", NULL);
+    /* grim_object z = grim_string_pack_escape("æ\\U000000f8\\u00e5", NULL); */
+    /* grim_object z = grim_string_pack_escape("abc\\n", NULL); */
+    /* grim_object z = grim_string_pack_escape("abc\\u00e5\\n", NULL); */
     grim_print(z, NULL);
     printf("\n");
 
-    grim_object v = grim_create_vector(3);
+    grim_object v = grim_vector_create(3);
     grim_vector_set(v, 0, grim_false);
     grim_vector_set(v, 1, grim_true);
     grim_vector_set(v, 2, grim_nil);
     grim_display(v, NULL);
     printf("\n");
 
-    grim_object c = grim_create_cons(grim_pack_integer(0), grim_pack_integer(1));
+    grim_object c = grim_cons_create(grim_integer_pack(0), grim_integer_pack(1));
     grim_display(c, NULL);
     printf("\n");
 
-    c = grim_create_cons(grim_pack_integer(0), grim_nil);
+    c = grim_cons_create(grim_integer_pack(0), grim_nil);
     grim_display(c, NULL);
     printf("\n");
 
-    c = grim_create_cons(grim_pack_integer(1), c);
+    c = grim_cons_create(grim_integer_pack(1), c);
     grim_display(c, NULL);
     printf("\n");
 
-    c = grim_create_cons(grim_pack_integer(2), c);
+    c = grim_cons_create(grim_integer_pack(2), c);
     grim_display(c, NULL);
     printf("\n");
 
@@ -82,47 +82,47 @@ int main() {
     grim_display(s, NULL);
     printf("\n");
 
-    grim_object d = grim_pack_character(0);
+    grim_object d = grim_character_pack(0);
     grim_print(d, NULL);
     printf("\n");
 
-    d = grim_pack_character('\n');
+    d = grim_character_pack('\n');
     grim_print(d, NULL);
     printf("\n");
 
-    d = grim_pack_character('a');
+    d = grim_character_pack('a');
     grim_print(d, NULL);
     printf("\n");
 
-    d = grim_pack_character(' ');
+    d = grim_character_pack(' ');
     grim_print(d, NULL);
     printf("\n");
 
-    d = grim_pack_character_name("^@", NULL);
+    d = grim_character_pack_name("^@", NULL);
     grim_print(d, NULL);
     printf("\n");
 
-    d = grim_pack_character_name("null", NULL);
+    d = grim_character_pack_name("null", NULL);
     grim_print(d, NULL);
     printf("\n");
 
-    d = grim_pack_character_name("\\", NULL);
+    d = grim_character_pack_name("\\", NULL);
     grim_print(d, NULL);
     printf("\n");
 
-    d = grim_pack_character_name("^", NULL);
+    d = grim_character_pack_name("^", NULL);
     grim_print(d, NULL);
     printf("\n");
 
-    d = grim_pack_character_name("x", NULL);
+    d = grim_character_pack_name("x", NULL);
     grim_print(d, NULL);
     printf("\n");
 
-    d = grim_pack_character_name("U000000f8", NULL);
+    d = grim_character_pack_name("U000000f8", NULL);
     grim_print(d, NULL);
     printf("\n");
 
-    d = grim_pack_character_name("u00e5", NULL);
+    d = grim_character_pack_name("u00e5", NULL);
     grim_print(d, NULL);
     printf("\n");
 }
