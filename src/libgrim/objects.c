@@ -312,6 +312,10 @@ grim_object grim_create_hashtable(size_t sizehint) {
     return (grim_object) obj;
 }
 
+size_t grim_hashtable_size(grim_object table) {
+    return ((grim_indirect *)table)->hashfill;
+}
+
 static grim_hashnode *grim_hashtable_node(grim_hashnode **nodes, grim_object key, size_t hash, size_t length, bool create) {
     size_t index = hash % length;
     grim_hashnode *node = nodes[index];
@@ -347,6 +351,12 @@ static void grim_hashtable_grow(grim_indirect *ind) {
     ind->hashnodes = newnodes;
 }
 
+bool grim_hashtable_has(grim_object table, grim_object key) {
+    grim_indirect *ind = (grim_indirect *) table;
+    grim_hashnode *node = grim_hashtable_node(ind->hashnodes, key, grim_hash(key, 0), ind->hashcap, false);
+    return node ? true : false;
+}
+
 grim_object grim_hashtable_get(grim_object table, grim_object key) {
     grim_indirect *ind = (grim_indirect *) table;
     grim_hashnode *node = grim_hashtable_node(ind->hashnodes, key, grim_hash(key, 0), ind->hashcap, false);
@@ -357,7 +367,7 @@ void grim_hashtable_set(grim_object table, grim_object key, grim_object value) {
     grim_indirect *ind = (grim_indirect *) table;
     size_t hash = grim_hash(key, 0);
     grim_hashnode *node = grim_hashtable_node(ind->hashnodes, key, hash, ind->hashcap, true);
-    if (node->value == grim_undefined && (double) ind->hashfill / ind->hashcap > GRIM_HASHTABLE_MAX_FILL) {
+    if (node->value == grim_undefined && ind->hashfill > ind->hashcap * GRIM_HASHTABLE_MAX_FILL) {
         grim_hashtable_grow(ind);
         node = grim_hashtable_node(ind->hashnodes, key, hash, ind->hashcap, true);
     }

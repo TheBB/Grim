@@ -56,6 +56,8 @@ ucs4_t grim_extract_character(grim_object obj);
 grim_object grim_create_buffer(size_t sizehint);
 
 grim_object grim_create_hashtable(size_t sizehint);
+size_t grim_hashtable_size(grim_object table);
+bool grim_hashtable_has(grim_object table, grim_object key);
 grim_object grim_hashtable_get(grim_object table, grim_object key);
 void grim_hashtable_set(grim_object table, grim_object key, grim_object value);
 
