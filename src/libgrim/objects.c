@@ -316,21 +316,19 @@ size_t grim_hashtable_size(grim_object table) {
     return ((grim_indirect *)table)->hashfill;
 }
 
-static grim_hashnode *grim_hashtable_node(grim_hashnode **nodes, grim_object key, size_t hash, size_t length, bool create) {
+static grim_hashnode **grim_hashtable_node(grim_hashnode **nodes, grim_object key, size_t hash, size_t length, bool create) {
     size_t index = hash % length;
-    grim_hashnode *node = nodes[index];
-    while (node && !grim_equal(key, node->key))
-        node = node->next;
-    if (node)
+    grim_hashnode **node = &nodes[index];
+    while ((*node) && !grim_equal(key, (*node)->key))
+        node = &(*node)->next;
+    if (*node || !create)
         return node;
-    if (!create)
-        return NULL;
-    node = GC_MALLOC(sizeof(grim_hashnode));
-    node->key = key;
-    node->value = grim_undefined;
-    node->hash = hash;
-    node->next = nodes[index];
-    nodes[index] = node;
+    grim_hashnode *newnode = GC_MALLOC(sizeof(grim_hashnode));
+    newnode->key = key;
+    newnode->value = grim_undefined;
+    newnode->hash = hash;
+    newnode->next = NULL;
+    *node = newnode;
     return node;
 }
 
@@ -342,8 +340,8 @@ static void grim_hashtable_grow(grim_indirect *ind) {
     for (size_t i = 0; i < oldsize; i++) {
         grim_hashnode *srcnode = oldnodes[i];
         while (srcnode) {
-            grim_hashnode *tgtnode = grim_hashtable_node(newnodes, srcnode->key, srcnode->hash, newsize, true);
-            tgtnode->value = srcnode->value;
+            grim_hashnode **tgtnode = grim_hashtable_node(newnodes, srcnode->key, srcnode->hash, newsize, true);
+            (*tgtnode)->value = srcnode->value;
             srcnode = srcnode->next;
         }
     }
@@ -353,25 +351,26 @@ static void grim_hashtable_grow(grim_indirect *ind) {
 
 bool grim_hashtable_has(grim_object table, grim_object key) {
     grim_indirect *ind = (grim_indirect *) table;
-    grim_hashnode *node = grim_hashtable_node(ind->hashnodes, key, grim_hash(key, 0), ind->hashcap, false);
-    return node ? true : false;
+    grim_hashnode **node = grim_hashtable_node(ind->hashnodes, key, grim_hash(key, 0), ind->hashcap, false);
+    return (*node) ? true : false;
 }
 
 grim_object grim_hashtable_get(grim_object table, grim_object key) {
     grim_indirect *ind = (grim_indirect *) table;
-    grim_hashnode *node = grim_hashtable_node(ind->hashnodes, key, grim_hash(key, 0), ind->hashcap, false);
-    return node ? node->value : grim_undefined;
+    grim_hashnode **node = grim_hashtable_node(ind->hashnodes, key, grim_hash(key, 0), ind->hashcap, false);
+    return (*node) ? (*node)->value : grim_undefined;
 }
 
 void grim_hashtable_set(grim_object table, grim_object key, grim_object value) {
     grim_indirect *ind = (grim_indirect *) table;
     size_t hash = grim_hash(key, 0);
-    grim_hashnode *node = grim_hashtable_node(ind->hashnodes, key, hash, ind->hashcap, true);
-    if (node->value == grim_undefined && ind->hashfill > ind->hashcap * GRIM_HASHTABLE_MAX_FILL) {
+    grim_hashnode **node = grim_hashtable_node(ind->hashnodes, key, hash, ind->hashcap, true);
+    if ((*node)->value == grim_undefined && ind->hashfill > ind->hashcap * GRIM_HASHTABLE_MAX_FILL) {
         grim_hashtable_grow(ind);
         node = grim_hashtable_node(ind->hashnodes, key, hash, ind->hashcap, true);
     }
-    if (node->value == grim_undefined)
+    if ((*node)->value == grim_undefined)
         ind->hashfill++;
-    node->value = value;
+    (*node)->value = value;
+}
 }
