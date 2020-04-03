@@ -8,7 +8,7 @@ static MunitResult insert(const MunitParameter params[], void *fixture) {
     grim_object table = grim_hashtable_create(0);
     gta_check_hashtable(table, 0);
 
-    grim_object key1 = grim_string_pack("alpha", NULL);
+    grim_object key1 = grim_string_pack("alpha", NULL, false);
     grim_hashtable_set(table, key1, grim_true);
     gta_check_hashtable(table, 1);
 
@@ -33,7 +33,7 @@ static MunitResult retrieve(const MunitParameter params[], void *fixture) {
     grim_object table = grim_hashtable_create(0);
     gta_check_hashtable(table, 0);
 
-    grim_object key1 = grim_string_pack("alpha", NULL);
+    grim_object key1 = grim_string_pack("alpha", NULL, false);
     grim_object val1 = grim_integer_pack(0);
     grim_hashtable_set(table, key1, val1);
 
@@ -56,18 +56,18 @@ static MunitResult retrieve(const MunitParameter params[], void *fixture) {
     munit_assert(grim_hashtable_has(table, key2));
     munit_assert(grim_hashtable_has(table, key3));
     munit_assert(grim_hashtable_has(table, key4));
-    munit_assert(grim_hashtable_has(table, grim_string_pack_escape("alpha", NULL)));
+    munit_assert(grim_hashtable_has(table, grim_string_pack("alpha", NULL, true)));
     munit_assert(grim_hashtable_has(table, grim_intern("pan", NULL)));
 
     munit_assert(!grim_hashtable_has(table, grim_integer_pack(0)));
-    munit_assert(!grim_hashtable_has(table, grim_string_pack("pan", NULL)));
+    munit_assert(!grim_hashtable_has(table, grim_string_pack("pan", NULL, false)));
     munit_assert(!grim_hashtable_has(table, grim_intern("alpha", NULL)));
 
     gta_check_fixnum(grim_hashtable_get(table, key1), 0);
     gta_check_fixnum(grim_hashtable_get(table, key2), 1);
     gta_check_fixnum(grim_hashtable_get(table, key3), 2);
     gta_check_fixnum(grim_hashtable_get(table, key4), 3);
-    gta_check_fixnum(grim_hashtable_get(table, grim_string_pack_escape("alpha", NULL)), 0);
+    gta_check_fixnum(grim_hashtable_get(table, grim_string_pack("alpha", NULL, true)), 0);
     gta_check_fixnum(grim_hashtable_get(table, grim_intern("pan", NULL)), 2);
 
     return MUNIT_OK;
@@ -77,8 +77,8 @@ static MunitResult overwrite(const MunitParameter params[], void *fixture) {
     grim_object table = grim_hashtable_create(0);
     gta_check_hashtable(table, 0);
 
-    grim_object key1 = grim_string_pack("alpha", NULL);
-    grim_object key2 = grim_string_pack("beta", NULL);
+    grim_object key1 = grim_string_pack("alpha", NULL, false);
+    grim_object key2 = grim_string_pack("beta", NULL, false);
 
     grim_hashtable_set(table, key1, grim_false);
     grim_hashtable_set(table, key2, grim_true);
@@ -101,9 +101,9 @@ static MunitResult delete(const MunitParameter params[], void *fixture) {
     grim_object table = grim_hashtable_create(0);
     gta_check_hashtable(table, 0);
 
-    grim_object key1 = grim_string_pack("alpha", NULL);
-    grim_object key2 = grim_string_pack("beta", NULL);
-    grim_object key3 = grim_string_pack("gamma", NULL);
+    grim_object key1 = grim_string_pack("alpha", NULL, false);
+    grim_object key2 = grim_string_pack("beta", NULL, false);
+    grim_object key3 = grim_string_pack("gamma", NULL, false);
 
     grim_hashtable_set(table, key1, grim_false);
     grim_hashtable_set(table, key2, grim_true);

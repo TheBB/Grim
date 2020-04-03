@@ -33,8 +33,7 @@ bool grim_integer_extractable(grim_object obj);
 intmax_t grim_integer_extract(grim_object obj);
 grim_object grim_integer_pack(intmax_t num);
 
-grim_object grim_string_pack(const char *input, const char *encoding);
-grim_object grim_string_pack_escape(const char *input, const char *encoding);
+grim_object grim_string_pack(const char *input, const char *encoding, bool escape);
 size_t grim_strlen(grim_object obj);
 
 grim_object grim_vector_create(size_t nelems);

@@ -43,7 +43,7 @@ int main() {
     grim_display(grim_integer_pack(-4611686018427387905), NULL);
     printf("\n");
 
-    grim_object z = grim_string_pack_escape("zz", NULL);
+    grim_object z = grim_string_pack("zz", NULL, true);
     /* grim_object z = grim_string_pack_escape("æ\\U000000f8\\u00e5", NULL); */
     /* grim_object z = grim_string_pack_escape("abc\\n", NULL); */
     /* grim_object z = grim_string_pack_escape("abc\\u00e5\\n", NULL); */

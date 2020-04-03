@@ -113,19 +113,15 @@ static grim_indirect *grim_string_create() {
     return obj;
 }
 
-grim_object grim_string_pack(const char *input, const char *encoding) {
+grim_object grim_string_pack(const char *input, const char *encoding, bool unescape) {
     grim_indirect *obj = grim_string_create();
     if (!encoding)
         encoding = locale_charset();
     obj->str = u8_conv_from_encoding(encoding, iconveh_error, input, strlen(input), NULL, NULL, &obj->strlen);
-    if (!obj->str)
-        return grim_undefined;
-    return (grim_object) obj;
-}
-
-grim_object grim_string_pack_escape(const char *input, const char *encoding) {
-    grim_object str = grim_string_pack(input, encoding);
-    grim_unescape_string(str);
+    assert(obj->str);
+    grim_object str = (grim_object) obj;
+    if (unescape)
+        grim_unescape_string(str);
     return str;
 }
 
@@ -199,7 +195,7 @@ static grim_object grim_symbol_create(grim_object name) {
 }
 
 grim_object grim_intern(const char *name, const char *encoding) {
-    grim_object str = grim_string_pack(name, encoding);
+    grim_object str = grim_string_pack(name, encoding, false);
     grim_object sym = grim_hashtable_get(grim_symbol_table, str);
     if (sym != grim_undefined)
         return sym;
