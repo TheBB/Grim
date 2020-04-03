@@ -45,27 +45,42 @@ typedef struct grim_hashnode_t grim_hashnode;
 typedef struct {
     grim_tag_t tag;
     union {
-        mpz_t bigint;
+        // GRIM_BIGINT_TAG
+        struct {
+            mpz_t bigint;
+        };
+
+        // GRIM_STRING_TAG
         struct {
             uint8_t *str;
             size_t strlen;
         };
+
+        // GRIM_VECTOR_TAG
         struct {
             grim_object *vectordata;
             size_t vectorlen;
         };
+
+        // GRIM_CONS_TAG
         struct {
             grim_object car;
             grim_object cdr;
         };
+
+        // GRIM_SYMBOL_TAG (via direct)
         struct {
             grim_object symbolname;
         };
+
+        // GRIM_BUFFER_TAG
         struct {
             char *buf;
             size_t buflen;
             size_t bufcap;
         };
+
+        // GRIM_HASHTABLE_TAG
         struct {
             grim_hashnode **hashnodes;
             size_t hashcap;
