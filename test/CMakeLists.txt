@@ -2,6 +2,7 @@ add_executable(
   grimtest
   main.c
   immediate-objects.c
+  numbers.c
   strings.c
   hashtables.c
 )

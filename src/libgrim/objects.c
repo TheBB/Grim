@@ -174,6 +174,8 @@ grim_object grim_rational_pack(grim_object numerator, grim_object denominator) {
     mpq_clear(num);
     mpq_clear(denom);
 
+    if (!mpz_cmp_ui(mpq_denref(obj->rational), 1))
+        return grim_mpz_to_integer(mpq_numref(obj->rational));
     return (grim_object) obj;
 }
 

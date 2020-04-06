@@ -4,6 +4,7 @@
 #include "internal.h"
 
 extern MunitTest tests_immediate_objects[];
+extern MunitTest tests_numbers[];
 extern MunitTest tests_strings[];
 extern MunitTest tests_hashtables[];
 
@@ -79,6 +80,58 @@ extern MunitTest tests_hashtables[];
         grim_object y = (c);                                                   \
         gta_is_char(y);                                                        \
         munit_assert_ulong(grim_character_extract(y), ==, v);                  \
+    } while (0)
+
+#define gta_is_float(c)                                                        \
+    do {                                                                       \
+        grim_object z = (c);                                                   \
+        munit_assert_int(grim_type(z), ==, GRIM_FLOAT);                        \
+        munit_assert_int(grim_direct_tag(z), ==, GRIM_INDIRECT_TAG);           \
+        munit_assert_int(grim_indirect_tag(z), ==, GRIM_FLOAT_TAG);            \
+    } while (0)
+
+#define gta_check_float(c, v)                                                  \
+    do {                                                                       \
+        grim_object y = (c);                                                   \
+        double w = v;                                                          \
+        gta_is_float(y);                                                       \
+        munit_assert_double(grim_float_extract(y), ==, w);                     \
+    } while (0)
+
+#define gta_is_bigint(c)                                                       \
+    do {                                                                       \
+        grim_object y = (c);                                                   \
+        gta_is_int(y);                                                         \
+        munit_assert_int(grim_direct_tag(y), ==, GRIM_INDIRECT_TAG);           \
+        munit_assert_int(grim_indirect_tag(y), ==, GRIM_BIGINT_TAG);           \
+    } while (0)
+
+#define gta_check_bigint(c, v)                                                 \
+    do {                                                                       \
+        grim_object x = (c);                                                   \
+        const char *w = v;                                                     \
+        gta_is_bigint(x);                                                      \
+        mpz_t t;                                                               \
+        mpz_init_set_str(t, w, 10);                                            \
+        int res = mpz_cmp(t, ((grim_indirect *)x)->bigint);                    \
+        mpz_clear(t);                                                          \
+        munit_assert_int(res, ==, 0);                                          \
+    } while (0)
+
+#define gta_is_rational(c)                                                     \
+    do {                                                                       \
+        grim_object z = (c);                                                   \
+        munit_assert_int(grim_type(z), ==, GRIM_RATIONAL);                     \
+        munit_assert_int(grim_direct_tag(z), ==, GRIM_INDIRECT_TAG);           \
+        munit_assert_int(grim_indirect_tag(z), ==, GRIM_RATIONAL_TAG);         \
+    } while (0)
+
+#define gta_is_complex(c)                                                      \
+    do {                                                                       \
+        grim_object z = (c);                                                   \
+        munit_assert_int(grim_type(z), ==, GRIM_COMPLEX);                      \
+        munit_assert_int(grim_direct_tag(z), ==, GRIM_INDIRECT_TAG);           \
+        munit_assert_int(grim_indirect_tag(z), ==, GRIM_COMPLEX_TAG);          \
     } while (0)
 
 #define gta_is_string(c)                                                       \
