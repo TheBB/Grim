@@ -69,7 +69,7 @@ grim_object grim_float_pack(double num) {
 }
 
 double grim_float_extract(grim_object obj) {
-    return ((grim_indirect *) obj)->floating;
+    return I(obj)->floating;
 }
 
 
@@ -78,7 +78,7 @@ double grim_float_extract(grim_object obj) {
 
 static void grim_bigint_finalize(void *obj, void *_) {
     (void)_;
-    mpz_clear(((grim_indirect *) obj)->bigint);
+    mpz_clear(I(obj)->bigint);
 }
 
 grim_indirect *grim_bigint_create() {
@@ -92,7 +92,7 @@ grim_indirect *grim_bigint_create() {
 bool grim_integer_extractable(grim_object obj) {
     if (grim_direct_tag(obj) == GRIM_FIXNUM_TAG)
         return true;
-    return mpz_fits_slong_p(((grim_indirect *) obj)->bigint);
+    return mpz_fits_slong_p(I(obj)->bigint);
 }
 
 intmax_t grim_integer_extract(grim_object obj) {
@@ -101,7 +101,7 @@ intmax_t grim_integer_extract(grim_object obj) {
         intptr_t ret = obj >> 1;
         return signbit ? (INTPTR_MIN | ret) : ret;
     }
-    return mpz_get_si(((grim_indirect *) obj)->bigint);
+    return mpz_get_si(I(obj)->bigint);
 }
 
 grim_object grim_integer_pack(intmax_t num) {
@@ -125,7 +125,7 @@ static void grim_integer_to_mpz(mpz_t tgt, grim_object obj) {
     if (grim_direct_tag(obj) == GRIM_FIXNUM_TAG)
         mpz_set_si(tgt, grim_integer_extract(obj));
     else
-        mpz_set(tgt, ((grim_indirect *) obj)->bigint);
+        mpz_set(tgt, I(obj)->bigint);
 }
 
 grim_object grim_mpz_to_integer(mpz_t src) {
@@ -142,7 +142,7 @@ grim_object grim_mpz_to_integer(mpz_t src) {
 
 static void grim_rational_finalize(void *obj, void *_) {
     (void)_;
-    mpq_clear(((grim_indirect *) obj)->rational);
+    mpq_clear(I(obj)->rational);
 }
 
 static grim_indirect *grim_rational_create() {
@@ -188,12 +188,12 @@ grim_object grim_rational_pack(grim_object numerator, grim_object denominator) {
     return (grim_object) obj;
 }
 
-grim_object grim_rational_numerator(grim_object obj) {
-    return grim_mpz_to_integer(mpq_numref(((grim_indirect *) obj)->rational));
+grim_object grim_rational_num(grim_object obj) {
+    return grim_mpz_to_integer(mpq_numref(I(obj)->rational));
 }
 
-grim_object grim_rational_denominator(grim_object obj) {
-    return grim_mpz_to_integer(mpq_denref(((grim_indirect *) obj)->rational));
+grim_object grim_rational_den(grim_object obj) {
+    return grim_mpz_to_integer(mpq_denref(I(obj)->rational));
 }
 
 
@@ -216,21 +216,13 @@ grim_object grim_complex_pack(grim_object real, grim_object imag) {
     return (grim_object) obj;
 }
 
-grim_object grim_complex_real(grim_object obj) {
-    return ((grim_indirect *) obj)->real;
-}
-
-grim_object grim_complex_imag(grim_object obj) {
-    return ((grim_indirect *) obj)->imag;
-}
-
 
 // Strings
 // -----------------------------------------------------------------------------
 
 static void grim_string_finalize(void *obj, void *_) {
     (void)_;
-    free(((grim_indirect *) obj)->str);
+    free(I(obj)->str);
 }
 
 static grim_indirect *grim_string_create() {
@@ -258,18 +250,6 @@ grim_object grim_string_pack(const char *input, const char *encoding, bool unesc
     return str;
 }
 
-size_t grim_strlen(grim_object obj) {
-    return ((grim_indirect *) obj)->strlen;
-}
-
-size_t grim_set_strlen(grim_object obj, size_t length) {
-    return ((grim_indirect *) obj)->strlen = length;
-}
-
-uint8_t *grim_strptr(grim_object obj) {
-    return ((grim_indirect *) obj)->str;
-}
-
 
 // Vectors
 // -----------------------------------------------------------------------------
@@ -281,20 +261,8 @@ grim_object grim_vector_create(size_t nelems) {
     obj->vectorlen = nelems;
     grim_object vec = (grim_object) obj;
     for (size_t i = 0; i < nelems; i++)
-        grim_vector_set(vec, i, grim_undefined);
+        I(vec)->vectordata[i] = grim_undefined;
     return vec;
-}
-
-size_t grim_vector_size(grim_object vec) {
-    return ((grim_indirect *) vec)->vectorlen;
-}
-
-void grim_vector_set(grim_object vec, size_t index, grim_object elt) {
-    ((grim_indirect *) vec)->vectordata[index] = elt;
-}
-
-grim_object grim_vector_get(grim_object vec, size_t index) {
-    return ((grim_indirect *) vec)->vectordata[index];
 }
 
 
@@ -307,14 +275,6 @@ grim_object grim_cons_pack(grim_object car, grim_object cdr) {
     obj->car = car;
     obj->cdr = cdr;
     return (grim_object) obj;
-}
-
-grim_object grim_car(grim_object obj) {
-    return ((grim_indirect *) obj)->car;
-}
-
-grim_object grim_cdr(grim_object obj) {
-    return ((grim_indirect *) obj)->cdr;
 }
 
 
@@ -411,14 +371,6 @@ void grim_buffer_copy(grim_object obj, const char *data, size_t length) {
     ind->buflen += length;
 }
 
-char *grim_bufptr(grim_object obj) {
-    return ((grim_indirect *) obj)->buf;
-}
-
-size_t grim_buflen(grim_object obj) {
-    return ((grim_indirect *) obj)->buflen;
-}
-
 
 // Hash tables
 // -----------------------------------------------------------------------------
@@ -439,10 +391,6 @@ grim_object grim_hashtable_create(size_t sizehint) {
     for (size_t i = 0; i < sizehint; i++)
         obj->hashnodes[i] = NULL;
     return (grim_object) obj;
-}
-
-size_t grim_hashtable_size(grim_object table) {
-    return ((grim_indirect *)table)->hashfill;
 }
 
 static grim_hashnode **grim_hashtable_node(grim_hashnode **nodes, grim_object key, size_t hash, size_t length, bool create) {

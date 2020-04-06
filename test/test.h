@@ -113,7 +113,7 @@ extern MunitTest tests_hashtables[];
         gta_is_bigint(x);                                                      \
         mpz_t t;                                                               \
         mpz_init_set_str(t, w, 10);                                            \
-        int res = mpz_cmp(t, ((grim_indirect *)x)->bigint);                    \
+        int res = mpz_cmp(t, I(x)->bigint);                    \
         mpz_clear(t);                                                          \
         munit_assert_int(res, ==, 0);                                          \
     } while (0)
@@ -148,10 +148,10 @@ extern MunitTest tests_hashtables[];
         gta_is_string(y);                                                      \
         size_t L = (l);                                                        \
         uint8_t *w = (uint8_t *)(v);                                           \
-        munit_assert_ullong(((grim_indirect *)y)->strlen, ==, L);              \
-        munit_assert_ullong(grim_strlen(y), ==, L);                            \
+        munit_assert_ullong(I(y)->strlen, ==, L);              \
+        munit_assert_ullong(I(y)->strlen, ==, L);                            \
         for (size_t i = 0; i < L; i++)                                         \
-            munit_assert_uint8(((grim_indirect *)y)->str[i], ==, w[i]);        \
+            munit_assert_uint8(I(y)->str[i], ==, w[i]);        \
     } while (0)
 
 #define gta_is_buffer(c)                                                       \
@@ -168,9 +168,9 @@ extern MunitTest tests_hashtables[];
         gta_is_buffer(y);                                                      \
         size_t L = (l);                                                        \
         char *w = (char *)(v);                                                 \
-        munit_assert_ullong(((grim_indirect *)y)->buflen, ==, L);              \
+        munit_assert_ullong(I(y)->buflen, ==, L);              \
         for (size_t i = 0; i <= L; i++)                                        \
-            munit_assert_char(((grim_indirect *)y)->buf[i], ==, w[i]);         \
+            munit_assert_char(I(y)->buf[i], ==, w[i]);         \
     } while (0)
 
 #define gta_is_hashtable(c)                                                    \
@@ -186,5 +186,5 @@ extern MunitTest tests_hashtables[];
         grim_object y = (c);                                                   \
         gta_is_hashtable(y);                                                   \
         size_t L = (l);                                                        \
-        munit_assert_ullong(grim_hashtable_size(y), ==, L);                    \
+        munit_assert_ullong(I(y)->hashfill, ==, L);                            \
     } while (0)

@@ -211,8 +211,8 @@ ucs4_t grim_unescape_character(uint8_t *str, size_t length) {
 
 
 void grim_unescape_string(grim_object str) {
-    uint8_t *srcptr = grim_strptr(str);
-    uint8_t *endptr = srcptr + grim_strlen(str);
+    uint8_t *srcptr = I(str)->str;
+    uint8_t *endptr = srcptr + I(str)->strlen;
     uint8_t *tgtptr = srcptr;
     uint8_t ch;
 
@@ -224,7 +224,7 @@ void grim_unescape_string(grim_object str) {
             grim_unescape(&srcptr, &tgtptr);
     }
 
-    grim_set_strlen(str, tgtptr - grim_strptr(str));
+    I(str)->strlen = tgtptr - I(str)->str;
 }
 
 
@@ -247,8 +247,8 @@ void grim_display_string(grim_object buf, grim_object src, const char *encoding)
     char *encoded = u8_conv_to_encoding(
         encoding,
         iconveh_question_mark,
-        grim_strptr(src),
-        grim_strlen(src),
+        I(src)->str,
+        I(src)->strlen,
         NULL, NULL,
         &convlength
     );
@@ -278,8 +278,8 @@ void grim_print_character(grim_object buf, grim_object src, const char *encoding
 void grim_print_string(grim_object buf, grim_object src, const char *encoding) {
     if (!encoding)
         encoding = locale_charset();
-    uint8_t *buffer = grim_strptr(src);
-    size_t start = 0, end, length = grim_strlen(src), convlength;
+    uint8_t *buffer = I(src)->str;
+    size_t start = 0, end, length = I(src)->strlen, convlength;
 
     grim_buffer_copy(buf, "\"", 1);
     while (start < length) {
@@ -309,4 +309,11 @@ void grim_print_string(grim_object buf, grim_object src, const char *encoding) {
         start = end + 1;
     }
     grim_buffer_copy(buf, "\"", 1);
+}
+
+int grim_peek_char(ucs4_t *retval, grim_object str, size_t offset) {
+    size_t len = I(str)->strlen;
+    if (offset >= len)
+        return -1;
+    return u8_mbtouc(retval, I(str)->str + offset, len - offset);
 }

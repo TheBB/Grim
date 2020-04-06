@@ -110,6 +110,8 @@ typedef struct {
     };
 } grim_indirect;
 
+#define I(c) ((grim_indirect *) c)
+
 extern grim_object grim_symbol_table;
 
 grim_tag_t grim_direct_tag(grim_object obj);
@@ -117,14 +119,9 @@ grim_tag_t grim_indirect_tag(grim_object obj);
 
 grim_object grim_mpz_to_integer(mpz_t src);
 
-uint8_t *grim_strptr(grim_object obj);
-size_t grim_set_strlen(grim_object obj, size_t length);
-
 void grim_buffer_dump(FILE *stream, grim_object obj);
 void grim_buffer_ensure_free_capacity(grim_object obj, size_t sizehint);
 void grim_buffer_copy(grim_object obj, const char *data, size_t length);
-char *grim_bufptr(grim_object obj);
-size_t grim_buflen(grim_object obj);
 
 void grim_encode_display(grim_object buf, grim_object src, const char *encoding);
 void grim_encode_print(grim_object buf, grim_object src, const char *encoding);

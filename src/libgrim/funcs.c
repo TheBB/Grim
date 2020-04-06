@@ -62,10 +62,11 @@ static void grim_encode_simple(grim_object buf, grim_object src, const char *enc
             grim_encode_mpz(buf, mpq_denref(((grim_indirect *) src)->rational));
             return;
         case GRIM_COMPLEX_TAG:
-            grim_encode_simple(buf, grim_complex_real(src), encoding);
-            if (grim_nonnegative(grim_complex_imag(src)))
+            grim_encode_simple(buf, I(src)->real, encoding);
+            if (grim_nonnegative(I(src)->imag))
                 grim_buffer_copy(buf, "+", 1);
-            grim_encode_simple(buf, grim_complex_imag(src), encoding);
+            grim_encode_simple(buf, I(src)->imag, encoding);
+            grim_buffer_copy(buf, "i", 1);
             return;
         case GRIM_BUFFER_TAG:
             grim_buffer_copy(buf, "#<buffer>", 9);
@@ -80,9 +81,9 @@ static void grim_encode_simple(grim_object buf, grim_object src, const char *enc
 
 static void grim_encode_vector(grim_object buf, grim_object src, const char *encoding, printfunc printer) {
     grim_buffer_copy(buf, "#(", 2);
-    size_t len = grim_vector_size(src);
+    size_t len = I(src)->vectorlen;
     for (size_t i = 0; i < len; i++) {
-        printer(buf, grim_vector_get(src, i), encoding);
+        printer(buf, I(src)->vectordata[i], encoding);
         if (i + 1 < len)
             grim_buffer_copy(buf, " ", 1);
     }
@@ -96,8 +97,8 @@ static void grim_encode_cons(grim_object buf, grim_object src, const char *encod
     while (grim_type(src) == GRIM_CONS) {
         if (needs_space)
             grim_buffer_copy(buf, " ", 1);
-        printer(buf, grim_car(src), encoding);
-        src = grim_cdr(src);
+        printer(buf, I(src)->car, encoding);
+        src = I(src)->cdr;
         needs_space = true;
     }
     if (grim_type(src) != GRIM_NIL) {
@@ -182,9 +183,9 @@ bool grim_equal(grim_object a, grim_object b) {
     case GRIM_BIGINT_TAG:
         return !mpz_cmp(((grim_indirect *)a)->bigint, ((grim_indirect *)b)->bigint);
     case GRIM_STRING_TAG:
-        if (grim_strlen(a) != grim_strlen(b))
+        if (I(a)->strlen != I(b)->strlen)
             return false;
-        return !memcmp(grim_strptr(a), grim_strptr(b), grim_strlen(a));
+        return !memcmp(I(a)->str, I(b)->str, I(a)->strlen);
     }
 
     return a == b;
@@ -197,11 +198,11 @@ bool grim_nonnegative(grim_object obj) {
     if (type == GRIM_INTEGER) {
         if (grim_integer_extractable(obj))
             return grim_integer_extract(obj) >= 0;
-        return mpz_sgn(((grim_indirect *) obj)->bigint) >= 0;
+        return mpz_sgn(I(obj)->bigint) >= 0;
     }
 
     if (type == GRIM_RATIONAL)
-        return mpq_sgn(((grim_indirect *) obj)->rational) >= 0;
+        return mpq_sgn(I(obj)->rational) >= 0;
 
     if (type == GRIM_FLOAT)
         return grim_float_extract(obj) >= 0.0;
@@ -220,22 +221,19 @@ bool grim_negate(grim_object obj) {
         return grim_float_pack(-grim_float_extract(obj));
 
     if (type == GRIM_INTEGER) {
-        grim_object ret = grim_mpz_to_integer(((grim_indirect *) obj)->bigint);
-        mpz_neg(((grim_indirect *) obj)->bigint, ((grim_indirect *) obj)->bigint);
+        grim_object ret = grim_mpz_to_integer(I(obj)->bigint);
+        mpz_neg(I(obj)->bigint, I(obj)->bigint);
         return ret;
     }
 
     if (type == GRIM_RATIONAL)
         return grim_rational_pack(
-            grim_negate(grim_rational_numerator(obj)),
-            grim_rational_denominator(obj)
+            grim_negate(grim_rational_num(obj)),
+            grim_rational_den(obj)
         );
 
     if (type == GRIM_COMPLEX)
-        return grim_complex_pack(
-            grim_negate(grim_complex_real(obj)),
-            grim_negate(grim_complex_imag(obj))
-        );
+        return grim_complex_pack(grim_negate(I(obj)->real), grim_negate(I(obj)->imag));
 
     assert(false);
 }
@@ -251,10 +249,10 @@ grim_object grim_asfloat(grim_object obj) {
         return obj;
 
     if (type == GRIM_INTEGER)
-        return grim_float_pack((double) mpz_get_d(((grim_indirect *) obj)->bigint));
+        return grim_float_pack((double) mpz_get_d(I(obj)->bigint));
 
     if (type == GRIM_RATIONAL)
-        return grim_float_pack((double) mpq_get_d(((grim_indirect *) obj)->rational));
+        return grim_float_pack((double) mpq_get_d(I(obj)->rational));
 
     assert(false);
 }

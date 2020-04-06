@@ -43,11 +43,11 @@ uint64_t grim_hash(grim_object obj, uint64_t h) {
     case GRIM_INDIRECT_TAG:
         switch (grim_indirect_tag(obj)) {
         case GRIM_BIGINT_TAG:
-            return hash_bigint(((grim_indirect *) obj)->bigint, h);
+            return hash_bigint(I(obj)->bigint, h);
         case GRIM_STRING_TAG:
-            return hash_buffer((char *) grim_strptr(obj), grim_strlen(obj), h);
+            return hash_buffer((char *) I(obj)->str, I(obj)->strlen, h);
         case GRIM_BUFFER_TAG:
-            return hash_buffer(grim_bufptr(obj), grim_buflen(obj), h);
+            return hash_buffer(I(obj)->buf, I(obj)->buflen, h);
         default:
             assert(false);
             return 0;

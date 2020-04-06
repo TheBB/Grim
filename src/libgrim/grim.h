@@ -41,12 +41,10 @@ grim_object grim_integer_pack(intmax_t num);
 grim_object grim_integer_read(const char *str, int base);
 
 grim_object grim_rational_pack(grim_object numerator, grim_object denominator);
-grim_object grim_rational_numerator(grim_object obj);
-grim_object grim_rational_denominator(grim_object obj);
+grim_object grim_rational_num(grim_object obj);
+grim_object grim_rational_den(grim_object obj);
 
 grim_object grim_complex_pack(grim_object real, grim_object imag);
-grim_object grim_complex_real(grim_object obj);
-grim_object grim_complex_imag(grim_object obj);
 
 grim_object grim_string_pack(const char *input, const char *encoding, bool escape);
 size_t grim_strlen(grim_object obj);
@@ -57,8 +55,6 @@ void grim_vector_set(grim_object vec, size_t index, grim_object elt);
 grim_object grim_vector_get(grim_object vec, size_t index);
 
 grim_object grim_cons_pack(grim_object car, grim_object cdr);
-grim_object grim_car(grim_object obj);
-grim_object grim_cdr(grim_object obj);
 
 grim_object grim_intern(const char *name, const char *encoding);
 grim_object grim_symbol_name(grim_object obj);
@@ -70,7 +66,6 @@ ucs4_t grim_character_extract(grim_object obj);
 grim_object grim_buffer_create(size_t sizehint);
 
 grim_object grim_hashtable_create(size_t sizehint);
-size_t grim_hashtable_size(grim_object table);
 bool grim_hashtable_has(grim_object table, grim_object key);
 grim_object grim_hashtable_get(grim_object table, grim_object key);
 void grim_hashtable_set(grim_object table, grim_object key, grim_object value);

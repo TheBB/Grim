@@ -37,23 +37,23 @@ static MunitResult rationals(const MunitParameter params[], void *fixture) {
 
     rat = grim_rational_pack(grim_integer_pack(1), grim_integer_pack(2));
     gta_is_rational(rat);
-    gta_check_fixnum(grim_rational_numerator(rat), 1);
-    gta_check_fixnum(grim_rational_denominator(rat), 2);
+    gta_check_fixnum(grim_rational_num(rat), 1);
+    gta_check_fixnum(grim_rational_den(rat), 2);
 
     rat = grim_rational_pack(grim_integer_pack(1), grim_integer_pack(-2));
     gta_is_rational(rat);
-    gta_check_fixnum(grim_rational_numerator(rat), -1);
-    gta_check_fixnum(grim_rational_denominator(rat), 2);
+    gta_check_fixnum(grim_rational_num(rat), -1);
+    gta_check_fixnum(grim_rational_den(rat), 2);
 
     rat = grim_rational_pack(grim_integer_pack(-1), grim_integer_pack(2));
     gta_is_rational(rat);
-    gta_check_fixnum(grim_rational_numerator(rat), -1);
-    gta_check_fixnum(grim_rational_denominator(rat), 2);
+    gta_check_fixnum(grim_rational_num(rat), -1);
+    gta_check_fixnum(grim_rational_den(rat), 2);
 
     rat = grim_rational_pack(grim_integer_pack(2), grim_integer_pack(4));
     gta_is_rational(rat);
-    gta_check_fixnum(grim_rational_numerator(rat), 1);
-    gta_check_fixnum(grim_rational_denominator(rat), 2);
+    gta_check_fixnum(grim_rational_num(rat), 1);
+    gta_check_fixnum(grim_rational_den(rat), 2);
 
     rat = grim_rational_pack(grim_integer_pack(4), grim_integer_pack(2));
     gta_check_fixnum(rat, 2);
@@ -70,16 +70,16 @@ static MunitResult complex(const MunitParameter params[], void *fixture) {
 
     cpl = grim_complex_pack(grim_integer_pack(1), grim_integer_pack(1));
     gta_is_complex(cpl);
-    gta_check_fixnum(grim_complex_real(cpl), 1);
-    gta_check_fixnum(grim_complex_imag(cpl), 1);
+    gta_check_fixnum(I(cpl)->real, 1);
+    gta_check_fixnum(I(cpl)->imag, 1);
 
     cpl = grim_complex_pack(grim_float_pack(3.1415), grim_float_pack(0.0));
     gta_check_float(cpl, 3.1415);
 
     cpl = grim_complex_pack(grim_float_pack(0.0), grim_float_pack(-1.0));
     gta_is_complex(cpl);
-    gta_check_float(grim_complex_real(cpl), 0.0);
-    gta_check_float(grim_complex_imag(cpl), -1.0);
+    gta_check_float(I(cpl)->real, 0.0);
+    gta_check_float(I(cpl)->imag, -1.0);
 
     return MUNIT_OK;
 }
