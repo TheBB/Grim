@@ -20,6 +20,9 @@ typedef enum {
     GRIM_UNDEFINED,
     GRIM_BOOLEAN,
     GRIM_NIL,
+    GRIM_FLOAT,
+    GRIM_RATIONAL,
+    GRIM_COMPLEX,
     GRIM_STRING,
     GRIM_VECTOR,
     GRIM_CONS,
@@ -29,9 +32,20 @@ typedef enum {
 
 grim_type_t grim_type(grim_object obj);
 
+grim_object grim_float_pack(double num);
+double grim_float_extract(grim_object obj);
+
 bool grim_integer_extractable(grim_object obj);
 intmax_t grim_integer_extract(grim_object obj);
 grim_object grim_integer_pack(intmax_t num);
+
+grim_object grim_rational_pack(grim_object numerator, grim_object denominator);
+grim_object grim_rational_numerator(grim_object obj);
+grim_object grim_rational_denominator(grim_object obj);
+
+grim_object grim_complex_create(grim_object real, grim_object imag);
+grim_object grim_complex_real(grim_object obj);
+grim_object grim_complex_imag(grim_object obj);
 
 grim_object grim_string_pack(const char *input, const char *encoding, bool escape);
 size_t grim_strlen(grim_object obj);
@@ -65,3 +79,4 @@ void grim_init();
 void grim_display(grim_object obj, const char *encoding);
 void grim_print(grim_object obj, const char *encoding);
 bool grim_equal(grim_object a, grim_object b);
+bool grim_nonnegative(grim_object obj);

@@ -33,7 +33,10 @@ grim_type_t grim_type(grim_object obj) {
     case GRIM_NIL_TAG: return GRIM_NIL;
     case GRIM_INDIRECT_TAG:
         switch (grim_indirect_tag(obj)) {
+        case GRIM_FLOAT_TAG: return GRIM_FLOAT;
         case GRIM_BIGINT_TAG: return GRIM_INTEGER;
+        case GRIM_RATIONAL_TAG: return GRIM_RATIONAL;
+        case GRIM_COMPLEX_TAG: return GRIM_COMPLEX;
         case GRIM_STRING_TAG: return GRIM_STRING;
         case GRIM_VECTOR_TAG: return GRIM_VECTOR;
         case GRIM_CONS_TAG: return GRIM_CONS;
@@ -53,6 +56,20 @@ static grim_indirect *grim_indirect_create(bool permanent) {
         retval = GC_MALLOC(sizeof(grim_indirect));
     assert(retval);
     return retval;
+}
+
+
+// Floats
+// -----------------------------------------------------------------------------
+
+grim_object grim_float_pack(double num) {
+    grim_indirect *obj = grim_indirect_create(false);
+    obj->floating = num;
+    return (grim_object) obj;
+}
+
+double grim_float_extract(grim_object obj) {
+    return ((grim_indirect *) obj)->floating;
 }
 
 
@@ -93,6 +110,107 @@ grim_object grim_integer_pack(intmax_t num) {
     grim_indirect *obj = grim_bigint_create();
     mpz_set_si(obj->bigint, num);
     return (grim_object) obj;
+}
+
+static void grim_integer_to_mpz(mpz_t tgt, grim_object obj) {
+    if (grim_direct_tag(obj) == GRIM_FIXNUM_TAG)
+        mpz_set_si(tgt, grim_integer_extract(obj));
+    else
+        mpz_set(tgt, ((grim_indirect *) obj)->bigint);
+}
+
+static grim_object grim_mpz_to_integer(mpz_t src) {
+    if (mpz_fits_slong_p(src))
+        return grim_integer_pack(mpz_get_si(src));
+    grim_indirect *obj = grim_bigint_create();
+    mpz_set(obj->bigint, src);
+    return (grim_object) obj;
+}
+
+
+// Rationals
+// -----------------------------------------------------------------------------
+
+static void grim_rational_finalize(void *obj, void *_) {
+    (void)_;
+    mpq_clear(((grim_indirect *) obj)->rational);
+}
+
+static grim_indirect *grim_rational_create() {
+    grim_indirect *obj = grim_indirect_create(false);
+    obj->tag = GRIM_RATIONAL_TAG;
+    mpq_init(obj->rational);
+    GC_REGISTER_FINALIZER(obj, grim_rational_finalize, NULL, NULL, NULL);
+    return obj;
+}
+
+grim_object grim_rational_pack(grim_object numerator, grim_object denominator) {
+    assert(grim_type(numerator) == GRIM_INTEGER);
+    assert(grim_type(denominator) == GRIM_INTEGER);
+
+    if (grim_integer_extractable(denominator)) {
+        intmax_t denom = grim_integer_extract(denominator);
+        assert(denom != 0);
+        if (denom == 1)
+            return numerator;
+    }
+
+    mpz_t temp;
+    mpq_t num, denom;
+    mpz_init(temp);
+
+    mpq_init(num);
+    grim_integer_to_mpz(temp, numerator);
+    mpq_set_z(num, temp);
+
+    mpq_init(denom);
+    grim_integer_to_mpz(temp, denominator);
+    mpq_set_z(denom, temp);
+
+    grim_indirect *obj = grim_rational_create();
+    mpq_div(obj->rational, num, denom);
+
+    mpz_clear(temp);
+    mpq_clear(num);
+    mpq_clear(denom);
+
+    return (grim_object) obj;
+}
+
+grim_object grim_rational_numerator(grim_object obj) {
+    return grim_mpz_to_integer(mpq_numref(((grim_indirect *) obj)->rational));
+}
+
+grim_object grim_rational_denominator(grim_object obj) {
+    return grim_mpz_to_integer(mpq_denref(((grim_indirect *) obj)->rational));
+}
+
+
+// Complex numbers
+// -----------------------------------------------------------------------------
+
+grim_object grim_complex_create(grim_object real, grim_object imag) {
+    if (grim_type(imag) == GRIM_INTEGER &&
+        grim_integer_extractable(imag) &&
+        grim_integer_extract(imag) == 0)
+        return real;
+
+    if (grim_type(imag) == GRIM_FLOAT && grim_float_extract(imag) == 0.0)
+        return real;
+
+    grim_indirect *obj = grim_indirect_create(false);
+    obj->tag = GRIM_COMPLEX_TAG;
+    obj->real = real;
+    obj->imag = imag;
+    return (grim_object) obj;
+}
+
+grim_object grim_complex_real(grim_object obj) {
+    return ((grim_indirect *) obj)->real;
+}
+
+grim_object grim_complex_imag(grim_object obj) {
+    return ((grim_indirect *) obj)->imag;
 }
 
 

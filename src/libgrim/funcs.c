@@ -1,4 +1,6 @@
 #define _GNU_SOURCE
+
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +14,13 @@
 
 typedef void printfunc(grim_object buf, grim_object src, const char *encoding);
 
+
+static void grim_encode_mpz(grim_object buf, mpz_t num) {
+    char *z = NULL;
+    int len = gmp_asprintf(&z, "%Zd", num);
+    grim_buffer_copy(buf, z, len);
+    free(z);
+}
 
 static void grim_encode_simple(grim_object buf, grim_object src, const char *encoding) {
     (void) encoding;
@@ -36,14 +45,28 @@ static void grim_encode_simple(grim_object buf, grim_object src, const char *enc
     }
     case GRIM_INDIRECT_TAG:
         switch (grim_indirect_tag(src)) {
-        case GRIM_BIGINT_TAG:
+        case GRIM_FLOAT_TAG:
         {
             char *z = NULL;
-            int len = gmp_asprintf(&z, "%Zd", ((grim_indirect *) src)->bigint);
+            int len = asprintf(&z, "%f", grim_float_extract(src));
             grim_buffer_copy(buf, z, len);
             free(z);
             return;
         }
+        case GRIM_BIGINT_TAG:
+            grim_encode_mpz(buf, ((grim_indirect *) src)->bigint);
+            return;
+        case GRIM_RATIONAL_TAG:
+            grim_encode_mpz(buf, mpq_numref(((grim_indirect *) src)->rational));
+            grim_buffer_copy(buf, "/", 1);
+            grim_encode_mpz(buf, mpq_denref(((grim_indirect *) src)->rational));
+            return;
+        case GRIM_COMPLEX_TAG:
+            grim_encode_simple(buf, grim_complex_real(src), encoding);
+            if (grim_nonnegative(grim_complex_imag(src)))
+                grim_buffer_copy(buf, "+", 1);
+            grim_encode_simple(buf, grim_complex_imag(src), encoding);
+            return;
         case GRIM_BUFFER_TAG:
             grim_buffer_copy(buf, "#<buffer>", 9);
             return;
@@ -165,4 +188,23 @@ bool grim_equal(grim_object a, grim_object b) {
     }
 
     return a == b;
+}
+
+
+bool grim_nonnegative(grim_object obj) {
+    grim_type_t type = grim_type(obj);
+
+    if (type == GRIM_INTEGER) {
+        if (grim_integer_extractable(obj))
+            return grim_integer_extract(obj) >= 0;
+        return mpz_sgn(((grim_indirect *) obj)->bigint) >= 0;
+    }
+
+    if (type == GRIM_RATIONAL)
+        return mpq_sgn(((grim_indirect *) obj)->rational) >= 0;
+
+    if (type == GRIM_FLOAT)
+        return grim_float_extract(obj) >= 0.0;
+
+    assert(false);
 }

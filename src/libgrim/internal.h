@@ -27,12 +27,15 @@ enum {
 
 // Indirect types
 enum {
-    GRIM_BIGINT_TAG    = 0x00,
-    GRIM_STRING_TAG    = 0x01,
-    GRIM_VECTOR_TAG    = 0x02,
-    GRIM_CONS_TAG      = 0x03,
-    GRIM_BUFFER_TAG    = 0x04,
-    GRIM_HASHTABLE_TAG = 0x05,
+    GRIM_FLOAT_TAG    = 0x00,
+    GRIM_BIGINT_TAG    = 0x01,
+    GRIM_RATIONAL_TAG  = 0x02,
+    GRIM_COMPLEX_TAG   = 0x03,
+    GRIM_STRING_TAG    = 0x04,
+    GRIM_VECTOR_TAG    = 0x05,
+    GRIM_CONS_TAG      = 0x06,
+    GRIM_BUFFER_TAG    = 0x07,
+    GRIM_HASHTABLE_TAG = 0x08,
 };
 
 struct grim_hashnode_t {
@@ -47,9 +50,25 @@ typedef struct grim_hashnode_t grim_hashnode;
 typedef struct {
     grim_tag_t tag;
     union {
+        // GRIM_FLOAT_TAG
+        struct {
+            double floating;
+        };
+
         // GRIM_BIGINT_TAG
         struct {
             mpz_t bigint;
+        };
+
+        // GRIM_RATIONAL_TAG
+        struct {
+            mpq_t rational;
+        };
+
+        // GRIM_COMPLEX_TAG
+        struct {
+            grim_object real;
+            grim_object imag;
         };
 
         // GRIM_STRING_TAG
