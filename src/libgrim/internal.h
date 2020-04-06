@@ -13,8 +13,8 @@ typedef uint8_t grim_tag_t;
 #define GRIM_FIXNUM_MAX (INTPTR_MAX / 2)
 #define GRIM_FIXNUM_MIN (INTPTR_MIN / 2)
 
+// Immediate types
 enum {
-    // Immediate types
     GRIM_INDIRECT_TAG  = 0b0000,
     GRIM_FIXNUM_TAG    = 0b0001,
     GRIM_CHARACTER_TAG = 0b0010,
@@ -23,14 +23,16 @@ enum {
     GRIM_FALSE_TAG     = 0b1000,
     GRIM_TRUE_TAG      = 0b1010,
     GRIM_NIL_TAG       = 0b1100,
+};
 
-    // Indirect types
-    GRIM_BIGINT_TAG    = 0x0f,
-    GRIM_STRING_TAG    = 0x1f,
-    GRIM_VECTOR_TAG    = 0x2f,
-    GRIM_CONS_TAG      = 0x3f,
-    GRIM_BUFFER_TAG    = 0x4f,
-    GRIM_HASHTABLE_TAG = 0x5f,
+// Indirect types
+enum {
+    GRIM_BIGINT_TAG    = 0x00,
+    GRIM_STRING_TAG    = 0x01,
+    GRIM_VECTOR_TAG    = 0x02,
+    GRIM_CONS_TAG      = 0x03,
+    GRIM_BUFFER_TAG    = 0x04,
+    GRIM_HASHTABLE_TAG = 0x05,
 };
 
 struct grim_hashnode_t {
