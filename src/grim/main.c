@@ -57,19 +57,19 @@ int main() {
     grim_display(v, NULL);
     printf("\n");
 
-    grim_object c = grim_cons_create(grim_integer_pack(0), grim_integer_pack(1));
+    grim_object c = grim_cons_pack(grim_integer_pack(0), grim_integer_pack(1));
     grim_display(c, NULL);
     printf("\n");
 
-    c = grim_cons_create(grim_integer_pack(0), grim_nil);
+    c = grim_cons_pack(grim_integer_pack(0), grim_nil);
     grim_display(c, NULL);
     printf("\n");
 
-    c = grim_cons_create(grim_integer_pack(1), c);
+    c = grim_cons_pack(grim_integer_pack(1), c);
     grim_display(c, NULL);
     printf("\n");
 
-    c = grim_cons_create(grim_integer_pack(2), c);
+    c = grim_cons_pack(grim_integer_pack(2), c);
     grim_display(c, NULL);
     printf("\n");
 

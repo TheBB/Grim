@@ -65,18 +65,18 @@ static MunitResult rationals(const MunitParameter params[], void *fixture) {
 static MunitResult complex(const MunitParameter params[], void *fixture) {
     grim_object cpl;
 
-    cpl = grim_complex_create(grim_integer_pack(1), grim_integer_pack(0));
+    cpl = grim_complex_pack(grim_integer_pack(1), grim_integer_pack(0));
     gta_check_fixnum(cpl, 1);
 
-    cpl = grim_complex_create(grim_integer_pack(1), grim_integer_pack(1));
+    cpl = grim_complex_pack(grim_integer_pack(1), grim_integer_pack(1));
     gta_is_complex(cpl);
     gta_check_fixnum(grim_complex_real(cpl), 1);
     gta_check_fixnum(grim_complex_imag(cpl), 1);
 
-    cpl = grim_complex_create(grim_float_pack(3.1415), grim_float_pack(0.0));
+    cpl = grim_complex_pack(grim_float_pack(3.1415), grim_float_pack(0.0));
     gta_check_float(cpl, 3.1415);
 
-    cpl = grim_complex_create(grim_float_pack(0.0), grim_float_pack(-1.0));
+    cpl = grim_complex_pack(grim_float_pack(0.0), grim_float_pack(-1.0));
     gta_is_complex(cpl);
     gta_check_float(grim_complex_real(cpl), 0.0);
     gta_check_float(grim_complex_imag(cpl), -1.0);

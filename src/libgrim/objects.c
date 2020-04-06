@@ -191,7 +191,7 @@ grim_object grim_rational_denominator(grim_object obj) {
 // Complex numbers
 // -----------------------------------------------------------------------------
 
-grim_object grim_complex_create(grim_object real, grim_object imag) {
+grim_object grim_complex_pack(grim_object real, grim_object imag) {
     if (grim_type(imag) == GRIM_INTEGER &&
         grim_integer_extractable(imag) &&
         grim_integer_extract(imag) == 0)
@@ -292,7 +292,7 @@ grim_object grim_vector_get(grim_object vec, size_t index) {
 // Cons cells
 // -----------------------------------------------------------------------------
 
-grim_object grim_cons_create(grim_object car, grim_object cdr) {
+grim_object grim_cons_pack(grim_object car, grim_object cdr) {
     grim_indirect *obj = grim_indirect_create(false);
     obj->tag = GRIM_CONS_TAG;
     obj->car = car;
