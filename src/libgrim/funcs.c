@@ -208,3 +208,53 @@ bool grim_nonnegative(grim_object obj) {
 
     assert(false);
 }
+
+
+bool grim_negate(grim_object obj) {
+    if (grim_direct_tag(obj) == GRIM_FIXNUM_TAG)
+        return grim_integer_pack(-grim_integer_extract(obj));
+
+    grim_type_t type = grim_type(obj);
+
+    if (type == GRIM_FLOAT)
+        return grim_float_pack(-grim_float_extract(obj));
+
+    if (type == GRIM_INTEGER) {
+        grim_object ret = grim_mpz_to_integer(((grim_indirect *) obj)->bigint);
+        mpz_neg(((grim_indirect *) obj)->bigint, ((grim_indirect *) obj)->bigint);
+        return ret;
+    }
+
+    if (type == GRIM_RATIONAL)
+        return grim_rational_pack(
+            grim_negate(grim_rational_numerator(obj)),
+            grim_rational_denominator(obj)
+        );
+
+    if (type == GRIM_COMPLEX)
+        return grim_complex_pack(
+            grim_negate(grim_complex_real(obj)),
+            grim_negate(grim_complex_imag(obj))
+        );
+
+    assert(false);
+}
+
+
+grim_object grim_asfloat(grim_object obj) {
+    if (grim_direct_tag(obj) == GRIM_FIXNUM_TAG)
+        return grim_float_pack((double) grim_integer_extract(obj));
+
+    grim_type_t type = grim_type(obj);
+
+    if (type == GRIM_FLOAT)
+        return obj;
+
+    if (type == GRIM_INTEGER)
+        return grim_float_pack((double) mpz_get_d(((grim_indirect *) obj)->bigint));
+
+    if (type == GRIM_RATIONAL)
+        return grim_float_pack((double) mpq_get_d(((grim_indirect *) obj)->rational));
+
+    assert(false);
+}

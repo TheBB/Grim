@@ -115,6 +115,8 @@ extern grim_object grim_symbol_table;
 grim_tag_t grim_direct_tag(grim_object obj);
 grim_tag_t grim_indirect_tag(grim_object obj);
 
+grim_object grim_mpz_to_integer(mpz_t src);
+
 uint8_t *grim_strptr(grim_object obj);
 size_t grim_set_strlen(grim_object obj, size_t length);
 

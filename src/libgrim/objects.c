@@ -81,7 +81,7 @@ static void grim_bigint_finalize(void *obj, void *_) {
     mpz_clear(((grim_indirect *) obj)->bigint);
 }
 
-static grim_indirect *grim_bigint_create() {
+grim_indirect *grim_bigint_create() {
     grim_indirect *obj = grim_indirect_create(false);
     obj->tag = GRIM_BIGINT_TAG;
     mpz_init(obj->bigint);
@@ -112,6 +112,15 @@ grim_object grim_integer_pack(intmax_t num) {
     return (grim_object) obj;
 }
 
+grim_object grim_integer_read(const char *str, int base) {
+    grim_indirect *obj = grim_bigint_create();
+    assert(!mpz_set_str(obj->bigint, str, base));
+    grim_object ret = (grim_object) obj;
+    if (!grim_integer_extractable(ret))
+        return ret;
+    return grim_integer_pack(grim_integer_extract(ret));
+}
+
 static void grim_integer_to_mpz(mpz_t tgt, grim_object obj) {
     if (grim_direct_tag(obj) == GRIM_FIXNUM_TAG)
         mpz_set_si(tgt, grim_integer_extract(obj));
@@ -119,7 +128,7 @@ static void grim_integer_to_mpz(mpz_t tgt, grim_object obj) {
         mpz_set(tgt, ((grim_indirect *) obj)->bigint);
 }
 
-static grim_object grim_mpz_to_integer(mpz_t src) {
+grim_object grim_mpz_to_integer(mpz_t src) {
     if (mpz_fits_slong_p(src))
         return grim_integer_pack(mpz_get_si(src));
     grim_indirect *obj = grim_bigint_create();
