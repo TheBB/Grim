@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -305,20 +306,56 @@ grim_object grim_negate_i(grim_object obj) {
     return obj;
 }
 
-grim_object grim_asfloat(grim_object obj) {
-    if (grim_direct_tag(obj) == GRIM_FIXNUM_TAG)
-        return grim_float_pack((double) grim_integer_extract(obj));
+static double grim_int_to_double(grim_object num) {
+    if (grim_direct_tag(num) == GRIM_FIXNUM_TAG)
+        return grim_integer_extract(num);
+    return mpz_get_d(I(num)->bigint);
+}
 
-    grim_type_t type = grim_type(obj);
+grim_object grim_scinot_pack(grim_object scale, int base, intmax_t exp, bool exact) {
+    assert(grim_type(scale) == GRIM_INTEGER);
 
+    if (!exact) {
+        double s = grim_int_to_double(scale);
+        return grim_float_pack(s * pow(base, exp));
+    }
+
+    if (exp == 0)
+        return scale;
+
+    mpz_t temp;
+    mpz_init_set_si(temp, base);
+    grim_object retval;
+
+    if (exp < 0) {
+        mpz_pow_ui(temp, temp, -exp);
+        retval = grim_rational_pack(scale, grim_mpz_to_integer(temp));
+    }
+    else {
+        mpz_pow_ui(temp, temp, exp);
+        if (grim_integer_extractable(scale))
+            mpz_mul_si(temp, temp, grim_integer_extract(scale));
+        else {
+            mpz_t s;
+            mpz_init(s);
+            grim_integer_to_mpz(s, scale);
+            mpz_mul(temp, temp, s);
+            mpz_clear(s);
+        }
+        retval = grim_mpz_to_integer(temp);
+    }
+
+    mpz_clear(temp);
+    return retval;
+}
+
+bool grim_is_exact(grim_object num) {
+    grim_type_t type = grim_type(num);
+    if (type == GRIM_INTEGER || type == GRIM_RATIONAL)
+        return true;
     if (type == GRIM_FLOAT)
-        return obj;
-
-    if (type == GRIM_INTEGER)
-        return grim_float_pack((double) mpz_get_d(I(obj)->bigint));
-
-    if (type == GRIM_RATIONAL)
-        return grim_float_pack((double) mpq_get_d(I(obj)->rational));
-
+        return false;
+    if (type == GRIM_COMPLEX)
+        return grim_is_exact(I(num)->real) && grim_is_exact(I(num)->imag);
     assert(false);
 }

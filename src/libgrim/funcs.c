@@ -108,6 +108,7 @@ static void grim_encode_cons(grim_object buf, grim_object src, const char *encod
     grim_buffer_copy(buf, ")", 1);
 }
 
+
 void grim_encode_display(grim_object buf, grim_object src, const char *encoding) {
     switch (grim_direct_tag(src)) {
     case GRIM_SYMBOL_TAG:

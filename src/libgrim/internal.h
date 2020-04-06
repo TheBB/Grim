@@ -129,6 +129,7 @@ void grim_encode_print(grim_object buf, grim_object src, const char *encoding);
 
 ucs4_t grim_unescape_character(uint8_t *str, size_t length);
 void grim_unescape_string(grim_object str);
+int grim_peek_char(ucs4_t *retval, grim_object str, size_t offset);
 
 void grim_display_character(grim_object buf, grim_object src, const char *encoding);
 void grim_display_string(grim_object buf, grim_object src, const char *encoding);
@@ -138,3 +139,5 @@ void grim_print_string(grim_object buf, grim_object src, const char *encoding);
 uint64_t grim_hash(grim_object obj, uint64_t h);
 
 grim_object grim_negate_i(grim_object obj);
+grim_object grim_scinot_pack(grim_object scale, int base, intmax_t exponent, bool exact);
+bool grim_is_exact(grim_object num);
