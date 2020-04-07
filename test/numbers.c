@@ -85,10 +85,37 @@ static MunitResult complex(const MunitParameter params[], void *fixture) {
 }
 
 
+static MunitResult readint(const MunitParameter params[], void *fixture) {
+    grim_init();
+    grim_object num;
+
+    num = grim_integer_read("1001#", 2);
+    gta_check_fixnum(num, 18);
+
+    num = grim_integer_read("2.01", 8);
+    gta_check_fixnum(num, 129);
+
+    num = grim_integer_read("27_91#", 10);
+    gta_check_fixnum(num, 27910);
+
+    num = grim_integer_read("7..1_6", 16);
+    gta_check_fixnum(num, 1814);
+
+    num = grim_integer_read("999999999999999999999999999999999", 10);
+    gta_check_bigint(num, "999999999999999999999999999999999");
+
+    num = grim_integer_read("99.99999._999999..999999999999__999#####", 10);
+    gta_check_bigint(num, "999999999999999999999999999900000");
+
+    return MUNIT_OK;
+}
+
+
 MunitTest tests_numbers[] = {
     {"/floats", floats, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/bigints", bigints, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/rationals", rationals, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/complex", complex, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+    {"/readint", readint, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
 };

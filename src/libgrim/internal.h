@@ -113,11 +113,12 @@ typedef struct {
 #define I(c) ((grim_indirect *) c)
 
 extern grim_object grim_symbol_table;
+extern size_t grim_fixnum_max_ndigits[];
+
+grim_indirect *grim_indirect_create(bool permanent);
 
 grim_tag_t grim_direct_tag(grim_object obj);
 grim_tag_t grim_indirect_tag(grim_object obj);
-
-grim_object grim_mpz_to_integer(mpz_t src);
 
 void grim_buffer_dump(FILE *stream, grim_object obj);
 void grim_buffer_ensure_free_capacity(grim_object obj, size_t sizehint);
@@ -135,3 +136,5 @@ void grim_print_character(grim_object buf, grim_object src, const char *encoding
 void grim_print_string(grim_object buf, grim_object src, const char *encoding);
 
 uint64_t grim_hash(grim_object obj, uint64_t h);
+
+grim_object grim_negate_i(grim_object obj);

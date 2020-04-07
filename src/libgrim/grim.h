@@ -76,4 +76,3 @@ void grim_display(grim_object obj, const char *encoding);
 void grim_print(grim_object obj, const char *encoding);
 bool grim_equal(grim_object a, grim_object b);
 bool grim_nonnegative(grim_object obj);
-bool grim_negate(grim_object obj);
