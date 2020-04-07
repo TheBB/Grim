@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -60,6 +61,28 @@ grim_object grim_float_pack(double num) {
 
 double grim_float_extract(grim_object obj) {
     return I(obj)->floating;
+}
+
+grim_object grim_float_read(const char *str) {
+    // Scanf understands a subset of our syntax:
+    // Normalize zero digits and ignorable characters
+    char *dup = strdup(str), *tgt = dup;
+    for (char *src = dup; *src; src++) {
+        if (*src == '_')
+            continue;
+        if (*src == '#')
+            *tgt = '0';
+        else
+            *tgt = *src;
+        tgt++;
+    }
+    *tgt = 0;
+
+    double value;
+    sscanf(dup, "%lf", &value);
+    free(dup);
+
+    return grim_float_pack(value);
 }
 
 

@@ -111,11 +111,28 @@ static MunitResult readint(const MunitParameter params[], void *fixture) {
 }
 
 
+static MunitResult readfloat(const MunitParameter params[], void *fixture) {
+    grim_init();
+    grim_object num;
+
+    num = grim_float_read("3.1415");
+    gta_check_float(num, 3.1415);
+
+    num = grim_float_read("3.1_4##");
+    gta_check_float(num, 3.14);
+
+    num = grim_float_read("3_14##e-4");
+    gta_check_float(num, 3.14);
+
+    return MUNIT_OK;
+}
+
 MunitTest tests_numbers[] = {
     {"/floats", floats, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/bigints", bigints, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/rationals", rationals, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/complex", complex, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"/readint", readint, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+    {"/readfloat", readfloat, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
 };

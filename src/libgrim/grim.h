@@ -34,6 +34,7 @@ grim_type_t grim_type(grim_object obj);
 
 grim_object grim_float_pack(double num);
 double grim_float_extract(grim_object obj);
+grim_object grim_float_read(const char *str);
 
 bool grim_integer_extractable(grim_object obj);
 intmax_t grim_integer_extract(grim_object obj);
