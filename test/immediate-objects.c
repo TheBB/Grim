@@ -125,10 +125,17 @@ static MunitResult characters(const MunitParameter params[], void *fixture) {
 }
 
 MunitTest tests_immediate_objects[] = {
-    {"/undefined", undefined, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {"/booleans", booleans, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {"/nil", nil, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {"/fixnums", fixnums, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {"/characters", characters, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+    gta_basic(undefined),
+    gta_basic(booleans),
+    gta_basic(nil),
+    gta_basic(fixnums),
+    gta_basic(characters),
+    gta_endtests,
+};
+
+MunitSuite suite_immediate_objects = {
+    "/immediate-objects",
+    tests_immediate_objects,
+    NULL,
+    1, MUNIT_SUITE_OPTION_NONE,
 };

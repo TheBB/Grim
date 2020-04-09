@@ -3,10 +3,24 @@
 #include "grim.h"
 #include "internal.h"
 
-extern MunitTest tests_immediate_objects[];
-extern MunitTest tests_numbers[];
-extern MunitTest tests_strings[];
-extern MunitTest tests_hashtables[];
+extern MunitSuite suite_immediate_objects;
+extern MunitSuite suite_numbers;
+extern MunitSuite suite_strings;
+extern MunitSuite suite_hashtables;
+
+void *gt_setup(const MunitParameter params[], void *fixture);
+
+#define gta_basic(name)                                                        \
+    { ("/" #name), name, gt_setup, NULL, MUNIT_TEST_OPTION_NONE, NULL, }
+
+#define gta_test(name, func)                                                   \
+    { ("/" name), func, gt_setup, NULL, MUNIT_TEST_OPTION_NONE, NULL, }
+
+#define gta_endtests                                                           \
+    { NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL }
+
+#define gta_endsuite                                                           \
+    { NULL, NULL, NULL, 0, MUNIT_SUITE_OPTION_NONE }
 
 #define gta_check_repr(c, v)                                                   \
     do {                                                                       \

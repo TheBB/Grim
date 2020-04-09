@@ -17,7 +17,6 @@ static MunitResult floats(const MunitParameter params[], void *fixture) {
     return MUNIT_OK;
 }
 
-
 static MunitResult bigints(const MunitParameter params[], void *fixture) {
     grim_object max = grim_integer_pack(4611686018427387904);
     gta_check_bigint(max, "4611686018427387904");
@@ -27,7 +26,6 @@ static MunitResult bigints(const MunitParameter params[], void *fixture) {
 
     return MUNIT_OK;
 }
-
 
 static MunitResult rationals(const MunitParameter params[], void *fixture) {
     grim_object rat;
@@ -61,7 +59,6 @@ static MunitResult rationals(const MunitParameter params[], void *fixture) {
     return MUNIT_OK;
 }
 
-
 static MunitResult complex(const MunitParameter params[], void *fixture) {
     grim_object cpl;
 
@@ -84,9 +81,7 @@ static MunitResult complex(const MunitParameter params[], void *fixture) {
     return MUNIT_OK;
 }
 
-
 static MunitResult readint(const MunitParameter params[], void *fixture) {
-    grim_init();
     grim_object num;
 
     num = grim_integer_read("1001#", 2);
@@ -110,9 +105,7 @@ static MunitResult readint(const MunitParameter params[], void *fixture) {
     return MUNIT_OK;
 }
 
-
 static MunitResult readfloat(const MunitParameter params[], void *fixture) {
-    grim_init();
     grim_object num;
 
     num = grim_float_read("3.1415");
@@ -128,11 +121,27 @@ static MunitResult readfloat(const MunitParameter params[], void *fixture) {
 }
 
 MunitTest tests_numbers[] = {
-    {"/floats", floats, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {"/bigints", bigints, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {"/rationals", rationals, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {"/complex", complex, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {"/readint", readint, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {"/readfloat", readfloat, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+    gta_basic(floats),
+    gta_basic(bigints),
+    gta_basic(rationals),
+    gta_basic(complex),
+    gta_endtests,
+};
+
+MunitTest tests_read[] = {
+    gta_test("rawint", readint),
+    gta_test("rawfloat", readfloat),
+    gta_endtests,
+};
+
+MunitSuite subsuites[] = {
+    {"/read", tests_read, NULL, 1, MUNIT_SUITE_OPTION_NONE},
+    gta_endsuite,
+};
+
+MunitSuite suite_numbers = {
+    "/numbers",
+    tests_numbers,
+    subsuites,
+    1, MUNIT_SUITE_OPTION_NONE,
 };

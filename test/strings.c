@@ -1,6 +1,7 @@
 #include "grim.h"
 #include "test.h"
 
+
 static MunitResult basic(const MunitParameter params[], void *fixture) {
     grim_object str;
 
@@ -121,9 +122,16 @@ static MunitResult print(const MunitParameter params[], void *fixture) {
 }
 
 MunitTest tests_strings[] = {
-    {"/basic", basic, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {"/escape", escape, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {"/display", display, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {"/print", print, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+    gta_basic(basic),
+    gta_basic(escape),
+    gta_basic(display),
+    gta_basic(print),
+    gta_endtests,
+};
+
+MunitSuite suite_strings = {
+    "/strings",
+    tests_strings,
+    NULL,
+    1, MUNIT_SUITE_OPTION_NONE,
 };

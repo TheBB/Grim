@@ -2,9 +2,8 @@
 #include "internal.h"
 #include "test.h"
 
-static MunitResult insert(const MunitParameter params[], void *fixture) {
-    grim_init();
 
+static MunitResult insert(const MunitParameter params[], void *fixture) {
     grim_object table = grim_hashtable_create(0);
     gta_check_hashtable(table, 0);
 
@@ -28,8 +27,6 @@ static MunitResult insert(const MunitParameter params[], void *fixture) {
 }
 
 static MunitResult retrieve(const MunitParameter params[], void *fixture) {
-    grim_init();
-
     grim_object table = grim_hashtable_create(0);
     gta_check_hashtable(table, 0);
 
@@ -141,10 +138,17 @@ static MunitResult stress(const MunitParameter params[], void *fixture) {
 }
 
 MunitTest tests_hashtables[] = {
-    {"/insert", insert, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {"/retrieve", retrieve, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {"/overwrite", overwrite, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {"/delete", delete, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {"/stress", stress, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-    {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+    gta_basic(insert),
+    gta_basic(retrieve),
+    gta_basic(overwrite),
+    gta_basic(delete),
+    gta_basic(stress),
+    gta_endtests,
+};
+
+MunitSuite suite_hashtables = {
+    "/hashtables",
+    tests_hashtables,
+    NULL,
+    1, MUNIT_SUITE_OPTION_NONE,
 };
