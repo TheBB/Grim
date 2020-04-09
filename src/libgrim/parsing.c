@@ -35,28 +35,34 @@ static char *substring(str_iter *iter, size_t start) {
     return code;
 }
 
-static bool done(str_iter *iter) {
+static inline bool done(str_iter *iter) {
     return iter->offset >= I(iter->str)->strlen;
 }
 
-static ucs4_t peek(str_iter *iter) {
+static inline ucs4_t unsafe_peek(str_iter *iter) {
     ucs4_t retval;
     iter->next_size = grim_peek_char(&retval, iter->str, iter->offset);
     return retval;
 }
 
-static void advance(str_iter *iter) {
+static inline void unsafe_advance(str_iter *iter) {
     if (iter->next_size != 0)
-        peek(iter);
+        unsafe_peek(iter);
     iter->offset += iter->next_size;
     iter->next_size = 0;
 }
 
-static ucs4_t next(str_iter *iter) {
-    ucs4_t retval = peek(iter);
-    advance(iter);
+static inline ucs4_t unsafe_next(str_iter *iter) {
+    ucs4_t retval = unsafe_peek(iter);
+    unsafe_advance(iter);
     return retval;
 }
+
+#define assert_not_done(iter) do { if (done(iter)) return false; } while (0)
+
+// Warning! Statement expressions
+#define safe_peek(iter) ({ assert_not_done(iter); unsafe_peek(iter); })
+#define safe_next(iter) ({ assert_not_done(iter); unsafe_next(iter); })
 
 
 // Utility functions
@@ -88,10 +94,10 @@ static bool is_hash(ucs4_t ch, int _) {
 static size_t consume_while(str_iter *iter, charpred pred, int param) {
     size_t retval = 0;
     while (!done(iter)) {
-        ucs4_t ch = peek(iter);
+        ucs4_t ch = unsafe_peek(iter);
         if (!pred(ch, param))
             return retval;
-        advance(iter);
+        unsafe_advance(iter);
         retval++;
     }
     return retval;
@@ -134,13 +140,10 @@ static bool parse_exponent(void *_out, str_iter *iter, int *_) {
     (void)_;
     intmax_t *out = (intmax_t *) _out;
 
-    if (peek(iter) != 'e')
+    if (safe_next(iter) != 'e')
         return false;
-    advance(iter);
 
-    bool positive = true;
-    if (peek(iter) == '+' || peek(iter) == '-')
-        positive = next(iter) == '+';
+    bool positive = safe_peek(iter) != '+';
 
     grim_object temp;
     int params[] = {10};
@@ -169,8 +172,10 @@ static bool parse_decimal_2(void *out, str_iter *iter, int *exact) {
     size_t start = iter->offset;
     bool digits_before = consume_while(iter, is_digit, 10) > 0;
     bool pounds_before = consume_while(iter, is_hash, 0) > 0;
-    if (next(iter) != '.')
+
+    if (safe_next(iter) != '.')
         return false;
+
     size_t fract = iter->offset;
     size_t ndigits_after = consume_while(iter, is_digit, 10);
     size_t npounds_after = consume_while(iter, is_hash, 0);
@@ -201,7 +206,7 @@ static bool parse_fraction(void *out, str_iter *iter, int* base) {
     grim_object num, den;
     if (!try(&num, iter, parse_uint, base))
         return false;
-    if (next(iter) != '/')
+    if (safe_next(iter) != '/')
         return false;
     if (!try(&den, iter, parse_uint, base))
         return false;
@@ -226,12 +231,12 @@ static bool parse_ureal(void *out, str_iter *iter, int* params) {
 
 // Params: base, exactness
 static bool parse_real(void *_out, str_iter *iter, int *params) {
-    bool negative = peek(iter) == '-';
-    if (peek(iter) == '-' || peek(iter) == '+')
-        advance(iter);
+    ucs4_t ch = safe_peek(iter);
+    if (ch == '-' || ch == '+')
+        unsafe_advance(iter);
     if (!try(_out, iter, parse_ureal, params))
         return false;
-    if (negative) {
+    if (ch == '-') {
         grim_object *out = (grim_object *) _out;
         *out = grim_negate_i(*out);
     }
@@ -241,30 +246,29 @@ static bool parse_real(void *_out, str_iter *iter, int *params) {
 // Params: base, exactness
 static bool parse_uimag(void *_out, str_iter *iter, int *params) {
     grim_object *out = (grim_object *) _out;
-    if (peek(iter) == 'i') {
-        advance(iter);
+    if (safe_peek(iter) == 'i') {
+        unsafe_advance(iter);
         *out = params[EXACTNESS] == INEXACT ? grim_float_pack(1.0) : grim_integer_pack(1);
         return true;
     }
     grim_object real;
     if (!try (&real, iter, parse_ureal, params))
         return false;
-    if (next(iter) != 'i')
+    if (safe_next(iter) != 'i')
         return false;
-
     *((grim_object *)_out) = real;
     return true;
 }
 
 // Params: base, exactness
 static bool parse_pure_imag_part(void *_out, str_iter *iter, int *params) {
-    if (peek(iter) != '+' && peek(iter) != '-')
+    ucs4_t ch = safe_next(iter);
+    if (ch != '+' && ch != '-')
         return false;
-    bool negative = next(iter) == '-';
     grim_object *out = (grim_object *) _out;
     if (!try(out, iter, parse_uimag, params))
         return false;
-    if (negative) {
+    if (ch == '-') {
         grim_object *out = (grim_object *) _out;
         *out = grim_negate_i(*out);
     }
@@ -274,7 +278,7 @@ static bool parse_pure_imag_part(void *_out, str_iter *iter, int *params) {
 // Params: base, exactness
 static bool parse_complex(void *_out, str_iter *iter, int *params) {
     grim_object real, imag, *out = (grim_object *) _out;
-    if (try (&imag, iter, parse_pure_imag_part, params)) {
+    if (try(&imag, iter, parse_pure_imag_part, params)) {
         bool exact = (params[EXACTNESS] == EXACT) ||
                      (params[EXACTNESS] == INDETERMINATE && grim_is_exact(imag));
         *out = exact ? grim_complex_pack(grim_integer_pack(0), imag)
@@ -283,7 +287,11 @@ static bool parse_complex(void *_out, str_iter *iter, int *params) {
     }
     if (!try (&real, iter, parse_real, params))
         return false;
-    ucs4_t mode = next(iter);
+    if (done(iter)) {
+        *out = real;
+        return true;
+    }
+    ucs4_t mode = safe_next(iter);
     if (mode != '@' && mode != '+' && mode != '-') {
         *out = real;
         return true;
@@ -308,22 +316,24 @@ static bool parse_number(void *out, str_iter *iter, int *_) {
     (void)_;
     int params[2] = { [BASE] = 10, [EXACTNESS] = INDETERMINATE };
     for (int i = 0; i < 2; i++) {
-        if (peek(iter) != '#')
+        ucs4_t ch = safe_peek(iter);
+        if (ch != '#')
             break;
-        advance(iter);
-        if (peek(iter) == 'i')
+        ch = safe_next(iter);
+        if (ch == 'i')
             params[EXACTNESS] = INEXACT;
-        else if (peek(iter) == 'e')
+        else if (ch == 'e')
             params[EXACTNESS] = EXACT;
-        else if (peek(iter) == 'b')
+        else if (ch == 'b')
             params[BASE] = 2;
-        else if (peek(iter) == 'o')
+        else if (ch == 'o')
             params[BASE] = 8;
-        else if (peek(iter) == 'd')
+        else if (ch == 'd')
             params[BASE] = 10;
-        else if (peek(iter) == 'x')
+        else if (ch == 'x')
             params[BASE] = 16;
-        advance(iter);
+        else
+            return false;
     }
     return parse_complex(out, iter, params);
 }
