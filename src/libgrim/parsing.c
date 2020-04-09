@@ -109,6 +109,12 @@ static void read_uint(grim_object *out, str_iter *iter, size_t start, int base) 
     free(code);
 }
 
+static void read_float(grim_object *out, str_iter *iter, size_t start) {
+    char *code = substring(iter, start);
+    *out = grim_float_read(code);
+    free(code);
+}
+
 
 // Combinators
 // -----------------------------------------------------------------------------
@@ -143,7 +149,9 @@ static bool parse_exponent(void *_out, str_iter *iter, int *_) {
     if (safe_next(iter) != 'e')
         return false;
 
-    bool positive = safe_peek(iter) != '+';
+    ucs4_t ch = safe_peek(iter);
+    if (ch == '+' || ch == '-')
+        unsafe_advance(iter);
 
     grim_object temp;
     int params[] = {10};
@@ -152,7 +160,7 @@ static bool parse_exponent(void *_out, str_iter *iter, int *_) {
     assert(grim_direct_tag(temp) == GRIM_FIXNUM_TAG);
     *out = grim_integer_extract(temp);
 
-    if (!positive)
+    if (ch == '-')
         *out = -(*out);
     return true;
 }
@@ -192,8 +200,13 @@ static bool parse_decimal_2(void *out, str_iter *iter, int *exact) {
 
     intmax_t exp = 0;
     try(&exp, iter, parse_exponent, 0);
-    exp -= ndigits_after + npounds_after;
 
+    if (*exact != EXACT) {
+        read_float((grim_object *) out, iter, start);
+        return true;
+    }
+
+    exp -= ndigits_after + npounds_after;
     for (size_t i = fract; i < end; i++)
         if (I(iter->str)->str[i] == '_')
             exp++;

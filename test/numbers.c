@@ -81,7 +81,7 @@ static MunitResult complex(const MunitParameter params[], void *fixture) {
     return MUNIT_OK;
 }
 
-static MunitResult readint(const MunitParameter params[], void *fixture) {
+static MunitResult rawint(const MunitParameter params[], void *fixture) {
     grim_object num;
 
     num = grim_integer_read("1001#", 2);
@@ -105,7 +105,7 @@ static MunitResult readint(const MunitParameter params[], void *fixture) {
     return MUNIT_OK;
 }
 
-static MunitResult readfloat(const MunitParameter params[], void *fixture) {
+static MunitResult rawfloat(const MunitParameter params[], void *fixture) {
     grim_object num;
 
     num = grim_float_read("3.1415");
@@ -120,6 +120,57 @@ static MunitResult readfloat(const MunitParameter params[], void *fixture) {
     return MUNIT_OK;
 }
 
+static MunitResult inexact(const MunitParameter params[], void *fixture) {
+    grim_object num;
+
+    num = grim_read(grim_string_pack("15.0", NULL, false));
+    gta_check_float(num, 15.0);
+
+    num = grim_read(grim_string_pack("+3.1415", NULL, false));
+    gta_check_float(num, 3.1415);
+
+    num = grim_read(grim_string_pack("-2.71828", NULL, false));
+    gta_check_float(num, -2.71828);
+
+    num = grim_read(grim_string_pack("15.123e-3", NULL, false));
+    gta_check_float(num, 0.015123);
+
+    num = grim_read(grim_string_pack("15.123e-2", NULL, false));
+    gta_check_float(num, 0.15123);
+
+    num = grim_read(grim_string_pack("15.123e-1", NULL, false));
+    gta_check_float(num, 1.5123);
+
+    num = grim_read(grim_string_pack("15.123e+0", NULL, false));
+    gta_check_float(num, 15.123);
+
+    num = grim_read(grim_string_pack("-15.123e1", NULL, false));
+    gta_check_float(num, -151.23);
+
+    num = grim_read(grim_string_pack("+15.123e2", NULL, false));
+    gta_check_float(num, 1512.3);
+
+    num = grim_read(grim_string_pack("15.123e3", NULL, false));
+    gta_check_float(num, 15123.0);
+
+    num = grim_read(grim_string_pack("15.23##", NULL, false));
+    gta_check_float(num, 15.23);
+
+    num = grim_read(grim_string_pack("1#.####", NULL, false));
+    gta_check_float(num, 10.0);
+
+    num = grim_read(grim_string_pack("1_000_000.53", NULL, false));
+    gta_check_float(num, 1000000.53);
+
+    num = grim_read(grim_string_pack(".129", NULL, false));
+    gta_check_float(num, 0.129);
+
+    num = grim_read(grim_string_pack("129.", NULL, false));
+    gta_check_float(num, 129.0);
+
+    return MUNIT_OK;
+}
+
 MunitTest tests_numbers[] = {
     gta_basic(floats),
     gta_basic(bigints),
@@ -129,8 +180,9 @@ MunitTest tests_numbers[] = {
 };
 
 MunitTest tests_read[] = {
-    gta_test("rawint", readint),
-    gta_test("rawfloat", readfloat),
+    gta_basic(rawint),
+    gta_basic(rawfloat),
+    gta_basic(inexact),
     gta_endtests,
 };
 
