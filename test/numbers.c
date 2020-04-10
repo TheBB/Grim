@@ -120,7 +120,7 @@ static MunitResult rawfloat(const MunitParameter params[], void *fixture) {
     return MUNIT_OK;
 }
 
-static MunitResult inexact(const MunitParameter params[], void *fixture) {
+static MunitResult parse_floats(const MunitParameter params[], void *fixture) {
     grim_object num;
 
     num = grim_read(grim_string_pack("15.0", NULL, false));
@@ -153,6 +153,9 @@ static MunitResult inexact(const MunitParameter params[], void *fixture) {
     num = grim_read(grim_string_pack("15.123e3", NULL, false));
     gta_check_float(num, 15123.0);
 
+    num = grim_read(grim_string_pack("1e3", NULL, false));
+    gta_check_float(num, 1000.0);
+
     num = grim_read(grim_string_pack("15.23##", NULL, false));
     gta_check_float(num, 15.23);
 
@@ -171,6 +174,30 @@ static MunitResult inexact(const MunitParameter params[], void *fixture) {
     return MUNIT_OK;
 }
 
+static MunitResult parse_ints(const MunitParameter params[], void *fixture) {
+    grim_object num;
+
+    num = grim_read(grim_string_pack("0", NULL, false));
+    gta_check_fixnum(num, 0);
+
+    num = grim_read(grim_string_pack("-1", NULL, false));
+    gta_check_fixnum(num, -1);
+
+    num = grim_read(grim_string_pack("51", NULL, false));
+    gta_check_fixnum(num, 51);
+
+    num = grim_read(grim_string_pack("+9", NULL, false));
+    gta_check_fixnum(num, 9);
+
+    num = grim_read(grim_string_pack("1_000", NULL, false));
+    gta_check_fixnum(num, 1000);
+
+    num = grim_read(grim_string_pack("1_###", NULL, false));
+    gta_check_fixnum(num, 1000);
+
+    return MUNIT_OK;
+}
+
 MunitTest tests_numbers[] = {
     gta_basic(floats),
     gta_basic(bigints),
@@ -182,7 +209,8 @@ MunitTest tests_numbers[] = {
 MunitTest tests_read[] = {
     gta_basic(rawint),
     gta_basic(rawfloat),
-    gta_basic(inexact),
+    gta_test("floats", parse_floats),
+    gta_test("ints", parse_ints),
     gta_endtests,
 };
 

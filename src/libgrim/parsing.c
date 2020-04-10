@@ -172,7 +172,7 @@ static bool parse_decimal_1(void *_out, str_iter *iter, int *exact) {
         return false;
     if (!try(&exp, iter, parse_exponent, NULL))
         return false;
-    *out = grim_scinot_pack(scale, 10, exp, *exact);
+    *out = grim_scinot_pack(scale, 10, exp, *exact == EXACT);
     return true;
 }
 
