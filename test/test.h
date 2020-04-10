@@ -182,9 +182,9 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         gta_is_buffer(y);                                                      \
         size_t L = (l);                                                        \
         char *w = (char *)(v);                                                 \
-        munit_assert_ullong(I(y)->buflen, ==, L);              \
-        for (size_t i = 0; i <= L; i++)                                        \
-            munit_assert_char(I(y)->buf[i], ==, w[i]);         \
+        munit_assert_ullong(I(y)->buflen, ==, L);                              \
+        for (size_t i = 0; i < L; i++)                                         \
+            munit_assert_char(I(y)->buf[i], ==, w[i]);                         \
     } while (0)
 
 #define gta_is_hashtable(c)                                                    \
