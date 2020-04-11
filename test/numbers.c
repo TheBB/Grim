@@ -195,6 +195,38 @@ static MunitResult parse_ints(const MunitParameter params[], void *fixture) {
     num = grim_read(grim_string_pack("1_###", NULL, false));
     gta_check_fixnum(num, 1000);
 
+    num = grim_read(grim_string_pack("999999999999999999999999999999999999999", NULL, false));
+    gta_check_bigint(num, "999999999999999999999999999999999999999");
+
+    return MUNIT_OK;
+}
+
+static MunitResult parse_exact(const MunitParameter params[], void *fixture) {
+    grim_object num;
+
+    num = grim_read(grim_string_pack("#e153", NULL, false));
+    gta_check_fixnum(num, 153);
+
+    num = grim_read(grim_string_pack("#e153.1", NULL, false));
+    gta_is_rational(num);
+    gta_check_fixnum(grim_rational_num(num), 1531);
+    gta_check_fixnum(grim_rational_den(num), 10);
+
+    num = grim_read(grim_string_pack("#e153e-1", NULL, false));
+    gta_is_rational(num);
+    gta_check_fixnum(grim_rational_num(num), 153);
+    gta_check_fixnum(grim_rational_den(num), 10);
+
+    num = grim_read(grim_string_pack("153/10", NULL, false));
+    gta_is_rational(num);
+    gta_check_fixnum(grim_rational_num(num), 153);
+    gta_check_fixnum(grim_rational_den(num), 10);
+
+    num = grim_read(grim_string_pack("#e153.12e1", NULL, false));
+    gta_is_rational(num);
+    gta_check_fixnum(grim_rational_num(num), 7656);
+    gta_check_fixnum(grim_rational_den(num), 5);
+
     return MUNIT_OK;
 }
 
@@ -211,6 +243,7 @@ MunitTest tests_read[] = {
     gta_basic(rawfloat),
     gta_test("floats", parse_floats),
     gta_test("ints", parse_ints),
+    gta_test("exact", parse_exact),
     gta_endtests,
 };
 

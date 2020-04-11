@@ -332,6 +332,7 @@ static bool parse_number(void *out, str_iter *iter, int *_) {
         ucs4_t ch = safe_peek(iter);
         if (ch != '#')
             break;
+        unsafe_advance(iter);
         ch = safe_next(iter);
         if (ch == 'i')
             params[EXACTNESS] = INEXACT;
