@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -326,8 +327,11 @@ static bool parse_complex(void *_out, str_iter *iter, int *params) {
         return true;
     }
 
-    // TODO: Handle '@'
-    return false;
+    *out = grim_complex_pack(
+        grim_float_pack(grim_to_double(real) * cos(grim_to_double(imag) * M_PI / 180)),
+        grim_float_pack(grim_to_double(real) * sin(grim_to_double(imag) * M_PI / 180))
+    );
+    return true;
 }
 
 static bool parse_number(void *out, str_iter *iter, int *_) {

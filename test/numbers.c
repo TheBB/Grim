@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "grim.h"
 #include "test.h"
 
@@ -298,6 +300,11 @@ static MunitResult parse_complex(const MunitParameter params[], void *fixture) {
     gta_is_complex(num);
     gta_check_float_approx(grim_complex_real(num), 0.4, 16);
     gta_check_float(grim_complex_imag(num), -2.0);
+
+    num = grim_read(grim_string_pack("2@45", NULL, false));
+    gta_is_complex(num);
+    gta_check_float_approx(grim_complex_real(num), sqrt(2.0), 15);
+    gta_check_float_approx(grim_complex_imag(num), sqrt(2.0), 15);
 
     return MUNIT_OK;
 }
