@@ -230,6 +230,78 @@ static MunitResult parse_exact(const MunitParameter params[], void *fixture) {
     return MUNIT_OK;
 }
 
+static MunitResult parse_inexact(const MunitParameter params[], void *fixture) {
+    grim_object num;
+
+    num = grim_read(grim_string_pack("#i12", NULL, false));
+    gta_check_float(num, 12.0);
+
+    num = grim_read(grim_string_pack("#i2/3", NULL, false));
+    gta_check_float_approx(num, 2.0/3.0, 16);
+
+    return MUNIT_OK;
+}
+
+static MunitResult parse_complex(const MunitParameter params[], void *fixture) {
+    grim_object num;
+
+    num = grim_read(grim_string_pack("+i", NULL, false));
+    gta_is_complex(num);
+    gta_check_fixnum(grim_complex_real(num), 0);
+    gta_check_fixnum(grim_complex_imag(num), 1);
+
+    num = grim_read(grim_string_pack("-i", NULL, false));
+    gta_is_complex(num);
+    gta_check_fixnum(grim_complex_real(num), 0);
+    gta_check_fixnum(grim_complex_imag(num), -1);
+
+    num = grim_read(grim_string_pack("1+i", NULL, false));
+    gta_is_complex(num);
+    gta_check_fixnum(grim_complex_real(num), 1);
+    gta_check_fixnum(grim_complex_imag(num), 1);
+
+    num = grim_read(grim_string_pack("243892304723894732947328914348329794+i", NULL, false));
+    gta_is_complex(num);
+    gta_check_bigint(grim_complex_real(num), "243892304723894732947328914348329794");
+    gta_check_fixnum(grim_complex_imag(num), 1);
+
+    num = grim_read(grim_string_pack("1+238942394871249810234783294732849324723i", NULL, false));
+    gta_is_complex(num);
+    gta_check_fixnum(grim_complex_real(num), 1);
+    gta_check_bigint(grim_complex_imag(num), "238942394871249810234783294732849324723");
+
+    num = grim_read(grim_string_pack("1-1.0i", NULL, false));
+    gta_is_complex(num);
+    gta_check_float(grim_complex_real(num), 1.0);
+    gta_check_float(grim_complex_imag(num), -1.0);
+
+    num = grim_read(grim_string_pack("1.0-1/2i", NULL, false));
+    gta_is_complex(num);
+    gta_check_float(grim_complex_real(num), 1.0);
+    gta_check_float(grim_complex_imag(num), -0.5);
+
+    num = grim_read(grim_string_pack("1-1/2i", NULL, false));
+    gta_is_complex(num);
+    gta_check_fixnum(grim_complex_real(num), 1.0);
+    gta_is_rational(grim_complex_imag(num));
+    gta_check_fixnum(grim_rational_num(grim_complex_imag(num)), -1);
+    gta_check_fixnum(grim_rational_den(grim_complex_imag(num)), 2);
+
+    num = grim_read(grim_string_pack("#e1.0+1/2i", NULL, false));
+    gta_is_complex(num);
+    gta_check_fixnum(grim_complex_real(num), 1);
+    gta_is_rational(grim_complex_imag(num));
+    gta_check_fixnum(grim_rational_num(grim_complex_imag(num)), 1);
+    gta_check_fixnum(grim_rational_den(grim_complex_imag(num)), 2);
+
+    num = grim_read(grim_string_pack("#i2/5-2i", NULL, false));
+    gta_is_complex(num);
+    gta_check_float_approx(grim_complex_real(num), 0.4, 16);
+    gta_check_float(grim_complex_imag(num), -2.0);
+
+    return MUNIT_OK;
+}
+
 MunitTest tests_numbers[] = {
     gta_basic(floats),
     gta_basic(bigints),
@@ -244,6 +316,7 @@ MunitTest tests_read[] = {
     gta_test("floats", parse_floats),
     gta_test("ints", parse_ints),
     gta_test("exact", parse_exact),
+    gta_test("complex", parse_complex),
     gta_endtests,
 };
 

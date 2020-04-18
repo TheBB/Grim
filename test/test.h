@@ -112,6 +112,14 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         munit_assert_double(grim_float_extract(y), ==, w);                     \
     } while (0)
 
+#define gta_check_float_approx(c, v, n)                                        \
+    do {                                                                       \
+        grim_object y = (c);                                                   \
+        double w = v;                                                          \
+        gta_is_float(y);                                                       \
+        munit_assert_double_equal(grim_float_extract(y), w, n);                \
+    } while (0)
+
 #define gta_is_bigint(c)                                                       \
     do {                                                                       \
         grim_object y = (c);                                                   \

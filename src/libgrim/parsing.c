@@ -215,15 +215,19 @@ static bool parse_decimal_2(void *out, str_iter *iter, int *exact) {
     return true;
 }
 
-static bool parse_fraction(void *out, str_iter *iter, int* base) {
+// Params: base, exactness
+static bool parse_fraction(void *out, str_iter *iter, int* params) {
     grim_object num, den;
-    if (!try(&num, iter, parse_uint, base))
+    if (!try(&num, iter, parse_uint, &params[BASE]))
         return false;
     if (safe_next(iter) != '/')
         return false;
-    if (!try(&den, iter, parse_uint, base))
+    if (!try(&den, iter, parse_uint, &params[BASE]))
         return false;
-    *((grim_object *) out) = grim_rational_pack(num, den);
+    grim_object res = grim_rational_pack(num, den);
+    if (params[EXACTNESS] == INEXACT)
+        res = grim_float_pack(grim_to_double(res));
+    *((grim_object *) out) = res;
     return true;
 }
 
@@ -235,7 +239,7 @@ static bool parse_ureal(void *out, str_iter *iter, int* params) {
         if (try(out, iter, parse_decimal_2, &params[EXACTNESS]))
             return true;
     }
-    if (try(out, iter, parse_fraction, &params[BASE]))
+    if (try(out, iter, parse_fraction, params))
         return true;
     if (try(out, iter, parse_uint, &params[BASE]))
         return true;
@@ -298,12 +302,13 @@ static bool parse_complex(void *_out, str_iter *iter, int *params) {
                      : grim_complex_pack(grim_float_pack(0.0), imag);
         return true;
     }
-    if (!try (&real, iter, parse_real, params))
+    if (!try(&real, iter, parse_real, params))
         return false;
     if (done(iter)) {
         *out = real;
         return true;
     }
+
     ucs4_t mode = safe_next(iter);
     if (mode != '@' && mode != '+' && mode != '-') {
         *out = real;

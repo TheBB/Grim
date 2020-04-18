@@ -86,6 +86,18 @@ grim_object grim_float_read(const char *str) {
     return grim_float_pack(value);
 }
 
+double grim_to_double(grim_object num) {
+    if (grim_direct_tag(num) == GRIM_FIXNUM_TAG)
+        return grim_integer_extract(num);
+    else if (grim_type(num) == GRIM_FLOAT)
+        return grim_float_extract(num);
+    else if (grim_type(num) == GRIM_INTEGER)
+        return mpz_get_d(I(num)->bigint);
+    else if (grim_type(num) == GRIM_RATIONAL)
+        return mpq_get_d(I(num)->rational);
+    assert(false);
+}
+
 
 // Integers
 // -----------------------------------------------------------------------------
@@ -258,11 +270,24 @@ grim_object grim_complex_pack(grim_object real, grim_object imag) {
     if (grim_type(imag) == GRIM_FLOAT && grim_float_extract(imag) == 0.0)
         return real;
 
+    if (grim_type(real) == GRIM_FLOAT && grim_type(imag) != GRIM_FLOAT)
+        imag = grim_float_pack(grim_to_double(imag));
+    else if (grim_type(imag) == GRIM_FLOAT && grim_type(real) != GRIM_FLOAT)
+        real = grim_float_pack(grim_to_double(real));
+
     grim_indirect *obj = grim_indirect_create(false);
     obj->tag = GRIM_COMPLEX_TAG;
     obj->real = real;
     obj->imag = imag;
     return (grim_object) obj;
+}
+
+grim_object grim_complex_real(grim_object num) {
+    return I(num)->real;
+}
+
+grim_object grim_complex_imag(grim_object num) {
+    return I(num)->imag;
 }
 
 
@@ -306,17 +331,11 @@ grim_object grim_negate_i(grim_object obj) {
     return obj;
 }
 
-static double grim_int_to_double(grim_object num) {
-    if (grim_direct_tag(num) == GRIM_FIXNUM_TAG)
-        return grim_integer_extract(num);
-    return mpz_get_d(I(num)->bigint);
-}
-
 grim_object grim_scinot_pack(grim_object scale, int base, intmax_t exp, bool exact) {
     assert(grim_type(scale) == GRIM_INTEGER);
 
     if (!exact) {
-        double s = grim_int_to_double(scale);
+        double s = grim_to_double(scale);
         return grim_float_pack(s * pow(base, exp));
     }
 
