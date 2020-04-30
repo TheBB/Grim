@@ -309,7 +309,7 @@ static MunitResult parse_complex(const MunitParameter params[], void *fixture) {
     return MUNIT_OK;
 }
 
-MunitTest tests_numbers[] = {
+static MunitTest tests_numbers[] = {
     gta_basic(floats),
     gta_basic(bigints),
     gta_basic(rationals),
@@ -317,7 +317,7 @@ MunitTest tests_numbers[] = {
     gta_endtests,
 };
 
-MunitTest tests_read[] = {
+static MunitTest tests_read[] = {
     gta_basic(rawint),
     gta_basic(rawfloat),
     gta_test("floats", parse_floats),
@@ -327,7 +327,7 @@ MunitTest tests_read[] = {
     gta_endtests,
 };
 
-MunitSuite subsuites[] = {
+static MunitSuite subsuites[] = {
     {"/read", tests_read, NULL, 1, MUNIT_SUITE_OPTION_NONE},
     gta_endsuite,
 };

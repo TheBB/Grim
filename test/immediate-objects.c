@@ -54,6 +54,10 @@ static MunitResult characters(const MunitParameter params[], void *fixture) {
     gta_check_char(ch, 97);
     gta_check_repr(ch, (97 << 8) | GRIM_CHARACTER_TAG);
 
+    ch = grim_character_pack_name("l", NULL);
+    gta_check_char(ch, 108);
+    gta_check_repr(ch, (108 << 8) | GRIM_CHARACTER_TAG);
+
     ch = grim_character_pack_name("^H", NULL);
     gta_check_char(ch, 8);
     gta_check_repr(ch, (8 << 8) | GRIM_CHARACTER_TAG);
@@ -124,7 +128,33 @@ static MunitResult characters(const MunitParameter params[], void *fixture) {
     return MUNIT_OK;
 }
 
-MunitTest tests_immediate_objects[] = {
+static MunitResult parse_characters(const MunitParameter params[], void *fixture) {
+    grim_object code, ch;
+
+    code = grim_string_pack("#\\a", "UTF-8", false);
+    ch = grim_read(code);
+    gta_check_char(ch, 97);
+
+    code = grim_string_pack("#\\l", "UTF-8", false);
+    ch = grim_read(code);
+    gta_check_char(ch, 108);
+
+    code = grim_string_pack("#\\linefeed", "UTF-8", false);
+    ch = grim_read(code);
+    gta_check_char(ch, 10);
+
+    code = grim_string_pack("#\\^A", "UTF-8", false);
+    ch = grim_read(code);
+    gta_check_char(ch, 1);
+
+    code = grim_string_pack("#\\\\", "UTF-8", false);
+    ch = grim_read(code);
+    gta_check_char(ch, 92);
+
+    return MUNIT_OK;
+}
+
+static MunitTest tests_immediate_objects[] = {
     gta_basic(undefined),
     gta_basic(booleans),
     gta_basic(nil),
@@ -133,9 +163,19 @@ MunitTest tests_immediate_objects[] = {
     gta_endtests,
 };
 
+static MunitTest tests_read[] = {
+    gta_test("characters", parse_characters),
+    gta_endtests,
+};
+
+static MunitSuite subsuites[] = {
+    {"/read", tests_read, NULL, 1, MUNIT_SUITE_OPTION_NONE},
+    gta_endsuite,
+};
+
 MunitSuite suite_immediate_objects = {
     "/immediate-objects",
     tests_immediate_objects,
-    NULL,
+    subsuites,
     1, MUNIT_SUITE_OPTION_NONE,
 };

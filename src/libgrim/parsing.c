@@ -81,6 +81,10 @@ static bool is_whitespace(ucs4_t ch, int _) {
     return ch == 9 || ch == 10 || ch == 12 || ch == 13 || ch == 32;
 }
 
+static bool is_not_delimiter(ucs4_t ch, int p) {
+    return !is_whitespace(ch, p) && (ch != ')');
+}
+
 static bool is_digit(ucs4_t ch, int base) {
     if (ch == '_')
         return true;
@@ -336,7 +340,6 @@ static bool parse_number(void *out, str_iter *iter, parse_params *params) {
     parse_params newparams = *params;
     newparams.base = 10;
     newparams.exactness = INDETERMINATE;
-    /* int params[2] = { [BASE] = 10, [EXACTNESS] = INDETERMINATE }; */
     for (int i = 0; i < 2; i++) {
         ucs4_t ch = safe_peek(iter);
         if (ch != '#')
@@ -387,6 +390,23 @@ static bool parse_string(void *out, str_iter *iter, parse_params *params) {
     return true;
 }
 
+static bool parse_character(void *out, str_iter *iter, parse_params *params) {
+    if (safe_next(iter) != '#')
+        return false;
+    if (safe_next(iter) != '\\')
+        return false;
+    size_t start = iter->offset;
+    safe_advance(iter);
+    consume_while(iter, is_not_delimiter, 0);
+    *((grim_object *) out) = grim_ncharacter_pack_name(
+        (char *) &I(iter->str)->str[start],
+        iter->offset - start,
+        params->encoding
+    );
+    unsafe_advance(iter);
+    return true;
+}
+
 
 // Main parsing functions
 // -----------------------------------------------------------------------------
@@ -397,9 +417,9 @@ static grim_object read_exp(str_iter *iter) {
     parse_params params = { .encoding = NULL };
     consume_while(iter, is_whitespace, 0);
     grim_object obj;
-    if (try(&obj, iter, parse_string, &params))
-        return obj;
-    if (try(&obj, iter, parse_number, &params))
+    if (try(&obj, iter, parse_string, &params) ||
+        try(&obj, iter, parse_character, &params) ||
+        try(&obj, iter, parse_number, &params))
         return obj;
     return grim_undefined;
 }

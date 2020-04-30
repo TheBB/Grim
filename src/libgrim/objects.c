@@ -157,14 +157,18 @@ grim_object grim_character_pack(ucs4_t ch) {
 }
 
 grim_object grim_character_pack_name(const char *name, const char *encoding) {
+    return grim_ncharacter_pack_name(name, strlen(name), encoding);
+}
+
+grim_object grim_ncharacter_pack_name(const char *name, size_t length, const char *encoding) {
     uint8_t *str;
     size_t u8len;
     if (!encoding) {
         str = (uint8_t *) name;
-        u8len = strlen(name);
+        u8len = length;
     }
     else
-        str = u8_conv_from_encoding(encoding, iconveh_error, name, strlen(name), NULL, NULL, &u8len);
+        str = u8_conv_from_encoding(encoding, iconveh_error, name, length, NULL, NULL, &u8len);
     ucs4_t ch = grim_unescape_character(str, u8len);
     if (encoding)
         free(str);

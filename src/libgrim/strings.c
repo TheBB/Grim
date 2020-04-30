@@ -196,14 +196,18 @@ ucs4_t grim_unescape_character(uint8_t *str, size_t length) {
     }
     if (ch == '\\')
         return 92;
-    for (size_t i = 0; i < N_CESCAPE_WORD; i++)
+    for (size_t i = 0; i < N_CESCAPE_WORD; i++) {
+        if (length < strlen(T_CESCAPE_WORD[i].word))
+            continue;
         if (!u8_strncmp(str, (const uint8_t *)T_CESCAPE_WORD[i].word, length))
             return T_CESCAPE_WORD[i].character;
+    }
     if (ch == 'u' || ch == 'U') {
         assert(length > ((ch == 'u') ? 4 : 8));
         uint8_t *srcptr = str + 1;
         return count_codepoint(&srcptr, (ch == 'u') ? 4 : 8);
     }
+    assert(u8_mblen(str, length) == (int) length);
     ucs4_t retval;
     u8_mbtouc(&retval, str, 1);
     return retval;
@@ -266,6 +270,8 @@ void grim_print_character(grim_object buf, grim_object src, const char *encoding
         grim_buffer_copy(buf, T_CESCAPE[ch], strlen(T_CESCAPE[ch]));
         return;
     }
+
+    grim_buffer_copy(buf, "#\\", 2);
     uint8_t workspace[6];
     int len = u8_uctomb(workspace, ch, 6);
     size_t convlength;

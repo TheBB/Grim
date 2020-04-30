@@ -65,6 +65,7 @@ grim_object grim_symbol_name(grim_object obj);
 
 grim_object grim_character_pack(ucs4_t ch);
 grim_object grim_character_pack_name(const char *name, const char *encoding);
+grim_object grim_ncharacter_pack_name(const char *name, size_t length, const char *encoding);
 ucs4_t grim_character_extract(grim_object obj);
 
 grim_object grim_buffer_create(size_t sizehint);

@@ -19,7 +19,7 @@ static MunitResult insert(const MunitParameter params[], void *fixture) {
     grim_hashtable_set(table, key3, grim_true);
     gta_check_hashtable(table, 3);
 
-    grim_object key4 = grim_character_pack_name("newline", NULL);
+    grim_object key4 = grim_character_pack_name("linefeed", NULL);
     grim_hashtable_set(table, key4, grim_true);
     gta_check_hashtable(table, 4);
 
