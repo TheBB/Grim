@@ -15,14 +15,18 @@ typedef struct {
     int next_size;
 } str_iter;
 
-typedef bool charpred(ucs4_t ch, int param);
-typedef bool parsefunc(void *out, str_iter *iter, int *params);
+typedef struct {
+    const char *encoding;
+    int base;
+    enum {
+        INDETERMINATE,
+        INEXACT,
+        EXACT
+    } exactness;
+} parse_params;
 
-#define BASE 0
-#define EXACTNESS 1
-#define INDETERMINATE -1
-#define INEXACT 0
-#define EXACT 1
+typedef bool charpred(ucs4_t ch, int param);
+typedef bool parsefunc(void *out, str_iter *iter, parse_params *params);
 
 
 // Source code inspection
@@ -69,7 +73,7 @@ static inline ucs4_t unsafe_next(str_iter *iter) {
 // Utility functions
 // -----------------------------------------------------------------------------
 
-static int pr_10[] = {10};
+static parse_params params_base10 = { .base = 10 };
 
 static bool is_whitespace(ucs4_t ch, int _) {
     (void)_;
@@ -120,7 +124,7 @@ static void read_float(grim_object *out, str_iter *iter, size_t start) {
 // Combinators
 // -----------------------------------------------------------------------------
 
-static bool try(void *out, str_iter *iter, parsefunc parser, int *params) {
+static bool try(void *out, str_iter *iter, parsefunc parser, parse_params *params) {
     size_t offset = iter->offset;
     bool retval = parser(out, iter, params);
     if (!retval) {
@@ -134,16 +138,16 @@ static bool try(void *out, str_iter *iter, parsefunc parser, int *params) {
 // Parsers
 // -----------------------------------------------------------------------------
 
-static bool parse_uint(void *out, str_iter *iter, int *base) {
+static bool parse_uint(void *out, str_iter *iter, parse_params *params) {
     size_t start = iter->offset;
-    if (consume_while(iter, is_digit, *base) == 0)
+    if (consume_while(iter, is_digit, params->base) == 0)
         return false;
     consume_while(iter, is_hash, 0);
-    read_uint(out, iter, start, *base);
+    read_uint(out, iter, start, params->base);
     return true;
 }
 
-static bool parse_exponent(void *_out, str_iter *iter, int *_) {
+static bool parse_exponent(void *_out, str_iter *iter, parse_params *_) {
     (void)_;
     intmax_t *out = (intmax_t *) _out;
 
@@ -155,8 +159,7 @@ static bool parse_exponent(void *_out, str_iter *iter, int *_) {
         unsafe_advance(iter);
 
     grim_object temp;
-    int params[] = {10};
-    if (!parse_uint(&temp, iter, params))
+    if (!parse_uint(&temp, iter, &params_base10))
         return false;
     assert(grim_direct_tag(temp) == GRIM_FIXNUM_TAG);
     *out = grim_integer_extract(temp);
@@ -166,18 +169,18 @@ static bool parse_exponent(void *_out, str_iter *iter, int *_) {
     return true;
 }
 
-static bool parse_decimal_1(void *_out, str_iter *iter, int *exact) {
+static bool parse_decimal_1(void *_out, str_iter *iter, parse_params *params) {
     grim_object scale, *out = (grim_object *) _out;
     intmax_t exp;
-    if (!try(&scale, iter, parse_uint, pr_10))
+    if (!try(&scale, iter, parse_uint, &params_base10))
         return false;
     if (!try(&exp, iter, parse_exponent, NULL))
         return false;
-    *out = grim_scinot_pack(scale, 10, exp, *exact == EXACT);
+    *out = grim_scinot_pack(scale, 10, exp, params->exactness);
     return true;
 }
 
-static bool parse_decimal_2(void *out, str_iter *iter, int *exact) {
+static bool parse_decimal_2(void *out, str_iter *iter, parse_params *params) {
     size_t start = iter->offset;
     bool digits_before = consume_while(iter, is_digit, 10) > 0;
     bool pounds_before = consume_while(iter, is_hash, 0) > 0;
@@ -202,7 +205,7 @@ static bool parse_decimal_2(void *out, str_iter *iter, int *exact) {
     intmax_t exp = 0;
     try(&exp, iter, parse_exponent, 0);
 
-    if (*exact != EXACT) {
+    if (params->exactness != EXACT) {
         read_float((grim_object *) out, iter, start);
         return true;
     }
@@ -212,43 +215,40 @@ static bool parse_decimal_2(void *out, str_iter *iter, int *exact) {
         if (I(iter->str)->str[i] == '_')
             exp++;
 
-    *((grim_object *) out) = grim_scinot_pack(scale, 10, exp, *exact == EXACT);
+    *((grim_object *) out) = grim_scinot_pack(scale, 10, exp, params->exactness == EXACT);
     return true;
 }
 
-// Params: base, exactness
-static bool parse_fraction(void *out, str_iter *iter, int* params) {
+static bool parse_fraction(void *out, str_iter *iter, parse_params* params) {
     grim_object num, den;
-    if (!try(&num, iter, parse_uint, &params[BASE]))
+    if (!try(&num, iter, parse_uint, params))
         return false;
     if (safe_next(iter) != '/')
         return false;
-    if (!try(&den, iter, parse_uint, &params[BASE]))
+    if (!try(&den, iter, parse_uint, params))
         return false;
     grim_object res = grim_rational_pack(num, den);
-    if (params[EXACTNESS] == INEXACT)
+    if (params->exactness == INEXACT)
         res = grim_float_pack(grim_to_double(res));
     *((grim_object *) out) = res;
     return true;
 }
 
-// Params: base, exactness
-static bool parse_ureal(void *out, str_iter *iter, int* params) {
-    if (params[BASE] == 10) {
-        if (try(out, iter, parse_decimal_1, &params[EXACTNESS]))
+static bool parse_ureal(void *out, str_iter *iter, parse_params* params) {
+    if (params->base == 10) {
+        if (try(out, iter, parse_decimal_1, params))
             return true;
-        if (try(out, iter, parse_decimal_2, &params[EXACTNESS]))
+        if (try(out, iter, parse_decimal_2, params))
             return true;
     }
     if (try(out, iter, parse_fraction, params))
         return true;
-    if (try(out, iter, parse_uint, &params[BASE]))
+    if (try(out, iter, parse_uint, params))
         return true;
     return false;
 }
 
-// Params: base, exactness
-static bool parse_real(void *_out, str_iter *iter, int *params) {
+static bool parse_real(void *_out, str_iter *iter, parse_params *params) {
     ucs4_t ch = safe_peek(iter);
     if (ch == '-' || ch == '+')
         unsafe_advance(iter);
@@ -261,12 +261,11 @@ static bool parse_real(void *_out, str_iter *iter, int *params) {
     return true;
 }
 
-// Params: base, exactness
-static bool parse_uimag(void *_out, str_iter *iter, int *params) {
+static bool parse_uimag(void *_out, str_iter *iter, parse_params *params) {
     grim_object *out = (grim_object *) _out;
     if (safe_peek(iter) == 'i') {
         unsafe_advance(iter);
-        *out = params[EXACTNESS] == INEXACT ? grim_float_pack(1.0) : grim_integer_pack(1);
+        *out = params->exactness == INEXACT ? grim_float_pack(1.0) : grim_integer_pack(1);
         return true;
     }
     grim_object real;
@@ -278,8 +277,7 @@ static bool parse_uimag(void *_out, str_iter *iter, int *params) {
     return true;
 }
 
-// Params: base, exactness
-static bool parse_pure_imag_part(void *_out, str_iter *iter, int *params) {
+static bool parse_pure_imag_part(void *_out, str_iter *iter, parse_params *params) {
     ucs4_t ch = safe_next(iter);
     if (ch != '+' && ch != '-')
         return false;
@@ -293,12 +291,11 @@ static bool parse_pure_imag_part(void *_out, str_iter *iter, int *params) {
     return true;
 }
 
-// Params: base, exactness
-static bool parse_complex(void *_out, str_iter *iter, int *params) {
+static bool parse_complex(void *_out, str_iter *iter, parse_params *params) {
     grim_object real, imag, *out = (grim_object *) _out;
     if (try(&imag, iter, parse_pure_imag_part, params)) {
-        bool exact = (params[EXACTNESS] == EXACT) ||
-                     (params[EXACTNESS] == INDETERMINATE && grim_is_exact(imag));
+        bool exact = (params->exactness == EXACT) ||
+                     (params->exactness == INDETERMINATE && grim_is_exact(imag));
         *out = exact ? grim_complex_pack(grim_integer_pack(0), imag)
                      : grim_complex_pack(grim_float_pack(0.0), imag);
         return true;
@@ -334,9 +331,11 @@ static bool parse_complex(void *_out, str_iter *iter, int *params) {
     return true;
 }
 
-static bool parse_number(void *out, str_iter *iter, int *_) {
-    (void)_;
-    int params[2] = { [BASE] = 10, [EXACTNESS] = INDETERMINATE };
+static bool parse_number(void *out, str_iter *iter, parse_params *params) {
+    parse_params newparams = *params;
+    newparams.base = 10;
+    newparams.exactness = INDETERMINATE;
+    /* int params[2] = { [BASE] = 10, [EXACTNESS] = INDETERMINATE }; */
     for (int i = 0; i < 2; i++) {
         ucs4_t ch = safe_peek(iter);
         if (ch != '#')
@@ -344,32 +343,36 @@ static bool parse_number(void *out, str_iter *iter, int *_) {
         unsafe_advance(iter);
         ch = safe_next(iter);
         if (ch == 'i')
-            params[EXACTNESS] = INEXACT;
+            newparams.exactness = INEXACT;
         else if (ch == 'e')
-            params[EXACTNESS] = EXACT;
+            newparams.exactness = EXACT;
         else if (ch == 'b')
-            params[BASE] = 2;
+            newparams.base = 2;
         else if (ch == 'o')
-            params[BASE] = 8;
+            newparams.base = 8;
         else if (ch == 'd')
-            params[BASE] = 10;
+            newparams.base = 10;
         else if (ch == 'x')
-            params[BASE] = 16;
+            newparams.base = 16;
         else
             return false;
     }
-    return parse_complex(out, iter, params);
+    return parse_complex(out, iter, &newparams);
 }
+
+/* static bool parse_string(void *out, str_iter *iter, ) */
 
 
 // Main parsing functions
 // -----------------------------------------------------------------------------
 
 static grim_object read_exp(str_iter *iter) {
+    // We are reading from a UTF-8 string, so we use encoding NULL to
+    // bypass internal encoding/decoding when parsing strings.
+    parse_params params = { .encoding = NULL };
     consume_while(iter, is_whitespace, 0);
     grim_object obj;
-    int params[] = {10, 0};
-    if (parse_number(&obj, iter, params))
+    if (parse_number(&obj, iter, &params))
         return obj;
     return grim_undefined;
 }
