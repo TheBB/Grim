@@ -121,11 +121,38 @@ static MunitResult print(const MunitParameter params[], void *fixture) {
     return MUNIT_OK;
 }
 
+static MunitResult read(const MunitParameter params[], void *fixture) {
+    grim_object code, str;
+
+    code = grim_string_pack("\"alpha\"", "UTF-8", false);
+    str = grim_read(code);
+    gta_check_string(str, 5, "alpha");
+
+    code = grim_string_pack("\"alpha\\\"\"", "UTF-8", false);
+    str = grim_read(code);
+    gta_check_string(str, 6, "alpha\"");
+
+    code = grim_string_pack("\"\\a\\b\\t\\n\\v\\f\\r\\^T\\^_\\\"\\\\\\^?\\e\"", "UTF-8", false);
+    str = grim_read(code);
+    gta_check_string(str, 13, "\x07\x08\x09\x0a\x0b\x0c\x0d\x14\x1f\x22\x5c\x7f\x1b");
+
+    code = grim_string_pack("\"\\U000000f8\"", "UTF-8", false);
+    str = grim_read(code);
+    gta_check_string(str, 2, "\xc3\xb8");
+
+    code = grim_string_pack("\"\\u00e5\"", "UTF-8", false);
+    str = grim_read(code);
+    gta_check_string(str, 2, "\xc3\xa5");
+
+    return MUNIT_OK;
+}
+
 MunitTest tests_strings[] = {
     gta_basic(basic),
     gta_basic(escape),
     gta_basic(display),
     gta_basic(print),
+    gta_basic(read),
     gta_endtests,
 };
 

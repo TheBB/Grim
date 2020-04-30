@@ -68,6 +68,7 @@ static inline ucs4_t unsafe_next(str_iter *iter) {
 // Warning! Statement expressions
 #define safe_peek(iter) ({ assert_not_done(iter); unsafe_peek(iter); })
 #define safe_next(iter) ({ assert_not_done(iter); unsafe_next(iter); })
+#define safe_advance(iter) ({ assert_not_done(iter); unsafe_advance(iter); })
 
 
 // Utility functions
@@ -360,7 +361,31 @@ static bool parse_number(void *out, str_iter *iter, parse_params *params) {
     return parse_complex(out, iter, &newparams);
 }
 
-/* static bool parse_string(void *out, str_iter *iter, ) */
+static bool parse_string(void *out, str_iter *iter, parse_params *params) {
+    if (safe_next(iter) != '"')
+        return false;
+    size_t start = iter->offset;
+    while (true) {
+        ucs4_t ch = safe_next(iter);
+        if (ch == '"')
+            break;
+        else if (ch != '\\')
+            continue;
+
+        // All escape sequences are one character long, except for
+        // those starting with a caret, which are two characters
+        if (safe_next(iter) != '^')
+            continue;
+        safe_advance(iter);
+    }
+
+    *((grim_object *) out) = grim_nstring_pack(
+        (char *) &I(iter->str)->str[start],
+        iter->offset - start - 1,
+        params->encoding, true
+    );
+    return true;
+}
 
 
 // Main parsing functions
@@ -372,7 +397,9 @@ static grim_object read_exp(str_iter *iter) {
     parse_params params = { .encoding = NULL };
     consume_while(iter, is_whitespace, 0);
     grim_object obj;
-    if (parse_number(&obj, iter, &params))
+    if (try(&obj, iter, parse_string, &params))
+        return obj;
+    if (try(&obj, iter, parse_number, &params))
         return obj;
     return grim_undefined;
 }
