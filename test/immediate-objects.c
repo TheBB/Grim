@@ -189,7 +189,7 @@ static MunitSuite subsuites[] = {
 };
 
 MunitSuite suite_immediate_objects = {
-    "/immediate-objects",
+    "/immediate",
     tests_immediate_objects,
     subsuites,
     1, MUNIT_SUITE_OPTION_NONE,
