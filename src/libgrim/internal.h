@@ -27,7 +27,7 @@ enum {
 
 // Indirect types
 enum {
-    GRIM_FLOAT_TAG    = 0x00,
+    GRIM_FLOAT_TAG     = 0x00,
     GRIM_BIGINT_TAG    = 0x01,
     GRIM_RATIONAL_TAG  = 0x02,
     GRIM_COMPLEX_TAG   = 0x03,

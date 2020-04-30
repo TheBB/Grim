@@ -77,14 +77,18 @@ static grim_indirect *grim_string_create() {
 }
 
 grim_object grim_string_pack(const char *input, const char *encoding, bool unescape) {
+    return grim_nstring_pack(input, strlen(input), encoding, unescape);
+}
+
+grim_object grim_nstring_pack(const char *input, size_t length, const char *encoding, bool unescape) {
     grim_indirect *obj = grim_string_create();
     if (!encoding) {
-        obj->strlen = strlen(input);
+        obj->strlen = length;
         obj->str = malloc((obj->strlen + 1) * sizeof(char));
         strcpy((char *) obj->str, input);
     }
     else
-        obj->str = u8_conv_from_encoding(encoding, iconveh_error, input, strlen(input), NULL, NULL, &obj->strlen);
+        obj->str = u8_conv_from_encoding(encoding, iconveh_error, input, length, NULL, NULL, &obj->strlen);
     assert(obj->str);
     grim_object str = (grim_object) obj;
     if (unescape)

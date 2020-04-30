@@ -50,6 +50,7 @@ grim_object grim_complex_real(grim_object obj);
 grim_object grim_complex_imag(grim_object obj);
 
 grim_object grim_string_pack(const char *input, const char *encoding, bool escape);
+grim_object grim_nstring_pack(const char *input, size_t length, const char *encoding, bool escape);
 size_t grim_strlen(grim_object obj);
 
 grim_object grim_vector_create(size_t nelems);
