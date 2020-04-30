@@ -154,6 +154,20 @@ static MunitResult parse_characters(const MunitParameter params[], void *fixture
     return MUNIT_OK;
 }
 
+static MunitResult parse_booleans(const MunitParameter params[], void *fixture) {
+    grim_object code, res;
+
+    code = grim_string_pack("#t", "UTF-8", false);
+    res = grim_read(code);
+    gta_check_repr(res, GRIM_TRUE_TAG);
+
+    code = grim_string_pack("#f", "UTF-8", false);
+    res = grim_read(code);
+    gta_check_repr(res, GRIM_FALSE_TAG);
+
+    return MUNIT_OK;
+}
+
 static MunitTest tests_immediate_objects[] = {
     gta_basic(undefined),
     gta_basic(booleans),
@@ -165,6 +179,7 @@ static MunitTest tests_immediate_objects[] = {
 
 static MunitTest tests_read[] = {
     gta_test("characters", parse_characters),
+    gta_test("booleans", parse_booleans),
     gta_endtests,
 };
 

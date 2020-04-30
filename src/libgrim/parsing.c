@@ -407,6 +407,22 @@ static bool parse_character(void *out, str_iter *iter, parse_params *params) {
     return true;
 }
 
+static bool parse_boolean(void *out, str_iter *iter, parse_params *_) {
+    (void)_;
+    if (safe_next(iter) != '#')
+        return false;
+    ucs4_t ch = safe_next(iter);
+    if (ch == 't') {
+        *((grim_object *) out) = grim_true;
+        return true;
+    }
+    if (ch == 'f') {
+        *((grim_object *) out) = grim_false;
+        return true;
+    }
+    return false;
+}
+
 
 // Main parsing functions
 // -----------------------------------------------------------------------------
@@ -419,6 +435,7 @@ static grim_object read_exp(str_iter *iter) {
     grim_object obj;
     if (try(&obj, iter, parse_string, &params) ||
         try(&obj, iter, parse_character, &params) ||
+        try(&obj, iter, parse_boolean, &params) ||
         try(&obj, iter, parse_number, &params))
         return obj;
     return grim_undefined;
