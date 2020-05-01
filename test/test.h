@@ -6,6 +6,7 @@
 extern MunitSuite suite_immediate_objects;
 extern MunitSuite suite_numbers;
 extern MunitSuite suite_strings;
+extern MunitSuite suite_symbols;
 extern MunitSuite suite_hashtables;
 
 void *gt_setup(const MunitParameter params[], void *fixture);
@@ -193,6 +194,20 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         munit_assert_ullong(I(y)->buflen, ==, L);                              \
         for (size_t i = 0; i < L; i++)                                         \
             munit_assert_char(I(y)->buf[i], ==, w[i]);                         \
+    } while (0)
+
+#define gta_is_symbol(c)                                                       \
+    do {                                                                       \
+        grim_object z = (c);                                                   \
+        munit_assert_int(grim_type(z), ==, GRIM_SYMBOL);                       \
+        munit_assert_int(grim_direct_tag(z), ==, GRIM_SYMBOL_TAG);             \
+    } while (0)
+
+#define gta_check_symbol(c, l, v)                                              \
+    do {                                                                       \
+        grim_object x = (c);                                                   \
+        gta_is_symbol(x);                                                      \
+        gta_check_string(grim_symbol_name(x), l, v);                           \
     } while (0)
 
 #define gta_is_hashtable(c)                                                    \

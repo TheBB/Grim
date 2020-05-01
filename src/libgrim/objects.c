@@ -129,12 +129,17 @@ grim_object grim_cons_pack(grim_object car, grim_object cdr) {
 
 static grim_object grim_symbol_create(grim_object name) {
     grim_indirect *obj = grim_indirect_create(true);
+    obj->tag = GRIM_SYMBOL_TAG;
     obj->symbolname = name;
     return ((grim_object) obj) | GRIM_SYMBOL_TAG;
 }
 
 grim_object grim_intern(const char *name, const char *encoding) {
-    grim_object str = grim_string_pack(name, encoding, false);
+    return grim_nintern(name, strlen(name), encoding);
+}
+
+grim_object grim_nintern(const char *name, size_t length, const char *encoding) {
+    grim_object str = grim_nstring_pack(name, length, encoding, false);
     grim_object sym = grim_hashtable_get(grim_symbol_table, str);
     if (sym != grim_undefined)
         return sym;

@@ -4,6 +4,7 @@ add_executable(
   immediate-objects.c
   numbers.c
   strings.c
+  symbols.c
   hashtables.c
 )
 target_link_libraries(grimtest munit libgrim)

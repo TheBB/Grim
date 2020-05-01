@@ -6,6 +6,7 @@
 #include "grim.h"
 #include "internal.h"
 
+#include "unictype.h"
 #include "unitypes.h"
 
 
@@ -69,6 +70,7 @@ static inline ucs4_t unsafe_next(str_iter *iter) {
 #define safe_peek(iter) ({ assert_not_done(iter); unsafe_peek(iter); })
 #define safe_next(iter) ({ assert_not_done(iter); unsafe_next(iter); })
 #define safe_advance(iter) ({ assert_not_done(iter); unsafe_advance(iter); })
+#define advance_if_safe(iter) ({ if (!done(iter)) unsafe_advance(iter); })
 
 
 // Utility functions
@@ -99,6 +101,17 @@ static bool is_digit(ucs4_t ch, int base) {
 static bool is_hash(ucs4_t ch, int _) {
     (void)_;
     return ch == '#' || ch == '_';
+}
+
+static bool is_symbol(ucs4_t ch, int _) {
+    (void)_;
+    if (uc_is_property_white_space(ch))
+        return false;
+    if (ch < 32 || ch == 127)
+        return false;
+    if (ch == ' ' || ch == ',' || ch == '.' || ch == '\'' || ch == '`')
+        return false;
+    return true;
 }
 
 static size_t consume_while(str_iter *iter, charpred pred, int param) {
@@ -403,7 +416,7 @@ static bool parse_character(void *out, str_iter *iter, parse_params *params) {
         iter->offset - start,
         params->encoding
     );
-    unsafe_advance(iter);
+    advance_if_safe(iter);
     return true;
 }
 
@@ -423,6 +436,32 @@ static bool parse_boolean(void *out, str_iter *iter, parse_params *_) {
     return false;
 }
 
+static bool parse_symbol(void *out, str_iter *iter, parse_params *params) {
+    size_t start = iter->offset;
+    consume_while(iter, is_symbol, 0);
+    if (iter->offset == start)
+        return false;
+    *((grim_object *) out) = grim_nintern(
+        (char *) &I(iter->str)->str[start],
+        iter->offset - start,
+        params->encoding
+    );
+    advance_if_safe(iter);
+    return true;
+}
+
+static bool parse_object(void *out, str_iter *iter, parse_params *params) {
+    consume_while(iter, is_whitespace, 0);
+    if (try(out, iter, parse_string, params) ||
+        try(out, iter, parse_character, params) ||
+        try(out, iter, parse_boolean, params) ||
+        try(out, iter, parse_number, params))
+        return true;
+    if (try(out, iter, parse_symbol, params))
+        return true;
+    return false;
+}
+
 
 // Main parsing functions
 // -----------------------------------------------------------------------------
@@ -431,12 +470,8 @@ static grim_object read_exp(str_iter *iter) {
     // We are reading from a UTF-8 string, so we use encoding NULL to
     // bypass internal encoding/decoding when parsing strings.
     parse_params params = { .encoding = NULL };
-    consume_while(iter, is_whitespace, 0);
     grim_object obj;
-    if (try(&obj, iter, parse_string, &params) ||
-        try(&obj, iter, parse_character, &params) ||
-        try(&obj, iter, parse_boolean, &params) ||
-        try(&obj, iter, parse_number, &params))
+    if (try(&obj, iter, parse_object, &params))
         return obj;
     return grim_undefined;
 }
