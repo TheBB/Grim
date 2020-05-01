@@ -109,7 +109,7 @@ static bool is_symbol(ucs4_t ch, int _) {
         return false;
     if (ch < 32 || ch == 127)
         return false;
-    if (ch == ' ' || ch == ',' || ch == '.' || ch == '\'' || ch == '`')
+    if (ch == ' ' || ch == ',' || ch == '.' || ch == '\'' || ch == '`' || ch == '(' || ch == ')')
         return false;
     return true;
 }
