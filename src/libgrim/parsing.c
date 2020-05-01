@@ -325,11 +325,13 @@ static bool parse_complex(void *_out, str_iter *iter, parse_params *params) {
         return true;
     }
 
-    ucs4_t mode = safe_next(iter);
+    ucs4_t mode = safe_peek(iter);
     if (mode != '@' && mode != '+' && mode != '-') {
         *out = real;
         return true;
     }
+    unsafe_advance(iter);
+
     if (mode == '@' && !try(&imag, iter, parse_real, params))
         return false;
     else if (mode != '@' && !try(&imag, iter, parse_uimag, params))
@@ -416,7 +418,6 @@ static bool parse_character(void *out, str_iter *iter, parse_params *params) {
         iter->offset - start,
         params->encoding
     );
-    advance_if_safe(iter);
     return true;
 }
 
@@ -446,7 +447,6 @@ static bool parse_symbol(void *out, str_iter *iter, parse_params *params) {
         iter->offset - start,
         params->encoding
     );
-    advance_if_safe(iter);
     return true;
 }
 
