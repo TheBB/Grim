@@ -17,13 +17,23 @@ typedef struct {
 } str_iter;
 
 typedef struct {
+    // Encoding used for string contents. Should be NULL in almsot all
+    // circumstances, as we're parsing Grim string objects, which are
+    // UTF-8 already.
     const char *encoding;
+
+    // Base for parsing numbers.
     int base;
+
+    // Exactness for parsing numbers.
     enum {
         INDETERMINATE,
         INEXACT,
         EXACT
     } exactness;
+
+    // Allow dotted lists when parsing lists.
+    bool allow_dotted : 1;
 } parse_params;
 
 typedef bool charpred(ucs4_t ch, int param);
@@ -473,7 +483,7 @@ static bool parse_list(void *out, str_iter *iter, parse_params *params) {
         }
 
         bool final = try(NULL, iter, parse_dot, params);
-        if (final && head == grim_nil)
+        if (final && (head == grim_nil || !params->allow_dotted))
             return false;
 
         grim_object element;
@@ -501,13 +511,44 @@ static bool parse_list(void *out, str_iter *iter, parse_params *params) {
     return true;
 }
 
+static bool parse_vector(void *out, str_iter *iter, parse_params *params) {
+    if (safe_next(iter) != '#')
+        return false;
+
+    // Parse the vector as a non-dotted list
+    parse_params subparams = *params;
+    subparams.allow_dotted = false;
+    grim_object list;
+    if (!try(&list, iter, parse_list, &subparams))
+        return false;
+
+    // Count number of elements
+    size_t nelems = 0;
+    grim_object cons = list;
+    while (cons != grim_nil) {
+        nelems++;
+        cons = grim_cdr(cons);
+    }
+
+    // Build vector
+    grim_object vec = grim_vector_create(nelems);
+    for (size_t i = 0; i < nelems; i++) {
+        grim_vector_set(vec, i, grim_car(list));
+        list = grim_cdr(list);
+    }
+
+    *((grim_object *) out) = vec;
+    return true;
+}
+
 static bool parse_object(void *out, str_iter *iter, parse_params *params) {
     consume_while(iter, is_whitespace, 0);
     if (try(out, iter, parse_string, params) ||
         try(out, iter, parse_character, params) ||
         try(out, iter, parse_boolean, params) ||
         try(out, iter, parse_number, params) ||
-        try(out, iter, parse_list, params))
+        try(out, iter, parse_list, params) ||
+        try(out, iter, parse_vector, params))
         return true;
     if (try(out, iter, parse_symbol, params))
         return true;
@@ -521,7 +562,10 @@ static bool parse_object(void *out, str_iter *iter, parse_params *params) {
 static grim_object read_exp(str_iter *iter) {
     // We are reading from a UTF-8 string, so we use encoding NULL to
     // bypass internal encoding/decoding when parsing strings.
-    parse_params params = { .encoding = NULL };
+    parse_params params = {
+        .encoding = NULL,
+        .allow_dotted = true,
+    };
     grim_object obj;
     if (try(&obj, iter, parse_object, &params))
         return obj;

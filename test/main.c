@@ -7,6 +7,7 @@ int main(int argc, char * const *argv) {
         suite_strings,
         suite_symbols,
         suite_lists,
+        suite_vectors,
         suite_hashtables,
         gta_endsuite,
     };

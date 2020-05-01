@@ -104,6 +104,7 @@ static MunitResult read_dotted(const MunitParameter params[], void *fixture) {
 static MunitTest tests_lists[] = {
     gta_test("simple", read_simple),
     gta_test("multi", read_multi),
+    gta_test("dotted", read_dotted),
     gta_endtests,
 };
 

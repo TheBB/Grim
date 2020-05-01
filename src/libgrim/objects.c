@@ -105,10 +105,21 @@ grim_object grim_vector_create(size_t nelems) {
     obj->tag = GRIM_VECTOR_TAG;
     assert((obj->vectordata = GC_MALLOC(nelems * sizeof(grim_object))));
     obj->vectorlen = nelems;
-    grim_object vec = (grim_object) obj;
     for (size_t i = 0; i < nelems; i++)
-        I(vec)->vectordata[i] = grim_undefined;
-    return vec;
+        obj->vectordata[i] = grim_undefined;
+    return (grim_object) obj;
+}
+
+size_t grim_vector_size(grim_object vec) {
+    return I(vec)->vectorlen;
+}
+
+void grim_vector_set(grim_object vec, size_t index, grim_object elt) {
+    I(vec)->vectordata[index] = elt;
+}
+
+grim_object grim_vector_get(grim_object vec, size_t index) {
+    return I(vec)->vectordata[index];
 }
 
 
