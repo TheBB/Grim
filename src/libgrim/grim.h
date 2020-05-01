@@ -59,6 +59,10 @@ void grim_vector_set(grim_object vec, size_t index, grim_object elt);
 grim_object grim_vector_get(grim_object vec, size_t index);
 
 grim_object grim_cons_pack(grim_object car, grim_object cdr);
+grim_object grim_car(grim_object cons);
+grim_object grim_cdr(grim_object cons);
+void grim_setcar(grim_object cons, grim_object newcar);
+void grim_setcdr(grim_object cons, grim_object newcdr);
 
 grim_object grim_intern(const char *name, const char *encoding);
 grim_object grim_nintern(const char *name, size_t length, const char *encoding);

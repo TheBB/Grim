@@ -33,7 +33,7 @@ static void grim_encode_simple(grim_object buf, grim_object src, const char *enc
         grim_buffer_copy(buf, "#t", 2);
         return;
     case GRIM_NIL_TAG:
-        grim_buffer_copy(buf, "nil", 3);
+        grim_buffer_copy(buf, "()", 3);
         return;
     case GRIM_FIXNUM_TAG:
     {

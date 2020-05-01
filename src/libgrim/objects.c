@@ -123,6 +123,22 @@ grim_object grim_cons_pack(grim_object car, grim_object cdr) {
     return (grim_object) obj;
 }
 
+grim_object grim_car(grim_object cons) {
+    return I(cons)->car;
+}
+
+grim_object grim_cdr(grim_object cons) {
+    return I(cons)->cdr;
+}
+
+void grim_setcar(grim_object cons, grim_object newcar) {
+    I(cons)->car = newcar;
+}
+
+void grim_setcdr(grim_object cons, grim_object newcdr) {
+    I(cons)->cdr = newcdr;
+}
+
 
 // Symbols
 // -----------------------------------------------------------------------------

@@ -29,6 +29,7 @@ typedef struct {
 typedef bool charpred(ucs4_t ch, int param);
 typedef bool parsefunc(void *out, str_iter *iter, parse_params *params);
 
+static bool parse_object(void *out, str_iter *iter, parse_params *params);
 
 // Source code inspection
 // -----------------------------------------------------------------------------
@@ -287,7 +288,7 @@ static bool parse_uimag(void *_out, str_iter *iter, parse_params *params) {
         return true;
     }
     grim_object real;
-    if (!try (&real, iter, parse_ureal, params))
+    if (!try(&real, iter, parse_ureal, params))
         return false;
     if (safe_next(iter) != 'i')
         return false;
@@ -450,12 +451,63 @@ static bool parse_symbol(void *out, str_iter *iter, parse_params *params) {
     return true;
 }
 
+static bool parse_dot(void *_, str_iter *iter, parse_params *__) {
+    (void)_; (void)__;
+    if (safe_next(iter) != '.')
+        return false;
+    if (safe_next(iter) != ' ')
+        return false;
+    return true;
+}
+
+static bool parse_list(void *out, str_iter *iter, parse_params *params) {
+    if (safe_next(iter) != '(')
+        return false;
+
+    grim_object head = grim_nil, tail;
+    while (true) {
+        consume_while(iter, is_whitespace, 0);
+        if (safe_peek(iter) == ')') {
+            unsafe_advance(iter);
+            break;
+        }
+
+        bool final = try(NULL, iter, parse_dot, params);
+        if (final && head == grim_nil)
+            return false;
+
+        grim_object element;
+        if (!try(&element, iter, parse_object, params))
+            return false;
+        if (head == grim_nil)
+            head = tail = grim_cons_pack(element, grim_nil);
+        else if (final)
+            grim_setcdr(tail, element);
+        else {
+            grim_object newtail = grim_cons_pack(element, grim_nil);
+            grim_setcdr(tail, newtail);
+            tail = newtail;
+        }
+
+        if (final) {
+            consume_while(iter, is_whitespace, 0);
+            if (safe_next(iter) != ')')
+                return false;
+            break;
+        }
+    }
+
+    *((grim_object *) out) = head;
+    return true;
+}
+
 static bool parse_object(void *out, str_iter *iter, parse_params *params) {
     consume_while(iter, is_whitespace, 0);
     if (try(out, iter, parse_string, params) ||
         try(out, iter, parse_character, params) ||
         try(out, iter, parse_boolean, params) ||
-        try(out, iter, parse_number, params))
+        try(out, iter, parse_number, params) ||
+        try(out, iter, parse_list, params))
         return true;
     if (try(out, iter, parse_symbol, params))
         return true;
