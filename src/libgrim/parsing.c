@@ -47,13 +47,13 @@ static bool parse_object(void *out, str_iter *iter, parse_params *params);
 static char *substring(str_iter *iter, size_t start) {
     size_t len = iter->offset - start;
     char *code = malloc((len + 1) * sizeof(char));
-    memcpy(code, I(iter->str)->str + start, len);
+    memcpy(code, I_str(iter->str) + start, len);
     code[len] = 0;
     return code;
 }
 
 static inline bool done(str_iter *iter) {
-    return iter->offset >= I(iter->str)->strlen;
+    return iter->offset >= I_strlen(iter->str);
 }
 
 static inline ucs4_t unsafe_peek(str_iter *iter) {
@@ -241,7 +241,7 @@ static bool parse_decimal_2(void *out, str_iter *iter, parse_params *params) {
 
     exp -= ndigits_after + npounds_after;
     for (size_t i = fract; i < end; i++)
-        if (I(iter->str)->str[i] == '_')
+        if (I_str(iter->str)[i] == '_')
             exp++;
 
     *((grim_object *) out) = grim_scinot_pack(scale, 10, exp, params->exactness == EXACT);
@@ -409,7 +409,7 @@ static bool parse_string(void *out, str_iter *iter, parse_params *params) {
     }
 
     *((grim_object *) out) = grim_nstring_pack(
-        (char *) &I(iter->str)->str[start],
+        (char *) &I_str(iter->str)[start],
         iter->offset - start - 1,
         params->encoding, true
     );
@@ -425,7 +425,7 @@ static bool parse_character(void *out, str_iter *iter, parse_params *params) {
     safe_advance(iter);
     consume_while(iter, is_not_delimiter, 0);
     *((grim_object *) out) = grim_ncharacter_pack_name(
-        (char *) &I(iter->str)->str[start],
+        (char *) &I_str(iter->str)[start],
         iter->offset - start,
         params->encoding
     );
@@ -454,7 +454,7 @@ static bool parse_symbol(void *out, str_iter *iter, parse_params *params) {
     if (iter->offset == start)
         return false;
     *((grim_object *) out) = grim_nintern(
-        (char *) &I(iter->str)->str[start],
+        (char *) &I_str(iter->str)[start],
         iter->offset - start,
         params->encoding
     );

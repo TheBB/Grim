@@ -47,28 +47,28 @@ static void grim_encode_simple(grim_object buf, grim_object src, const char *enc
         grim_display_string(buf, grim_symbol_name(src), encoding);
         return;
     case GRIM_INDIRECT_TAG:
-        switch (grim_indirect_tag(src)) {
+        switch (I_tag(src)) {
         case GRIM_FLOAT_TAG:
         {
             char *z = NULL;
-            int len = asprintf(&z, "%f", grim_float_extract(src));
+            int len = asprintf(&z, "%f", I_floating(src));
             grim_buffer_copy(buf, z, len);
             free(z);
             return;
         }
         case GRIM_BIGINT_TAG:
-            grim_encode_mpz(buf, ((grim_indirect *) src)->bigint);
+            grim_encode_mpz(buf, I_bigint(src));
             return;
         case GRIM_RATIONAL_TAG:
-            grim_encode_mpz(buf, mpq_numref(((grim_indirect *) src)->rational));
+            grim_encode_mpz(buf, mpq_numref(I_rational(src)));
             grim_buffer_copy(buf, "/", 1);
-            grim_encode_mpz(buf, mpq_denref(((grim_indirect *) src)->rational));
+            grim_encode_mpz(buf, mpq_denref(I_rational(src)));
             return;
         case GRIM_COMPLEX_TAG:
-            grim_encode_simple(buf, I(src)->real, encoding);
-            if (grim_nonnegative(I(src)->imag))
+            grim_encode_simple(buf, I_real(src), encoding);
+            if (grim_nonnegative(I_imag(src)))
                 grim_buffer_copy(buf, "+", 1);
-            grim_encode_simple(buf, I(src)->imag, encoding);
+            grim_encode_simple(buf, I_imag(src), encoding);
             grim_buffer_copy(buf, "i", 1);
             return;
         case GRIM_BUFFER_TAG:
@@ -76,12 +76,12 @@ static void grim_encode_simple(grim_object buf, grim_object src, const char *enc
             return;
         case GRIM_CELL_TAG:
             grim_buffer_copy(buf, "#<cell [", 8);
-            grim_encode_print(buf, grim_cell_extract(src), encoding);
+            grim_encode_print(buf, I_cellvalue(src), encoding);
             grim_buffer_copy(buf, "]>", 2);
             return;
         case GRIM_MODULE_TAG:
             grim_buffer_copy(buf, "#<module [", 10);
-            grim_encode_simple(buf, I(src)->modulename, encoding);
+            grim_encode_simple(buf, I_modulename(src), encoding);
             grim_buffer_copy(buf, "]>", 2);
             return;
         }
@@ -94,9 +94,9 @@ static void grim_encode_simple(grim_object buf, grim_object src, const char *enc
 
 static void grim_encode_vector(grim_object buf, grim_object src, const char *encoding, printfunc printer) {
     grim_buffer_copy(buf, "#(", 2);
-    size_t len = I(src)->vectorlen;
+    size_t len = I_vectorlen(src);
     for (size_t i = 0; i < len; i++) {
-        printer(buf, I(src)->vectordata[i], encoding);
+        printer(buf, I_vectordata(src)[i], encoding);
         if (i + 1 < len)
             grim_buffer_copy(buf, " ", 1);
     }
@@ -110,11 +110,11 @@ static void grim_encode_cons(grim_object buf, grim_object src, const char *encod
     while (grim_type(src) == GRIM_CONS) {
         if (needs_space)
             grim_buffer_copy(buf, " ", 1);
-        printer(buf, I(src)->car, encoding);
-        src = I(src)->cdr;
+        printer(buf, I_car(src), encoding);
+        src = I_cdr(src);
         needs_space = true;
     }
-    if (grim_type(src) != GRIM_NIL) {
+    if (src != grim_nil) {
         grim_buffer_copy(buf, " . ", 3);
         printer(buf, src, encoding);
     }
@@ -128,7 +128,7 @@ void grim_encode_display(grim_object buf, grim_object src, const char *encoding)
         grim_display_character(buf, src, encoding);
         return;
     case GRIM_INDIRECT_TAG:
-        switch (grim_indirect_tag(src)) {
+        switch (I_tag(src)) {
         case GRIM_STRING_TAG:
             grim_display_string(buf, src, encoding);
             return;
@@ -150,7 +150,7 @@ void grim_encode_print(grim_object buf, grim_object src, const char *encoding) {
         grim_print_character(buf, src, encoding);
         return;
     case GRIM_INDIRECT_TAG:
-        switch (grim_indirect_tag(src)) {
+        switch (I_tag(src)) {
         case GRIM_STRING_TAG:
             grim_print_string(buf, src, encoding);
             return;
@@ -185,15 +185,15 @@ bool grim_equal(grim_object a, grim_object b) {
     if (grim_direct_tag(a) != GRIM_INDIRECT_TAG &&
         grim_direct_tag(b) != GRIM_INDIRECT_TAG)
         return a == b;
-    if (grim_indirect_tag(a) != grim_indirect_tag(b))
+    if (I_tag(a) != I_tag(b))
         return false;
-    switch (grim_indirect_tag(a)) {
+    switch (I_tag(a)) {
     case GRIM_BIGINT_TAG:
-        return !mpz_cmp(((grim_indirect *)a)->bigint, ((grim_indirect *)b)->bigint);
+        return !mpz_cmp(I_bigint(a), I_bigint(b));
     case GRIM_STRING_TAG:
-        if (I(a)->strlen != I(b)->strlen)
+        if (I_strlen(a) != I_strlen(b))
             return false;
-        return !memcmp(I(a)->str, I(b)->str, I(a)->strlen);
+        return !memcmp(I_str(a), I_str(b), I_strlen(a));
     }
 
     return a == b;

@@ -124,6 +124,28 @@ typedef struct {
 } grim_indirect;
 
 #define I(c) ((grim_indirect *) c)
+#define I_tag(c) (I(c)->tag)
+#define I_floating(c) (I(c)->floating)
+#define I_bigint(c) (I(c)->bigint)
+#define I_rational(c) (I(c)->rational)
+#define I_real(c) (I(c)->real)
+#define I_imag(c) (I(c)->imag)
+#define I_str(c) (I(c)->str)
+#define I_strlen(c) (I(c)->strlen)
+#define I_vectordata(c) (I(c)->vectordata)
+#define I_vectorlen(c) (I(c)->vectorlen)
+#define I_car(c) (I(c)->car)
+#define I_cdr(c) (I(c)->cdr)
+#define I_symbolname(c) (I(c)->symbolname)
+#define I_buf(c) (I(c)->buf)
+#define I_buflen(c) (I(c)->buflen)
+#define I_bufcap(c) (I(c)->bufcap)
+#define I_hashnodes(c) (I(c)->hashnodes)
+#define I_hashcap(c) (I(c)->hashcap)
+#define I_hashfill(c) (I(c)->hashfill)
+#define I_cellvalue(c) (I(c)->cellvalue)
+#define I_modulename(c) (I(c)->modulename)
+#define I_modulemembers(c) (I(c)->modulemembers)
 
 extern grim_object grim_symbol_table;
 extern grim_object gs_i_moduleset;
@@ -133,7 +155,6 @@ extern size_t grim_fixnum_max_ndigits[];
 grim_indirect *grim_indirect_create(bool permanent);
 
 grim_tag_t grim_direct_tag(grim_object obj);
-grim_tag_t grim_indirect_tag(grim_object obj);
 
 void grim_buffer_dump(FILE *stream, grim_object obj);
 void grim_buffer_ensure_free_capacity(grim_object obj, size_t sizehint);
