@@ -28,6 +28,8 @@ typedef enum {
     GRIM_CONS,
     GRIM_BUFFER,
     GRIM_HASHTABLE,
+    GRIM_CELL,
+    GRIM_MODULE,
 } grim_type_t;
 
 grim_type_t grim_type(grim_object obj);
@@ -80,6 +82,13 @@ bool grim_hashtable_has(grim_object table, grim_object key);
 grim_object grim_hashtable_get(grim_object table, grim_object key);
 void grim_hashtable_set(grim_object table, grim_object key, grim_object value);
 void grim_hashtable_unset(grim_object table, grim_object key);
+
+grim_object grim_cell_pack(grim_object value);
+grim_object grim_cell_extract(grim_object obj);
+void grim_cell_set(grim_object obj, grim_object value);
+
+grim_object grim_module_create(grim_object name);
+grim_object grim_module_cell(grim_object module, grim_object name, bool require);
 
 void grim_init();
 void grim_display(grim_object obj, const char *encoding);

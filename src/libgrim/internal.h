@@ -36,6 +36,8 @@ enum {
     GRIM_CONS_TAG      = 0x06,
     GRIM_BUFFER_TAG    = 0x07,
     GRIM_HASHTABLE_TAG = 0x08,
+    GRIM_CELL_TAG      = 0x09,
+    GRIM_MODULE_TAG    = 0x10,
 };
 
 struct grim_hashnode_t {
@@ -106,6 +108,17 @@ typedef struct {
             grim_hashnode **hashnodes;
             size_t hashcap;
             size_t hashfill;
+        };
+
+        // GRIM_CELL_TAG
+        struct {
+            grim_object cellvalue;
+        };
+
+        // GRIM_MODULE_TAG
+        struct {
+            grim_object modulename;
+            grim_object modulemembers;
         };
     };
 } grim_indirect;

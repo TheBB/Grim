@@ -42,6 +42,8 @@ grim_type_t grim_type(grim_object obj) {
         case GRIM_CONS_TAG: return GRIM_CONS;
         case GRIM_BUFFER_TAG: return GRIM_BUFFER;
         case GRIM_HASHTABLE_TAG: return GRIM_HASHTABLE;
+        case GRIM_CELL_TAG: return GRIM_CELL;
+        case GRIM_MODULE_TAG: return GRIM_MODULE;
         }
     default: case GRIM_UNDEFINED_TAG: return GRIM_UNDEFINED;
     }
@@ -346,4 +348,45 @@ void grim_hashtable_unset(grim_object table, grim_object key) {
         *node = (*node)->next;
         ind->hashfill--;
     }
+}
+
+
+// Cells
+// -----------------------------------------------------------------------------
+
+grim_object grim_cell_pack(grim_object value) {
+    grim_indirect *ind = grim_indirect_create(false);
+    ind->tag = GRIM_CELL_TAG;
+    ind->cellvalue = value;
+    return (grim_object) ind;
+}
+
+grim_object grim_cell_extract(grim_object obj) {
+    return I(obj)->cellvalue;
+}
+
+void grim_cell_set(grim_object obj, grim_object value) {
+    I(obj)->cellvalue = value;
+}
+
+
+// Modules
+// -----------------------------------------------------------------------------
+
+grim_object grim_module_create(grim_object name) {
+    grim_indirect *ind = grim_indirect_create(false);
+    ind->tag = GRIM_MODULE_TAG;
+    ind->modulename = name;
+    ind->modulemembers = grim_hashtable_create(0);
+    return (grim_object) ind;
+}
+
+grim_object grim_module_cell(grim_object module, grim_object name, bool require) {
+    if (!grim_hashtable_has(I(module)->modulemembers, name)) {
+        assert(!require);
+        grim_object cell = grim_cell_pack(grim_undefined);
+        grim_hashtable_set(I(module)->modulemembers, name, cell);
+        return cell;
+    }
+    return grim_hashtable_get(I(module)->modulemembers, name);
 }
