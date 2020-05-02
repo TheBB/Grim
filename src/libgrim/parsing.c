@@ -573,6 +573,32 @@ static grim_object read_exp(str_iter *iter) {
 }
 
 
+grim_object grim_read_all(grim_object str) {
+    grim_object head = grim_nil, tail;
+    str_iter iter = {str, 0, 0};
+    parse_params params = {
+        .encoding = NULL,
+        .allow_dotted = true,
+    };
+    while (true) {
+        grim_object obj;
+        if (!try(&obj, &iter, parse_object, &params))
+            break;
+        if (head == grim_nil)
+            head = tail = grim_cons_pack(obj, grim_nil);
+        else {
+            grim_object newtail = grim_cons_pack(obj, grim_nil);
+            grim_setcdr(tail, newtail);
+            tail = newtail;
+        }
+    }
+    consume_while(&iter, is_whitespace, 0);
+    if (!done(&iter))
+        return grim_undefined;
+    return head;
+}
+
+
 grim_object grim_read(grim_object str) {
     str_iter iter = {str, 0, 0};
     return read_exp(&iter);

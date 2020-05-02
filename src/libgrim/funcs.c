@@ -43,6 +43,9 @@ static void grim_encode_simple(grim_object buf, grim_object src, const char *enc
         free(z);
         return;
     }
+    case GRIM_SYMBOL_TAG:
+        grim_display_string(buf, grim_symbol_name(src), encoding);
+        return;
     case GRIM_INDIRECT_TAG:
         switch (grim_indirect_tag(src)) {
         case GRIM_FLOAT_TAG:
@@ -71,13 +74,23 @@ static void grim_encode_simple(grim_object buf, grim_object src, const char *enc
         case GRIM_BUFFER_TAG:
             grim_buffer_copy(buf, "#<buffer>", 9);
             return;
+        case GRIM_CELL_TAG:
+            grim_buffer_copy(buf, "#<cell [", 8);
+            grim_encode_print(buf, grim_cell_extract(src), encoding);
+            grim_buffer_copy(buf, "]>", 2);
+            return;
+        case GRIM_MODULE_TAG:
+            grim_buffer_copy(buf, "#<module [", 10);
+            grim_encode_simple(buf, I(src)->modulename, encoding);
+            grim_buffer_copy(buf, "]>", 2);
+            return;
         }
         return;
     }
 
     grim_buffer_copy(buf, "#<undefined>", 12);
-
 }
+
 
 static void grim_encode_vector(grim_object buf, grim_object src, const char *encoding, printfunc printer) {
     grim_buffer_copy(buf, "#(", 2);
@@ -111,9 +124,6 @@ static void grim_encode_cons(grim_object buf, grim_object src, const char *encod
 
 void grim_encode_display(grim_object buf, grim_object src, const char *encoding) {
     switch (grim_direct_tag(src)) {
-    case GRIM_SYMBOL_TAG:
-        grim_display_string(buf, grim_symbol_name(src), encoding);
-        return;
     case GRIM_CHARACTER_TAG:
         grim_display_character(buf, src, encoding);
         return;
@@ -136,9 +146,6 @@ void grim_encode_display(grim_object buf, grim_object src, const char *encoding)
 
 void grim_encode_print(grim_object buf, grim_object src, const char *encoding) {
     switch (grim_direct_tag(src)) {
-    case GRIM_SYMBOL_TAG:
-        grim_display_string(buf, grim_symbol_name(src), encoding);
-        return;
     case GRIM_CHARACTER_TAG:
         grim_print_character(buf, src, encoding);
         return;

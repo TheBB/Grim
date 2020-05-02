@@ -390,3 +390,7 @@ grim_object grim_module_cell(grim_object module, grim_object name, bool require)
     }
     return grim_hashtable_get(I(module)->modulemembers, name);
 }
+
+void grim_module_set(grim_object module, grim_object name, grim_object value) {
+    grim_cell_set(grim_module_cell(module, name, false), value);
+}

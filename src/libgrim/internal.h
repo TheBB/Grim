@@ -126,6 +126,8 @@ typedef struct {
 #define I(c) ((grim_indirect *) c)
 
 extern grim_object grim_symbol_table;
+extern grim_object gs_i_moduleset;
+
 extern size_t grim_fixnum_max_ndigits[];
 
 grim_indirect *grim_indirect_create(bool permanent);
@@ -155,3 +157,6 @@ double grim_to_double(grim_object num);
 grim_object grim_negate_i(grim_object obj);
 grim_object grim_scinot_pack(grim_object scale, int base, intmax_t exponent, bool exact);
 bool grim_is_exact(grim_object num);
+
+grim_object grim_eval_in_module(grim_object module, grim_object expr);
+grim_object grim_build_module(grim_object name, grim_object code);

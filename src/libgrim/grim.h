@@ -89,6 +89,7 @@ void grim_cell_set(grim_object obj, grim_object value);
 
 grim_object grim_module_create(grim_object name);
 grim_object grim_module_cell(grim_object module, grim_object name, bool require);
+void grim_module_set(grim_object module, grim_object name, grim_object value);
 
 void grim_init();
 void grim_display(grim_object obj, const char *encoding);
@@ -96,4 +97,5 @@ void grim_print(grim_object obj, const char *encoding);
 bool grim_equal(grim_object a, grim_object b);
 bool grim_nonnegative(grim_object obj);
 
+grim_object grim_read_all(grim_object str);
 grim_object grim_read(grim_object str);
