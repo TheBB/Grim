@@ -123,7 +123,7 @@ typedef struct {
     };
 } grim_indirect;
 
-#define I(c) ((grim_indirect *) c)
+#define I(c) ((grim_indirect *) (c))
 #define I_tag(c) (I(c)->tag)
 #define I_floating(c) (I(c)->floating)
 #define I_bigint(c) (I(c)->bigint)
@@ -152,7 +152,7 @@ extern grim_object gs_i_moduleset;
 
 extern size_t grim_fixnum_max_ndigits[];
 
-grim_indirect *grim_indirect_create(bool permanent);
+grim_object grim_indirect_create(bool permanent);
 
 grim_tag_t grim_direct_tag(grim_object obj);
 

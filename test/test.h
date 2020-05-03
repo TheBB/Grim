@@ -104,7 +104,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         grim_object z = (c);                                                   \
         munit_assert_int(grim_type(z), ==, GRIM_FLOAT);                        \
         munit_assert_int(grim_direct_tag(z), ==, GRIM_INDIRECT_TAG);           \
-        munit_assert_int(I_tag(z), ==, GRIM_FLOAT_TAG);            \
+        munit_assert_int(I_tag(z), ==, GRIM_FLOAT_TAG);                        \
     } while (0)
 
 #define gta_check_float(c, v)                                                  \
@@ -128,7 +128,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         grim_object y = (c);                                                   \
         gta_is_int(y);                                                         \
         munit_assert_int(grim_direct_tag(y), ==, GRIM_INDIRECT_TAG);           \
-        munit_assert_int(I_tag(y), ==, GRIM_BIGINT_TAG);           \
+        munit_assert_int(I_tag(y), ==, GRIM_BIGINT_TAG);                       \
     } while (0)
 
 #define gta_check_bigint(c, v)                                                 \
@@ -148,7 +148,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         grim_object z = (c);                                                   \
         munit_assert_int(grim_type(z), ==, GRIM_RATIONAL);                     \
         munit_assert_int(grim_direct_tag(z), ==, GRIM_INDIRECT_TAG);           \
-        munit_assert_int(I_tag(z), ==, GRIM_RATIONAL_TAG);         \
+        munit_assert_int(I_tag(z), ==, GRIM_RATIONAL_TAG);                     \
     } while (0)
 
 #define gta_is_complex(c)                                                      \
@@ -156,7 +156,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         grim_object z = (c);                                                   \
         munit_assert_int(grim_type(z), ==, GRIM_COMPLEX);                      \
         munit_assert_int(grim_direct_tag(z), ==, GRIM_INDIRECT_TAG);           \
-        munit_assert_int(I_tag(z), ==, GRIM_COMPLEX_TAG);          \
+        munit_assert_int(I_tag(z), ==, GRIM_COMPLEX_TAG);                      \
     } while (0)
 
 #define gta_is_string(c)                                                       \
@@ -164,7 +164,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         grim_object z = (c);                                                   \
         munit_assert_int(grim_type(z), ==, GRIM_STRING);                       \
         munit_assert_int(grim_direct_tag(z), ==, GRIM_INDIRECT_TAG);           \
-        munit_assert_int(I_tag(z), ==, GRIM_STRING_TAG);           \
+        munit_assert_int(I_tag(z), ==, GRIM_STRING_TAG);                       \
     } while (0)
 
 #define gta_check_string(c, l, v)                                              \
@@ -184,7 +184,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         grim_object z = (c);                                                   \
         munit_assert_int(grim_type(z), ==, GRIM_BUFFER);                       \
         munit_assert_int(grim_direct_tag(z), ==, GRIM_INDIRECT_TAG);           \
-        munit_assert_int(I_tag(z), ==, GRIM_BUFFER_TAG);           \
+        munit_assert_int(I_tag(z), ==, GRIM_BUFFER_TAG);                       \
     } while (0)
 
 #define gta_check_buffer(c, l, v)                                              \
@@ -217,7 +217,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         grim_object z = (c);                                                   \
         munit_assert_int(grim_type(z), ==, GRIM_CONS);                         \
         munit_assert_int(grim_direct_tag(z), ==, GRIM_INDIRECT_TAG);           \
-        munit_assert_int(I_tag(z), ==, GRIM_CONS_TAG);             \
+        munit_assert_int(I_tag(z), ==, GRIM_CONS_TAG);                         \
     } while (0)
 
 #define gta_is_vector(c)                                                       \
@@ -225,7 +225,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         grim_object z = (c);                                                   \
         munit_assert_int(grim_type(z), ==, GRIM_VECTOR);                       \
         munit_assert_int(grim_direct_tag(z), ==, GRIM_INDIRECT_TAG);           \
-        munit_assert_int(I_tag(z), ==, GRIM_VECTOR_TAG);           \
+        munit_assert_int(I_tag(z), ==, GRIM_VECTOR_TAG);                       \
     } while (0)
 
 #define gta_check_vector(c, l)                                                 \
@@ -240,7 +240,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         grim_object z = (c);                                                   \
         munit_assert_int(grim_type(z), ==, GRIM_HASHTABLE);                    \
         munit_assert_int(grim_direct_tag(z), ==, GRIM_INDIRECT_TAG);           \
-        munit_assert_int(I_tag(z), ==, GRIM_HASHTABLE_TAG);        \
+        munit_assert_int(I_tag(z), ==, GRIM_HASHTABLE_TAG);                    \
     } while (0)
 
 #define gta_check_hashtable(c, l)                                              \

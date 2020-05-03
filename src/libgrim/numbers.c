@@ -55,9 +55,9 @@ size_t grim_fixnum_max_ndigits[] = {
 // -----------------------------------------------------------------------------
 
 grim_object grim_float_pack(double num) {
-    grim_indirect *obj = grim_indirect_create(false);
+    grim_object obj = grim_indirect_create(false);
     I_floating(obj) = num;
-    return (grim_object) obj;
+    return obj;
 }
 
 double grim_float_extract(grim_object obj) {
@@ -107,11 +107,11 @@ static void grim_bigint_finalize(void *obj, void *_) {
     mpz_clear(I(obj)->bigint);
 }
 
-grim_indirect *grim_bigint_create() {
-    grim_indirect *obj = grim_indirect_create(false);
+grim_object grim_bigint_create() {
+    grim_object obj = grim_indirect_create(false);
     I_tag(obj) = GRIM_BIGINT_TAG;
     mpz_init(I_bigint(obj));
-    GC_REGISTER_FINALIZER(obj, grim_bigint_finalize, NULL, NULL, NULL);
+    GC_REGISTER_FINALIZER((void*)obj, grim_bigint_finalize, NULL, NULL, NULL);
     return obj;
 }
 
@@ -133,7 +133,7 @@ intmax_t grim_integer_extract(grim_object obj) {
 grim_object grim_integer_pack(intmax_t num) {
     if (num >= GRIM_FIXNUM_MIN && num <= GRIM_FIXNUM_MAX)
         return (grim_object) ((uintptr_t) num << 1) | GRIM_FIXNUM_TAG;
-    grim_indirect *obj = grim_bigint_create();
+    grim_object obj = grim_bigint_create();
     mpz_set_si(I_bigint(obj), num);
     return (grim_object) obj;
 }
@@ -175,11 +175,11 @@ grim_object grim_integer_read(const char *str, int base) {
     }
     *tgt = 0;
 
-    grim_indirect *obj = grim_bigint_create();
+    grim_object obj = grim_bigint_create();
     assert(!mpz_set_str(I_bigint(obj), dup, base));
     free(dup);
 
-    return grim_integer_normalize((grim_object) obj);
+    return grim_integer_normalize(obj);
 }
 
 static void grim_integer_to_mpz(mpz_t tgt, grim_object obj) {
@@ -192,9 +192,9 @@ static void grim_integer_to_mpz(mpz_t tgt, grim_object obj) {
 static grim_object grim_mpz_to_integer(mpz_t src) {
     if (mpz_fits_slong_p(src))
         return grim_integer_pack(mpz_get_si(src));
-    grim_indirect *obj = grim_bigint_create();
+    grim_object obj = grim_bigint_create();
     mpz_set(I_bigint(obj), src);
-    return (grim_object) obj;
+    return obj;
 }
 
 
@@ -206,11 +206,11 @@ static void grim_rational_finalize(void *obj, void *_) {
     mpq_clear(I_rational(obj));
 }
 
-static grim_indirect *grim_rational_create() {
-    grim_indirect *obj = grim_indirect_create(false);
+static grim_object grim_rational_create() {
+    grim_object obj = grim_indirect_create(false);
     I_tag(obj) = GRIM_RATIONAL_TAG;
     mpq_init(I_rational(obj));
-    GC_REGISTER_FINALIZER(obj, grim_rational_finalize, NULL, NULL, NULL);
+    GC_REGISTER_FINALIZER((void*) obj, grim_rational_finalize, NULL, NULL, NULL);
     return obj;
 }
 
@@ -237,7 +237,7 @@ grim_object grim_rational_pack(grim_object numerator, grim_object denominator) {
     grim_integer_to_mpz(temp, denominator);
     mpq_set_z(denom, temp);
 
-    grim_indirect *obj = grim_rational_create();
+    grim_object obj = grim_rational_create();
     mpq_div(I_rational(obj), num, denom);
 
     mpz_clear(temp);
@@ -246,7 +246,7 @@ grim_object grim_rational_pack(grim_object numerator, grim_object denominator) {
 
     if (!mpz_cmp_ui(mpq_denref(I_rational(obj)), 1))
         return grim_mpz_to_integer(mpq_numref(I_rational(obj)));
-    return (grim_object) obj;
+    return obj;
 }
 
 grim_object grim_rational_num(grim_object obj) {
@@ -275,11 +275,11 @@ grim_object grim_complex_pack(grim_object real, grim_object imag) {
     else if (grim_type(imag) == GRIM_FLOAT && grim_type(real) != GRIM_FLOAT)
         real = grim_float_pack(grim_to_double(real));
 
-    grim_indirect *obj = grim_indirect_create(false);
+    grim_object obj = grim_indirect_create(false);
     I_tag(obj) = GRIM_COMPLEX_TAG;
     I_real(obj) = real;
     I_imag(obj) = imag;
-    return (grim_object) obj;
+    return obj;
 }
 
 grim_object grim_complex_real(grim_object num) {
