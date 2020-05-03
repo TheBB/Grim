@@ -4,6 +4,7 @@ find_package(Unistring REQUIRED)
 add_library(libgrim SHARED
   grim.c objects.c strings.c numbers.c
   funcs.c hashing.c parsing.c modules.c
+  exec.c builtins.c
 )
 set_target_properties(libgrim PROPERTIES
   C_STANDARD 11

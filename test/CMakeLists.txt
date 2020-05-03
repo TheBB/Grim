@@ -8,6 +8,7 @@ add_executable(
   lists.c
   vectors.c
   hashtables.c
+  builtins.c
 )
 target_link_libraries(grimtest munit libgrim)
 

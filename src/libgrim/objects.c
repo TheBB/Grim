@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -331,7 +332,7 @@ grim_object grim_module_create(grim_object name) {
     return ind;
 }
 
-grim_object grim_module_cell(grim_object module, grim_object name, bool require) {
+static grim_object grim_module_cell(grim_object module, grim_object name, bool require) {
     if (!grim_hashtable_has(I_modulemembers(module), name)) {
         assert(!require);
         grim_object cell = grim_cell_pack(grim_undefined);
@@ -341,6 +342,24 @@ grim_object grim_module_cell(grim_object module, grim_object name, bool require)
     return grim_hashtable_get(I_modulemembers(module), name);
 }
 
+grim_object grim_module_get(grim_object module, grim_object name) {
+    return I_cellvalue(grim_module_cell(module, name, false));
+}
+
 void grim_module_set(grim_object module, grim_object name, grim_object value) {
     I_cellvalue(grim_module_cell(module, name, false)) = value;
+}
+
+
+// Functions
+// -----------------------------------------------------------------------------
+
+grim_object grim_cfunc_create(grim_cfunc *cfunc, uint8_t minargs, uint8_t maxargs, bool varargs) {
+    grim_object obj = grim_indirect_create(false);
+    I_tag(obj) = GRIM_CFUNC_TAG;
+    I_cfunc(obj) = cfunc;
+    I_minargs(obj) = minargs;
+    I_maxargs(obj) = maxargs;
+    I_varargs(obj) = varargs;
+    return obj;
 }

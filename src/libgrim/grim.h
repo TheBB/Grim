@@ -7,6 +7,7 @@
 #include "unitypes.h"
 
 typedef uintptr_t grim_object;
+typedef grim_object grim_cfunc(int nargs, const grim_object *args);
 
 extern const grim_object grim_undefined;
 extern const grim_object grim_false;
@@ -78,8 +79,10 @@ void grim_hashtable_unset(grim_object table, grim_object key);
 grim_object grim_cell_pack(grim_object value);
 
 grim_object grim_module_create(grim_object name);
-grim_object grim_module_cell(grim_object module, grim_object name, bool require);
+grim_object grim_module_get(grim_object module, grim_object name);
 void grim_module_set(grim_object module, grim_object name, grim_object value);
+
+grim_object grim_cfunc_create(grim_cfunc *cfunc, uint8_t minargs, uint8_t maxargs, bool varargs);
 
 void grim_init();
 void grim_display(grim_object obj, const char *encoding);

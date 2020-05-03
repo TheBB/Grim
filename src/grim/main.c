@@ -26,8 +26,8 @@ int main(int argc, char **argv) {
     grim_object module = grim_build_module(name, code);
     grim_print(module, "UTF-8");
     printf("\n");
-    grim_print(grim_module_cell(module, grim_intern("a", NULL), true), "UTF-8");
+    grim_print(grim_module_get(module, grim_intern("a", NULL)), "UTF-8");
     printf("\n");
-    grim_print(grim_module_cell(module, grim_intern("b", NULL), true), "UTF-8");
+    grim_print(grim_module_get(module, grim_intern("b", NULL)), "UTF-8");
     printf("\n");
 }

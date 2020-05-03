@@ -52,8 +52,6 @@ struct grim_hashnode_t {
 
 typedef struct grim_hashnode_t grim_hashnode;
 
-typedef grim_object grim_cfunc(int nargs, grim_object *args);
-
 typedef struct {
     grim_tag_t tag;
     union {
@@ -181,7 +179,13 @@ typedef struct {
 #define I_frameargs(c) (I(c)->frameargs)
 #define I_parentframe(c) (I(c)->parentframe)
 
+// Hash table mapping strings to symbols
 extern grim_object grim_symbol_table;
+
+// Module with builtin functions and variables
+extern grim_object grim_builtin_module;
+
+extern grim_object grim_top_frame;
 extern grim_object gs_i_moduleset;
 
 extern size_t grim_fixnum_max_ndigits[];
@@ -216,3 +220,14 @@ grim_object grim_read_file(FILE *file);
 
 grim_object grim_eval_in_module(grim_object module, grim_object expr);
 grim_object grim_build_module(grim_object name, grim_object code);
+
+grim_object grim_call(grim_object func, int nargs, const grim_object *args);
+grim_object grim_call_0(grim_object func);
+grim_object grim_call_1(grim_object func, grim_object arg);
+grim_object grim_call_2(grim_object func, grim_object arg1, grim_object arg2);
+
+
+// Builtin functions
+// -----------------------------------------------------------------------------
+
+grim_cfunc gf_identity;
