@@ -84,6 +84,13 @@ static void grim_encode_simple(grim_object buf, grim_object src, const char *enc
             grim_encode_simple(buf, I_modulename(src), encoding);
             grim_buffer_copy(buf, "]>", 2);
             return;
+        case GRIM_CFUNC_TAG:
+        case GRIM_LFUNC_TAG:
+            grim_buffer_copy(buf, "#<function>", 11);
+            return;
+        case GRIM_FRAME_TAG:
+            grim_buffer_copy(buf, "#<frame>", 8);
+            return;
         }
         return;
     }

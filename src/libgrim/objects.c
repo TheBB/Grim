@@ -40,6 +40,8 @@ grim_type_t grim_type(grim_object obj) {
         case GRIM_HASHTABLE_TAG: return GRIM_HASHTABLE;
         case GRIM_CELL_TAG: return GRIM_CELL;
         case GRIM_MODULE_TAG: return GRIM_MODULE;
+        case GRIM_CFUNC_TAG: case GRIM_LFUNC_TAG: return GRIM_FUNCTION;
+        case GRIM_FRAME_TAG: return GRIM_FRAME;
         }
     default: case GRIM_UNDEFINED_TAG: return GRIM_UNDEFINED;
     }

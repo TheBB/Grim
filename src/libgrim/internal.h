@@ -38,6 +38,9 @@ enum {
     GRIM_HASHTABLE_TAG = 0x08,
     GRIM_CELL_TAG      = 0x09,
     GRIM_MODULE_TAG    = 0x10,
+    GRIM_CFUNC_TAG     = 0x11,
+    GRIM_LFUNC_TAG     = 0x12,
+    GRIM_FRAME_TAG     = 0x13,
 };
 
 struct grim_hashnode_t {
@@ -48,6 +51,8 @@ struct grim_hashnode_t {
 };
 
 typedef struct grim_hashnode_t grim_hashnode;
+
+typedef grim_object grim_cfunc(int nargs, grim_object *args);
 
 typedef struct {
     grim_tag_t tag;
@@ -114,6 +119,28 @@ typedef struct {
             grim_object modulename;
             grim_object modulemembers;
         };
+
+        // GRIM_CFUNC_TAG, GRIM_LFUNC_TAG
+        struct {
+            union {
+                grim_cfunc *cfunc;
+                struct {
+                    grim_object bytecode;
+                    grim_object cellvars;
+                    int8_t nlocals;
+                };
+            };
+            uint8_t minargs;
+            uint8_t maxargs;
+            bool varargs;
+        };
+
+        // GRIM_FRAME_TAG
+        struct {
+            grim_object framefunc;
+            grim_object frameargs;
+            grim_object parentframe;
+        };
     };
 } grim_indirect;
 
@@ -143,6 +170,16 @@ typedef struct {
 #define I_cellvalue(c) (I(c)->cellvalue)
 #define I_modulename(c) (I(c)->modulename)
 #define I_modulemembers(c) (I(c)->modulemembers)
+#define I_cfunc(c) (I(c)->cfunc)
+#define I_bytecode(c) (I(c)->bytecode)
+#define I_cellvars(c) (I(c)->cellvars)
+#define I_nlocals(c) (I(c)->nlocals)
+#define I_minargs(c) (I(c)->minargs)
+#define I_maxargs(c) (I(c)->maxargs)
+#define I_varargs(c) (I(c)->varargs)
+#define I_framefunc(c) (I(c)->framefunc)
+#define I_frameargs(c) (I(c)->frameargs)
+#define I_parentframe(c) (I(c)->parentframe)
 
 extern grim_object grim_symbol_table;
 extern grim_object gs_i_moduleset;

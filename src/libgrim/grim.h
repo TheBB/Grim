@@ -30,6 +30,8 @@ typedef enum {
     GRIM_HASHTABLE,
     GRIM_CELL,
     GRIM_MODULE,
+    GRIM_FUNCTION,
+    GRIM_FRAME,
 } grim_type_t;
 
 grim_type_t grim_type(grim_object obj);
