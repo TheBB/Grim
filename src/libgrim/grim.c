@@ -24,23 +24,15 @@ grim_object gs_i_moduleset;
 #define NBUF 300
 static char buf[NBUF];
 
-#define BUILTIN(name, min, max, var)                                           \
+#define BUILTIN(name, impl, min, max, var)                                     \
     do {                                                                       \
-        grim_module_set(grim_builtin_module, grim_intern(#name, NULL),         \
-                        grim_cfunc_create(gf_##name, min, max, var));          \
+        grim_module_set(grim_builtin_module, grim_intern(name, NULL),          \
+                        grim_cfunc_create(gf_##impl, min, max, var));          \
     } while (0)
 
 static void grim_init_builtins() {
     grim_builtin_module = grim_module_create(grim_intern("--builtins--", NULL));
-    BUILTIN(identity, 1, 1, false);
-    /* grim_module_set(grim_builtin_module, grim_intern("identity", NULL), */
-    /*                 grim_cfunc_create(gf_identity, 1, 1, false)); */
-    /* grim_object builtins_ht = I_modulemembers(grim_builtin_module); */
-    /* grim_hashtable_set( */
-    /*     builtins_ht, */
-    /*     grim_intern("identity", NULL), */
-    /*     grim_cfunc_create(gf_identity, ) */
-    /* ); */
+    BUILTIN("+", add, 0, 0, true);
 }
 
 void grim_init() {

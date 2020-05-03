@@ -366,3 +366,95 @@ bool grim_is_exact(grim_object num) {
         return grim_is_exact(I_real(num)) && grim_is_exact(I_imag(num));
     assert(false);
 }
+
+
+grim_object grim_add(grim_object a, grim_object b) {
+    grim_type_t ta = grim_type(a), tb = grim_type(b);
+    switch (ta) {
+    case GRIM_COMPLEX: switch(tb) {
+        case GRIM_COMPLEX:
+            return grim_complex_pack(grim_add(I_real(a), I_real(b)), grim_add(I_imag(a), I_imag(b)));
+        case GRIM_FLOAT: case GRIM_RATIONAL: case GRIM_INTEGER:
+            return grim_complex_pack(grim_add(I_real(a), b), I_imag(a));
+        default:
+            return grim_undefined;
+        }
+    case GRIM_FLOAT:
+        switch (tb) {
+        case GRIM_COMPLEX:
+            return grim_complex_pack(grim_add(a, I_real(b)), I_imag(b));
+        case GRIM_FLOAT:
+            return grim_float_pack(I_floating(a) + I_floating(b));
+        case GRIM_RATIONAL: case GRIM_INTEGER:
+            return grim_float_pack(I_floating(a) + grim_to_double(b));
+        default:
+            return grim_undefined;
+        }
+    case GRIM_RATIONAL:
+        switch (tb) {
+        case GRIM_COMPLEX:
+            return grim_complex_pack(grim_add(a, I_real(b)), I_imag(b));
+        case GRIM_FLOAT:
+            return grim_float_pack(grim_to_double(a) + I_floating(b));
+        case GRIM_RATIONAL: {
+            // TODO: grim_rational_normalize
+            grim_object retval = grim_rational_create();
+            mpq_add(I_rational(retval), I_rational(a), I_rational(b));
+            return retval;
+        }
+        case GRIM_INTEGER: {
+            grim_object retval = grim_rational_create();
+            if (grim_integer_extractable(a))
+                mpq_set_si(I_rational(retval), grim_integer_extract(a), 1);
+            else
+                mpq_set_z(I_rational(retval), I_bigint(a));
+            mpq_add(I_rational(retval), I_rational(retval), I_rational(b));
+            return retval;
+        }
+        default:
+            return grim_undefined;
+        }
+    case GRIM_INTEGER:
+        switch (tb) {
+        case GRIM_COMPLEX:
+            return grim_complex_pack(grim_add(a, I_real(b)), I_imag(b));
+        case GRIM_FLOAT:
+            return grim_float_pack(grim_to_double(a) + I_floating(b));
+        case GRIM_RATIONAL: {
+            grim_object retval = grim_rational_create();
+            if (grim_integer_extractable(b))
+                mpq_set_si(I_rational(retval), grim_integer_extract(b), 1);
+            else
+                mpq_set_z(I_rational(retval), I_bigint(b));
+            mpq_add(I_rational(retval), I_rational(retval), I_rational(a));
+            return retval;
+        }
+        case GRIM_INTEGER: {
+            bool exa = grim_direct_tag(a) == GRIM_FIXNUM_TAG;
+            bool exb = grim_direct_tag(b) == GRIM_FIXNUM_TAG;
+            if (exa && exb)
+                return grim_integer_pack(grim_integer_extract(a) + grim_integer_extract(b));
+            else {
+                grim_object retval = grim_bigint_create();
+
+                mpz_t temp;
+                mpz_init(temp);
+                grim_integer_to_mpz(temp, a);
+
+                if (grim_integer_extractable(b))
+                    mpz_set_si(I_bigint(retval), grim_integer_extract(b));
+                else
+                    grim_integer_to_mpz(I_bigint(retval), b);
+
+                mpz_add(I_bigint(retval), I_bigint(retval), temp);
+                mpz_clear(temp);
+                return grim_integer_normalize(retval);
+            }
+        }
+        default:
+            return grim_undefined;
+        }
+    default:
+        return grim_undefined;
+    }
+}
