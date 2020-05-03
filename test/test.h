@@ -173,10 +173,10 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         gta_is_string(y);                                                      \
         size_t L = (l);                                                        \
         uint8_t *w = (uint8_t *)(v);                                           \
-        munit_assert_ullong(I(y)->strlen, ==, L);                              \
-        munit_assert_ullong(I(y)->strlen, ==, L);                              \
+        munit_assert_ullong(I_strlen(y), ==, L);                               \
+        munit_assert_ullong(I_strlen(y), ==, L);                               \
         for (size_t i = 0; i < L; i++)                                         \
-            munit_assert_uint8(I(y)->str[i], ==, w[i]);                        \
+            munit_assert_uint8(I_str(y)[i], ==, w[i]);                         \
     } while (0)
 
 #define gta_is_buffer(c)                                                       \

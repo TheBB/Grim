@@ -251,8 +251,8 @@ void grim_display_string(grim_object buf, grim_object src, const char *encoding)
     char *encoded = u8_conv_to_encoding(
         encoding,
         iconveh_question_mark,
-        I(src)->str,
-        I(src)->strlen,
+        I_str(src),
+        I_strlen(src),
         NULL, NULL,
         &convlength
     );

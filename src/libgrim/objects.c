@@ -68,7 +68,7 @@ static void grim_string_finalize(void *obj, void *_) {
 static grim_object grim_string_create() {
     grim_object obj = grim_indirect_create(false);
     I_tag(obj) = GRIM_STRING_TAG;
-    I_str(obj) = NULL;
+    I_setstr(obj, NULL);
     I_strlen(obj) = 0;
     GC_REGISTER_FINALIZER((void*) obj, grim_string_finalize, NULL, NULL, NULL);
     return obj;
@@ -82,11 +82,11 @@ grim_object grim_nstring_pack(const char *input, size_t length, const char *enco
     grim_object obj = grim_string_create();
     if (!encoding) {
         I_strlen(obj) = length;
-        I_str(obj) = malloc((I_strlen(obj) + 1) * sizeof(char));
+        I_setstr(obj, malloc((I_strlen(obj) + 1) * sizeof(char)));
         strcpy((char *) I_str(obj), input);
     }
     else
-        I_str(obj) = u8_conv_from_encoding(encoding, iconveh_error, input, length, NULL, NULL, &I_strlen(obj));
+        I_setstr(obj, u8_conv_from_encoding(encoding, iconveh_error, input, length, NULL, NULL, &I_strlen(obj)));
     assert(I_str(obj));
     if (unescape)
         grim_unescape_string(obj);

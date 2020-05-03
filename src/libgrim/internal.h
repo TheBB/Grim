@@ -73,12 +73,6 @@ typedef struct {
             grim_object imag;
         };
 
-        // GRIM_STRING_TAG
-        struct {
-            uint8_t *str;
-            size_t strlen;
-        };
-
         // GRIM_VECTOR_TAG
         struct {
             grim_object *vectordata;
@@ -96,7 +90,7 @@ typedef struct {
             grim_object symbolname;
         };
 
-        // GRIM_BUFFER_TAG
+        // GRIM_BUFFER_TAG, GRIM_STRING_TAG
         struct {
             char *buf;
             size_t buflen;
@@ -130,8 +124,9 @@ typedef struct {
 #define I_rational(c) (I(c)->rational)
 #define I_real(c) (I(c)->real)
 #define I_imag(c) (I(c)->imag)
-#define I_str(c) (I(c)->str)
-#define I_strlen(c) (I(c)->strlen)
+#define I_str(c) ((uint8_t *) (I(c)->buf))
+#define I_setstr(c, v) do { I(c)->buf = (char *) (v); } while (0)
+#define I_strlen(c) (I(c)->buflen)
 #define I_vectordata(c) (I(c)->vectordata)
 #define I_vectorlen(c) (I(c)->vectorlen)
 #define I_vectorelt(c, i) (I(c)->vectordata[i])
