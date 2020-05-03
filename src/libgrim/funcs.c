@@ -198,3 +198,18 @@ bool grim_equal(grim_object a, grim_object b) {
 
     return a == b;
 }
+
+
+grim_object grim_read_file(FILE *file) {
+    // TODO: Handle encoding
+    grim_object buf = grim_buffer_create(0);
+    while (!feof(file)) {
+        grim_buffer_ensure_free_capacity(buf, 1024);
+        size_t nread = fread(&I_bufend(buf), 1, 1024, file);
+        I_buflen(buf) += nread;
+    }
+
+    // Slightly hacky, but buffers and strings are identical in memory
+    I_tag(buf) = GRIM_STRING_TAG;
+    return buf;
+}

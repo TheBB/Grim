@@ -136,6 +136,7 @@ typedef struct {
 #define I_buf(c) (I(c)->buf)
 #define I_buflen(c) (I(c)->buflen)
 #define I_bufcap(c) (I(c)->bufcap)
+#define I_bufend(c) (I(c)->buf[I(c)->buflen])
 #define I_hashnodes(c) (I(c)->hashnodes)
 #define I_hashcap(c) (I(c)->hashcap)
 #define I_hashfill(c) (I(c)->hashfill)
@@ -174,6 +175,7 @@ double grim_to_double(grim_object num);
 grim_object grim_negate_i(grim_object obj);
 grim_object grim_scinot_pack(grim_object scale, int base, intmax_t exponent, bool exact);
 bool grim_is_exact(grim_object num);
+grim_object grim_read_file(FILE *file);
 
 grim_object grim_eval_in_module(grim_object module, grim_object expr);
 grim_object grim_build_module(grim_object name, grim_object code);

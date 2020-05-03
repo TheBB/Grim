@@ -206,7 +206,6 @@ void grim_buffer_ensure_free_capacity(grim_object obj, size_t sizehint) {
     size_t required = I_buflen(obj) + sizehint;
     while (I_bufcap(obj) < required) {
         size_t newsize = (size_t) (I_bufcap(obj) * GRIM_BUFFER_GROWTH_FACTOR);
-        printf("%lu\n", newsize);
         assert((I_buf(obj) = realloc(I_buf(obj), newsize)));
         I_bufcap(obj) = newsize;
     }
