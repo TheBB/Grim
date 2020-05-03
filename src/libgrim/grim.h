@@ -59,7 +59,6 @@ grim_object grim_cons_pack(grim_object car, grim_object cdr);
 
 grim_object grim_intern(const char *name, const char *encoding);
 grim_object grim_nintern(const char *name, size_t length, const char *encoding);
-grim_object grim_symbol_name(grim_object obj);
 
 grim_object grim_character_pack(ucs4_t ch);
 grim_object grim_character_pack_name(const char *name, const char *encoding);

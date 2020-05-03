@@ -209,7 +209,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
     do {                                                                       \
         grim_object x = (c);                                                   \
         gta_is_symbol(x);                                                      \
-        gta_check_string(grim_symbol_name(x), l, v);                           \
+        gta_check_string(I_symbolname(x), l, v);                               \
     } while (0)
 
 #define gta_is_cons(c)                                                         \

@@ -44,7 +44,7 @@ static void grim_encode_simple(grim_object buf, grim_object src, const char *enc
         return;
     }
     case GRIM_SYMBOL_TAG:
-        grim_display_string(buf, grim_symbol_name(src), encoding);
+        grim_display_string(buf, I_symbolname(src), encoding);
         return;
     case GRIM_INDIRECT_TAG:
         switch (I_tag(src)) {

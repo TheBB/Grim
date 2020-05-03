@@ -124,10 +124,9 @@ grim_object grim_cons_pack(grim_object car, grim_object cdr) {
 // -----------------------------------------------------------------------------
 
 static grim_object grim_symbol_create(grim_object name) {
-    grim_object obj = grim_indirect_create(true);
-    I_tag(obj) = GRIM_SYMBOL_TAG;
+    grim_object obj = grim_indirect_create(true) | GRIM_SYMBOL_TAG;
     I_symbolname(obj) = name;
-    return obj | GRIM_SYMBOL_TAG;
+    return obj;
 }
 
 grim_object grim_intern(const char *name, const char *encoding) {
@@ -142,10 +141,6 @@ grim_object grim_nintern(const char *name, size_t length, const char *encoding) 
     sym = grim_symbol_create(str);
     grim_hashtable_set(grim_symbol_table, str, sym);
     return sym;
-}
-
-grim_object grim_symbol_name(grim_object obj) {
-    return I_symbolname(obj - GRIM_SYMBOL_TAG);
 }
 
 

@@ -132,7 +132,7 @@ typedef struct {
 #define I_vectorelt(c, i) (I(c)->vectordata[i])
 #define I_car(c) (I(c)->car)
 #define I_cdr(c) (I(c)->cdr)
-#define I_symbolname(c) (I(c)->symbolname)
+#define I_symbolname(c) (I((c) - GRIM_SYMBOL_TAG)->symbolname)
 #define I_buf(c) (I(c)->buf)
 #define I_buflen(c) (I(c)->buflen)
 #define I_bufcap(c) (I(c)->bufcap)
