@@ -112,7 +112,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         grim_object y = (c);                                                   \
         double w = v;                                                          \
         gta_is_float(y);                                                       \
-        munit_assert_double(grim_float_extract(y), ==, w);                     \
+        munit_assert_double(I_floating(y), ==, w);                     \
     } while (0)
 
 #define gta_check_float_approx(c, v, n)                                        \
@@ -120,7 +120,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         grim_object y = (c);                                                   \
         double w = v;                                                          \
         gta_is_float(y);                                                       \
-        munit_assert_double_equal(grim_float_extract(y), w, n);                \
+        munit_assert_double_equal(I_floating(y), w, n);                \
     } while (0)
 
 #define gta_is_bigint(c)                                                       \
@@ -232,7 +232,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
     do {                                                                       \
         grim_object y = (c);                                                   \
         gta_is_vector(y);                                                      \
-        munit_assert_llong(grim_vector_size(y), ==, l);                        \
+        munit_assert_llong(I_vectorlen(y), ==, l);                      \
     } while (0)
 
 #define gta_is_hashtable(c)                                                    \

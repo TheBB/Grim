@@ -249,62 +249,62 @@ static MunitResult parse_complex(const MunitParameter params[], void *fixture) {
 
     num = grim_read(grim_string_pack("+i", NULL, false));
     gta_is_complex(num);
-    gta_check_fixnum(grim_complex_real(num), 0);
-    gta_check_fixnum(grim_complex_imag(num), 1);
+    gta_check_fixnum(I_real(num), 0);
+    gta_check_fixnum(I_imag(num), 1);
 
     num = grim_read(grim_string_pack("-i", NULL, false));
     gta_is_complex(num);
-    gta_check_fixnum(grim_complex_real(num), 0);
-    gta_check_fixnum(grim_complex_imag(num), -1);
+    gta_check_fixnum(I_real(num), 0);
+    gta_check_fixnum(I_imag(num), -1);
 
     num = grim_read(grim_string_pack("1+i", NULL, false));
     gta_is_complex(num);
-    gta_check_fixnum(grim_complex_real(num), 1);
-    gta_check_fixnum(grim_complex_imag(num), 1);
+    gta_check_fixnum(I_real(num), 1);
+    gta_check_fixnum(I_imag(num), 1);
 
     num = grim_read(grim_string_pack("243892304723894732947328914348329794+i", NULL, false));
     gta_is_complex(num);
-    gta_check_bigint(grim_complex_real(num), "243892304723894732947328914348329794");
-    gta_check_fixnum(grim_complex_imag(num), 1);
+    gta_check_bigint(I_real(num), "243892304723894732947328914348329794");
+    gta_check_fixnum(I_imag(num), 1);
 
     num = grim_read(grim_string_pack("1+238942394871249810234783294732849324723i", NULL, false));
     gta_is_complex(num);
-    gta_check_fixnum(grim_complex_real(num), 1);
-    gta_check_bigint(grim_complex_imag(num), "238942394871249810234783294732849324723");
+    gta_check_fixnum(I_real(num), 1);
+    gta_check_bigint(I_imag(num), "238942394871249810234783294732849324723");
 
     num = grim_read(grim_string_pack("1-1.0i", NULL, false));
     gta_is_complex(num);
-    gta_check_float(grim_complex_real(num), 1.0);
-    gta_check_float(grim_complex_imag(num), -1.0);
+    gta_check_float(I_real(num), 1.0);
+    gta_check_float(I_imag(num), -1.0);
 
     num = grim_read(grim_string_pack("1.0-1/2i", NULL, false));
     gta_is_complex(num);
-    gta_check_float(grim_complex_real(num), 1.0);
-    gta_check_float(grim_complex_imag(num), -0.5);
+    gta_check_float(I_real(num), 1.0);
+    gta_check_float(I_imag(num), -0.5);
 
     num = grim_read(grim_string_pack("1-1/2i", NULL, false));
     gta_is_complex(num);
-    gta_check_fixnum(grim_complex_real(num), 1.0);
-    gta_is_rational(grim_complex_imag(num));
-    gta_check_fixnum(grim_rational_num(grim_complex_imag(num)), -1);
-    gta_check_fixnum(grim_rational_den(grim_complex_imag(num)), 2);
+    gta_check_fixnum(I_real(num), 1.0);
+    gta_is_rational(I_imag(num));
+    gta_check_fixnum(grim_rational_num(I_imag(num)), -1);
+    gta_check_fixnum(grim_rational_den(I_imag(num)), 2);
 
     num = grim_read(grim_string_pack("#e1.0+1/2i", NULL, false));
     gta_is_complex(num);
-    gta_check_fixnum(grim_complex_real(num), 1);
-    gta_is_rational(grim_complex_imag(num));
-    gta_check_fixnum(grim_rational_num(grim_complex_imag(num)), 1);
-    gta_check_fixnum(grim_rational_den(grim_complex_imag(num)), 2);
+    gta_check_fixnum(I_real(num), 1);
+    gta_is_rational(I_imag(num));
+    gta_check_fixnum(grim_rational_num(I_imag(num)), 1);
+    gta_check_fixnum(grim_rational_den(I_imag(num)), 2);
 
     num = grim_read(grim_string_pack("#i2/5-2i", NULL, false));
     gta_is_complex(num);
-    gta_check_float_approx(grim_complex_real(num), 0.4, 16);
-    gta_check_float(grim_complex_imag(num), -2.0);
+    gta_check_float_approx(I_real(num), 0.4, 16);
+    gta_check_float(I_imag(num), -2.0);
 
     num = grim_read(grim_string_pack("2@45", NULL, false));
     gta_is_complex(num);
-    gta_check_float_approx(grim_complex_real(num), sqrt(2.0), 15);
-    gta_check_float_approx(grim_complex_imag(num), sqrt(2.0), 15);
+    gta_check_float_approx(I_real(num), sqrt(2.0), 15);
+    gta_check_float_approx(I_imag(num), sqrt(2.0), 15);
 
     return MUNIT_OK;
 }

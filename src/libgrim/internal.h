@@ -134,6 +134,7 @@ typedef struct {
 #define I_strlen(c) (I(c)->strlen)
 #define I_vectordata(c) (I(c)->vectordata)
 #define I_vectorlen(c) (I(c)->vectorlen)
+#define I_vectorelt(c, i) (I(c)->vectordata[i])
 #define I_car(c) (I(c)->car)
 #define I_cdr(c) (I(c)->cdr)
 #define I_symbolname(c) (I(c)->symbolname)

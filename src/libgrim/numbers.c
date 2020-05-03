@@ -60,10 +60,6 @@ grim_object grim_float_pack(double num) {
     return obj;
 }
 
-double grim_float_extract(grim_object obj) {
-    return I_floating(obj);
-}
-
 grim_object grim_float_read(const char *str) {
     // Scanf understands a subset of our syntax:
     // Normalize zero digits and ignorable characters
@@ -90,7 +86,7 @@ double grim_to_double(grim_object num) {
     if (grim_direct_tag(num) == GRIM_FIXNUM_TAG)
         return grim_integer_extract(num);
     else if (grim_type(num) == GRIM_FLOAT)
-        return grim_float_extract(num);
+        return I_floating(num);
     else if (grim_type(num) == GRIM_INTEGER)
         return mpz_get_d(I(num)->bigint);
     else if (grim_type(num) == GRIM_RATIONAL)
@@ -267,7 +263,7 @@ grim_object grim_complex_pack(grim_object real, grim_object imag) {
         grim_integer_extract(imag) == 0)
         return real;
 
-    if (grim_type(imag) == GRIM_FLOAT && grim_float_extract(imag) == 0.0)
+    if (grim_type(imag) == GRIM_FLOAT && I_floating(imag) == 0.0)
         return real;
 
     if (grim_type(real) == GRIM_FLOAT && grim_type(imag) != GRIM_FLOAT)
@@ -280,14 +276,6 @@ grim_object grim_complex_pack(grim_object real, grim_object imag) {
     I_real(obj) = real;
     I_imag(obj) = imag;
     return obj;
-}
-
-grim_object grim_complex_real(grim_object num) {
-    return I_real(num);
-}
-
-grim_object grim_complex_imag(grim_object num) {
-    return I_imag(num);
 }
 
 
@@ -307,7 +295,7 @@ bool grim_nonnegative(grim_object obj) {
         return mpq_sgn(I_rational(obj)) >= 0;
 
     if (type == GRIM_FLOAT)
-        return grim_float_extract(obj) >= 0.0;
+        return I_floating(obj) >= 0.0;
 
     assert(false);
 }

@@ -107,18 +107,6 @@ grim_object grim_vector_create(size_t nelems) {
     return obj;
 }
 
-size_t grim_vector_size(grim_object vec) {
-    return I_vectorlen(vec);
-}
-
-void grim_vector_set(grim_object vec, size_t index, grim_object elt) {
-    I_vectordata(vec)[index] = elt;
-}
-
-grim_object grim_vector_get(grim_object vec, size_t index) {
-    return I_vectordata(vec)[index];
-}
-
 
 // Cons cells
 // -----------------------------------------------------------------------------
@@ -129,22 +117,6 @@ grim_object grim_cons_pack(grim_object car, grim_object cdr) {
     I_car(obj) = car;
     I_cdr(obj) = cdr;
     return obj;
-}
-
-grim_object grim_car(grim_object cons) {
-    return I_car(cons);
-}
-
-grim_object grim_cdr(grim_object cons) {
-    return I_cdr(cons);
-}
-
-void grim_setcar(grim_object cons, grim_object newcar) {
-    I_car(cons) = newcar;
-}
-
-void grim_setcdr(grim_object cons, grim_object newcdr) {
-    I_cdr(cons) = newcdr;
 }
 
 
@@ -351,14 +323,6 @@ grim_object grim_cell_pack(grim_object value) {
     return obj;
 }
 
-grim_object grim_cell_extract(grim_object obj) {
-    return I_cellvalue(obj);
-}
-
-void grim_cell_set(grim_object obj, grim_object value) {
-    I_cellvalue(obj) = value;
-}
-
 
 // Modules
 // -----------------------------------------------------------------------------
@@ -382,5 +346,5 @@ grim_object grim_module_cell(grim_object module, grim_object name, bool require)
 }
 
 void grim_module_set(grim_object module, grim_object name, grim_object value) {
-    grim_cell_set(grim_module_cell(module, name, false), value);
+    I_cellvalue(grim_module_cell(module, name, false)) = value;
 }

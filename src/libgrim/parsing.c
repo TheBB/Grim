@@ -492,10 +492,10 @@ static bool parse_list(void *out, str_iter *iter, parse_params *params) {
         if (head == grim_nil)
             head = tail = grim_cons_pack(element, grim_nil);
         else if (final)
-            grim_setcdr(tail, element);
+            I_cdr(tail) = element;
         else {
             grim_object newtail = grim_cons_pack(element, grim_nil);
-            grim_setcdr(tail, newtail);
+            I_cdr(tail) = newtail;
             tail = newtail;
         }
 
@@ -527,14 +527,14 @@ static bool parse_vector(void *out, str_iter *iter, parse_params *params) {
     grim_object cons = list;
     while (cons != grim_nil) {
         nelems++;
-        cons = grim_cdr(cons);
+        cons = I_cdr(cons);
     }
 
     // Build vector
     grim_object vec = grim_vector_create(nelems);
     for (size_t i = 0; i < nelems; i++) {
-        grim_vector_set(vec, i, grim_car(list));
-        list = grim_cdr(list);
+        I_vectorelt(vec, i) = I_car(list);
+        list = I_cdr(list);
     }
 
     *((grim_object *) out) = vec;
@@ -588,7 +588,7 @@ grim_object grim_read_all(grim_object str) {
             head = tail = grim_cons_pack(obj, grim_nil);
         else {
             grim_object newtail = grim_cons_pack(obj, grim_nil);
-            grim_setcdr(tail, newtail);
+            I_cdr(tail) = newtail;
             tail = newtail;
         }
     }
