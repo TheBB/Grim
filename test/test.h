@@ -112,7 +112,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         grim_object y = (c);                                                   \
         double w = v;                                                          \
         gta_is_float(y);                                                       \
-        munit_assert_double(I_floating(y), ==, w);                     \
+        munit_assert_double(I_floating(y), ==, w);                             \
     } while (0)
 
 #define gta_check_float_approx(c, v, n)                                        \
@@ -120,7 +120,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         grim_object y = (c);                                                   \
         double w = v;                                                          \
         gta_is_float(y);                                                       \
-        munit_assert_double_equal(I_floating(y), w, n);                \
+        munit_assert_double_equal(I_floating(y), w, n);                        \
     } while (0)
 
 #define gta_is_bigint(c)                                                       \
@@ -138,7 +138,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         gta_is_bigint(x);                                                      \
         mpz_t t;                                                               \
         mpz_init_set_str(t, w, 10);                                            \
-        int res = mpz_cmp(t, I(x)->bigint);                                    \
+        int res = mpz_cmp(t, I_bigint(x));                                     \
         mpz_clear(t);                                                          \
         munit_assert_int(res, ==, 0);                                          \
     } while (0)
@@ -193,9 +193,9 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         gta_is_buffer(y);                                                      \
         size_t L = (l);                                                        \
         char *w = (char *)(v);                                                 \
-        munit_assert_ullong(I(y)->buflen, ==, L);                              \
+        munit_assert_ullong(I_buflen(y), ==, L);                               \
         for (size_t i = 0; i < L; i++)                                         \
-            munit_assert_char(I(y)->buf[i], ==, w[i]);                         \
+            munit_assert_char(I_buf(y)[i], ==, w[i]);                          \
     } while (0)
 
 #define gta_is_symbol(c)                                                       \
@@ -232,7 +232,7 @@ void *gt_setup(const MunitParameter params[], void *fixture);
     do {                                                                       \
         grim_object y = (c);                                                   \
         gta_is_vector(y);                                                      \
-        munit_assert_llong(I_vectorlen(y), ==, l);                      \
+        munit_assert_llong(I_vectorlen(y), ==, l);                             \
     } while (0)
 
 #define gta_is_hashtable(c)                                                    \
@@ -248,5 +248,5 @@ void *gt_setup(const MunitParameter params[], void *fixture);
         grim_object y = (c);                                                   \
         gta_is_hashtable(y);                                                   \
         size_t L = (l);                                                        \
-        munit_assert_ullong(I(y)->hashfill, ==, L);                            \
+        munit_assert_ullong(I_hashfill(y), ==, L);                             \
     } while (0)
