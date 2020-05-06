@@ -332,7 +332,7 @@ grim_object grim_module_create(grim_object name) {
     return ind;
 }
 
-static grim_object grim_module_cell(grim_object module, grim_object name, bool require) {
+grim_object grim_module_cell(grim_object module, grim_object name, bool require) {
     if (!grim_hashtable_has(I_modulemembers(module), name)) {
         assert(!require);
         grim_object cell = grim_cell_pack(grim_undefined);

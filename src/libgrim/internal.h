@@ -217,6 +217,7 @@ bool grim_is_exact(grim_object num);
 grim_object grim_add(grim_object a, grim_object b, bool negate);
 grim_object grim_read_file(FILE *file);
 
+grim_object grim_module_cell(grim_object module, grim_object name, bool require);
 grim_object grim_eval_in_module(grim_object module, grim_object expr);
 grim_object grim_build_module(grim_object name, grim_object code);
 
