@@ -24,16 +24,16 @@ grim_object gs_i_moduleset;
 #define NBUF 300
 static char buf[NBUF];
 
-#define BUILTIN(name, impl, min, max, var)                                     \
+#define BUILTIN(name, impl, nargs, var)                                        \
     do {                                                                       \
         grim_module_set(grim_builtin_module, grim_intern(name, NULL),          \
-                        grim_cfunc_create(gf_##impl, min, max, var));          \
+                        grim_cfunc_create(gf_##impl, nargs, var));             \
     } while (0)
 
 static void grim_init_builtins() {
     grim_builtin_module = grim_module_create(grim_intern("--builtins--", NULL));
-    BUILTIN("+", add, 0, 0, true);
-    BUILTIN("-", sub, 0, 0, true);
+    BUILTIN("+", add, 0, true);
+    BUILTIN("-", sub, 0, true);
 }
 
 void grim_init() {

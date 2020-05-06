@@ -343,7 +343,7 @@ static grim_object grim_module_cell(grim_object module, grim_object name, bool r
 }
 
 grim_object grim_module_get(grim_object module, grim_object name) {
-    return I_cellvalue(grim_module_cell(module, name, false));
+    return I_cellvalue(grim_module_cell(module, name, true));
 }
 
 void grim_module_set(grim_object module, grim_object name, grim_object value) {
@@ -354,12 +354,37 @@ void grim_module_set(grim_object module, grim_object name, grim_object value) {
 // Functions
 // -----------------------------------------------------------------------------
 
-grim_object grim_cfunc_create(grim_cfunc *cfunc, uint8_t minargs, uint8_t maxargs, bool varargs) {
+grim_object grim_cfunc_create(grim_cfunc *cfunc, uint8_t nargs, bool variadic) {
     grim_object obj = grim_indirect_create(false);
     I_tag(obj) = GRIM_CFUNC_TAG;
     I_cfunc(obj) = cfunc;
-    I_minargs(obj) = minargs;
-    I_maxargs(obj) = maxargs;
-    I_varargs(obj) = varargs;
+    I_nargs(obj) = nargs;
+    I_variadic(obj) = variadic;
     return obj;
+}
+
+grim_object grim_lfunc_create(grim_object bytecode, grim_object refs, uint8_t nlocals, uint8_t nargs, bool variadic) {
+    grim_object obj = grim_indirect_create(false);
+    I_tag(obj) = GRIM_LFUNC_TAG;
+    I_bytecode(obj) = bytecode;
+    I_funcrefs(obj) = refs;
+    I_nlocals(obj) = nlocals;
+    I_nargs(obj) = nargs;
+    I_variadic(obj) = variadic;
+    return obj;
+}
+
+
+// Frames
+// -----------------------------------------------------------------------------
+
+grim_object grim_frame_create(grim_object func, grim_object parent) {
+    grim_object frame = grim_indirect_create(false);
+    I_tag(frame) = GRIM_FRAME_TAG;
+    I_framefunc(frame) = func;
+
+    size_t nargs = I_nargs(func) + I_variadic(func);
+    I_framestack(frame) = grim_vector_create(nargs + I_nlocals(func) + GRIM_STACK_SIZE);
+    I_parentframe(frame) = parent;
+    return frame;
 }

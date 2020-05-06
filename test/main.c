@@ -10,6 +10,7 @@ int main(int argc, char * const *argv) {
         suite_vectors,
         suite_hashtables,
         suite_builtins,
+        suite_bytecode,
         gta_endsuite,
     };
 

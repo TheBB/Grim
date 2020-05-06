@@ -124,19 +124,18 @@ typedef struct {
                 grim_cfunc *cfunc;
                 struct {
                     grim_object bytecode;
-                    grim_object cellvars;
-                    int8_t nlocals;
+                    grim_object funcrefs;
+                    uint8_t nlocals;
                 };
             };
-            uint8_t minargs;
-            uint8_t maxargs;
-            bool varargs;
+            uint8_t nargs;
+            bool variadic;
         };
 
         // GRIM_FRAME_TAG
         struct {
             grim_object framefunc;
-            grim_object frameargs;
+            grim_object framestack;
             grim_object parentframe;
         };
     };
@@ -170,13 +169,12 @@ typedef struct {
 #define I_modulemembers(c) (I(c)->modulemembers)
 #define I_cfunc(c) (I(c)->cfunc)
 #define I_bytecode(c) (I(c)->bytecode)
-#define I_cellvars(c) (I(c)->cellvars)
+#define I_funcrefs(c) (I(c)->funcrefs)
 #define I_nlocals(c) (I(c)->nlocals)
-#define I_minargs(c) (I(c)->minargs)
-#define I_maxargs(c) (I(c)->maxargs)
-#define I_varargs(c) (I(c)->varargs)
+#define I_nargs(c) (I(c)->nargs)
+#define I_variadic(c) (I(c)->variadic)
 #define I_framefunc(c) (I(c)->framefunc)
-#define I_frameargs(c) (I(c)->frameargs)
+#define I_framestack(c) (I(c)->framestack)
 #define I_parentframe(c) (I(c)->parentframe)
 
 // Hash table mapping strings to symbols
@@ -222,7 +220,9 @@ grim_object grim_read_file(FILE *file);
 grim_object grim_eval_in_module(grim_object module, grim_object expr);
 grim_object grim_build_module(grim_object name, grim_object code);
 
-grim_object grim_call(grim_object func, int nargs, const grim_object *args);
+grim_object grim_lfunc_create(grim_object bytecode, grim_object refs, uint8_t nlocals, uint8_t nargs, bool variadic);
+grim_object grim_frame_create(grim_object func, grim_object parent);
+grim_object grim_call(grim_object func, size_t nargs, const grim_object *args);
 grim_object grim_call_0(grim_object func);
 grim_object grim_call_1(grim_object func, grim_object arg);
 grim_object grim_call_2(grim_object func, grim_object arg1, grim_object arg2);
@@ -232,3 +232,18 @@ grim_object grim_call_2(grim_object func, grim_object arg1, grim_object arg2);
 // -----------------------------------------------------------------------------
 
 grim_cfunc gf_add, gf_sub;
+
+
+// Bytecode
+// -----------------------------------------------------------------------------
+
+#define GRIM_STACK_SIZE 256
+
+enum {
+    GRIM_BC_LOAD_REF      = 0x01,
+    GRIM_BC_LOAD_REF_CELL = 0x02,
+    GRIM_BC_LOAD_ARG      = 0x03,
+    GRIM_BC_STORE_LOCAL   = 0x04,
+    GRIM_BC_CALL          = 0x05,
+    GRIM_BC_RETURN        = 0x06,
+};

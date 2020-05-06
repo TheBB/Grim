@@ -11,6 +11,7 @@ extern MunitSuite suite_lists;
 extern MunitSuite suite_vectors;
 extern MunitSuite suite_hashtables;
 extern MunitSuite suite_builtins;
+extern MunitSuite suite_bytecode;
 
 void *gt_setup(const MunitParameter params[], void *fixture);
 

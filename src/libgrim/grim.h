@@ -82,7 +82,7 @@ grim_object grim_module_create(grim_object name);
 grim_object grim_module_get(grim_object module, grim_object name);
 void grim_module_set(grim_object module, grim_object name, grim_object value);
 
-grim_object grim_cfunc_create(grim_cfunc *cfunc, uint8_t minargs, uint8_t maxargs, bool varargs);
+grim_object grim_cfunc_create(grim_cfunc *cfunc, uint8_t nargs, bool variadic);
 
 void grim_init();
 void grim_display(grim_object obj, const char *encoding);
