@@ -244,7 +244,8 @@ enum {
     GRIM_BC_LOAD_REF      = 0x01,
     GRIM_BC_LOAD_REF_CELL = 0x02,
     GRIM_BC_LOAD_ARG      = 0x03,
-    GRIM_BC_STORE_LOCAL   = 0x04,
-    GRIM_BC_CALL          = 0x05,
-    GRIM_BC_RETURN        = 0x06,
+    GRIM_BC_LOAD_LOCAL    = 0x04,
+    GRIM_BC_STORE_LOCAL   = 0x05,
+    GRIM_BC_CALL          = 0x06,
+    GRIM_BC_RETURN        = 0x07,
 };

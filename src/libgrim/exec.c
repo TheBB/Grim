@@ -34,6 +34,9 @@ static grim_object grim_exec_frame(grim_object frame) {
         case GRIM_BC_LOAD_ARG:
             PUSH(args[NEXT_OFFSET()]);
             break;
+        case GRIM_BC_LOAD_LOCAL:
+            PUSH(locals[NEXT_OFFSET()]);
+            break;
         case GRIM_BC_STORE_LOCAL:
             locals[NEXT_OFFSET()] = POP();
             break;
