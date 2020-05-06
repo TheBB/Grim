@@ -33,6 +33,7 @@ static char buf[NBUF];
 static void grim_init_builtins() {
     grim_builtin_module = grim_module_create(grim_intern("--builtins--", NULL));
     BUILTIN("+", add, 0, 0, true);
+    BUILTIN("-", sub, 0, 0, true);
 }
 
 void grim_init() {

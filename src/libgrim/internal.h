@@ -216,7 +216,7 @@ double grim_to_double(grim_object num);
 grim_object grim_negate_i(grim_object obj);
 grim_object grim_scinot_pack(grim_object scale, int base, intmax_t exponent, bool exact);
 bool grim_is_exact(grim_object num);
-grim_object grim_add(grim_object a, grim_object b);
+grim_object grim_add(grim_object a, grim_object b, bool negate);
 grim_object grim_read_file(FILE *file);
 
 grim_object grim_eval_in_module(grim_object module, grim_object expr);
@@ -231,4 +231,4 @@ grim_object grim_call_2(grim_object func, grim_object arg1, grim_object arg2);
 // Builtin functions
 // -----------------------------------------------------------------------------
 
-grim_cfunc gf_add;
+grim_cfunc gf_add, gf_sub;
