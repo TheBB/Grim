@@ -76,12 +76,6 @@ typedef struct {
             grim_object imag;
         };
 
-        // GRIM_VECTOR_TAG
-        struct {
-            grim_object *vectordata;
-            size_t vectorlen;
-        };
-
         // GRIM_CONS_TAG
         struct {
             grim_object car;
@@ -93,18 +87,16 @@ typedef struct {
             grim_object symbolname;
         };
 
-        // GRIM_BUFFER_TAG, GRIM_STRING_TAG
+        // GRIM_BUFFER_TAG, GRIM_STRING_TAG, GRIM_VECTOR_TAG, GRIM_HASHTABLE_TAG
         struct {
-            char *buf;
+            union {
+                char *cbuf;
+                uint8_t *sbuf;
+                grim_object *obuf;
+                grim_hashnode **hbuf;
+            };
             size_t buflen;
             size_t bufcap;
-        };
-
-        // GRIM_HASHTABLE_TAG
-        struct {
-            grim_hashnode **hashnodes;
-            size_t hashcap;
-            size_t hashfill;
         };
 
         // GRIM_CELL_TAG
@@ -148,22 +140,21 @@ typedef struct {
 #define I_rational(c) (I(c)->rational)
 #define I_real(c) (I(c)->real)
 #define I_imag(c) (I(c)->imag)
-#define I_str(c) ((uint8_t *) (I(c)->buf))
-#define I_setstr(c, v) do { I(c)->buf = (char *) (v); } while (0)
+#define I_str(c) (I(c)->sbuf)
 #define I_strlen(c) (I(c)->buflen)
-#define I_vectordata(c) (I(c)->vectordata)
-#define I_vectorlen(c) (I(c)->vectorlen)
-#define I_vectorelt(c, i) (I(c)->vectordata[i])
+#define I_vectordata(c) (I(c)->obuf)
+#define I_vectorlen(c) (I(c)->buflen)
+#define I_vectorelt(c, i) (I(c)->obuf[i])
 #define I_car(c) (I(c)->car)
 #define I_cdr(c) (I(c)->cdr)
 #define I_symbolname(c) (I((c) - GRIM_SYMBOL_TAG)->symbolname)
-#define I_buf(c) (I(c)->buf)
+#define I_buf(c) (I(c)->cbuf)
 #define I_buflen(c) (I(c)->buflen)
 #define I_bufcap(c) (I(c)->bufcap)
-#define I_bufend(c) (I(c)->buf[I(c)->buflen])
-#define I_hashnodes(c) (I(c)->hashnodes)
-#define I_hashcap(c) (I(c)->hashcap)
-#define I_hashfill(c) (I(c)->hashfill)
+#define I_bufend(c) (I(c)->cbuf[I(c)->buflen])
+#define I_hashnodes(c) (I(c)->hbuf)
+#define I_hashcap(c) (I(c)->bufcap)
+#define I_hashfill(c) (I(c)->buflen)
 #define I_cellvalue(c) (I(c)->cellvalue)
 #define I_modulename(c) (I(c)->modulename)
 #define I_modulemembers(c) (I(c)->modulemembers)
